@@ -16,8 +16,8 @@ export class Scene3D {
   constructor(canvasContainer, soundEngine) {
     this.container = canvasContainer;
     this.sound = soundEngine;
-    this.width = this.container.clientWidth;
-    this.height = this.container.clientHeight;
+    this.width = this.container.clientWidth || 700;
+    this.height = this.container.clientHeight || 580;
 
     this.scene = null;
     this.camera = null;
@@ -231,25 +231,37 @@ export class Scene3D {
   }
 
   createShadowPlane() {
-    // Elegant soft ground reflection
-    const planeGeo = new THREE.PlaneGeometry(12, 12);
-    const planeMat = new THREE.MeshStandardMaterial({
-      color: 0x07080c,
-      roughness: 0.65,
-      metalness: 0.4
+    // Soft radial pedestal shadow
+    const shadowGeo = new THREE.CircleGeometry(2.4, 64);
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.75)');
+    grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.35)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+    const shadowTex = new THREE.CanvasTexture(canvas);
+
+    const planeMat = new THREE.MeshBasicMaterial({
+      map: shadowTex,
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false
     });
-    const plane = new THREE.Mesh(planeGeo, planeMat);
+    const plane = new THREE.Mesh(shadowGeo, planeMat);
     plane.rotation.x = -Math.PI / 2;
     plane.position.y = -1.2;
-    plane.receiveShadow = true;
     this.scene.add(plane);
 
     // Subtle radial pedestal ring
-    const ringGeo = new THREE.RingGeometry(0.8, 1.45, 64);
+    const ringGeo = new THREE.RingGeometry(0.85, 1.35, 64);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0xd4af37,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.14,
       side: THREE.DoubleSide
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -1076,8 +1088,8 @@ export class Scene3D {
   }
 
   onWindowResize() {
-    this.width = this.container.clientWidth;
-    this.height = this.container.clientHeight;
+    this.width = this.container.clientWidth || 700;
+    this.height = this.container.clientHeight || 580;
     this.camera.aspect = this.width / this.height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.width, this.height);
@@ -1149,3 +1161,4 @@ export class Scene3D {
     this.renderer.render(this.scene, this.camera);
   }
 }
+

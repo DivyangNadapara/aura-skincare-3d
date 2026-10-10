@@ -197,32 +197,32 @@ function renderProductGrid() {
     // Key actives pills
     const activeTags = (p.actives || [])
       .slice(0, 2)
-      .map(a => `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-pearl/80">${a.name}</span>`)
+      .map(a => `<span class="tag-pill" style="font-size:0.6rem; padding:0.15rem 0.5rem; background:rgba(255,255,255,0.04); color:var(--pearl-muted);">${a.name}</span>`)
       .join('');
 
     card.innerHTML = `
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[10px] uppercase tracking-wider text-gold font-mono">${p.categoryName || 'Cellular Core'}</span>
-          <span class="text-xs text-pearl/50 font-mono">${p.volume}</span>
+        <div class="meta-card-header">
+          <span class="tag-pill">${p.categoryName || 'Cellular Core'}</span>
+          <span class="volume-tag">${p.volume}</span>
         </div>
-        <h3 class="font-serif text-lg text-pearl font-medium leading-snug">${p.name}</h3>
-        <p class="text-xs text-gold/80 tracking-wide mt-1 mb-3">${p.subtitle}</p>
-        <p class="text-xs text-pearl/60 line-clamp-2 font-light leading-relaxed mb-4">${p.description}</p>
+        <h3 class="meta-prod-name" style="font-size:1.15rem; margin-top:0.35rem;">${p.name}</h3>
+        <p class="meta-prod-sub" style="margin-bottom:0.65rem;">${p.subtitle}</p>
+        <p class="hero-desc" style="font-size:0.75rem; margin-bottom:1rem; line-height:1.5;">${p.description}</p>
         
-        <div class="flex flex-wrap gap-1.5 mb-5">
+        <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1.25rem;">
           ${activeTags}
         </div>
       </div>
 
-      <div class="pt-4 border-t border-white/10 flex items-center justify-between">
-        <span class="font-serif text-xl text-pearl">$${p.price}</span>
-        <div class="flex items-center space-x-2">
-          <button class="inspect-btn px-3 py-1.5 rounded-full border border-gold/40 text-gold hover:bg-gold hover:text-black text-[11px] font-semibold tracking-wider uppercase transition-all" data-id="${p.id}">
+      <div class="meta-card-footer">
+        <span class="price-val" style="font-size:1.25rem;">$${p.price}</span>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <button class="inspect-btn cat-pill" data-id="${p.id}" style="padding:0.35rem 0.85rem; font-size:0.65rem;">
             Inspect 3D
           </button>
-          <button class="add-card-btn p-2 rounded-full bg-white/10 hover:bg-gold hover:text-black text-pearl transition-all" data-id="${p.id}" title="Add to Bag">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button class="add-card-btn bag-btn" data-id="${p.id}" title="Add to Bag">
+            <svg class="icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
           </button>
@@ -358,13 +358,13 @@ function updatePrescription() {
   }
 
   prescItems.innerHTML = selected3.map((prod, idx) => `
-    <div class="p-4 rounded-xl bg-white/[0.03] border border-white/5 flex items-center space-x-3">
-      <div class="w-7 h-7 rounded-full bg-gold/20 text-gold flex items-center justify-center text-xs font-mono font-bold flex-shrink-0">
+    <div style="padding:0.85rem 1rem; border-radius:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:0.75rem;">
+      <div class="step-badge">
         0${idx + 1}
       </div>
-      <div class="overflow-hidden">
-        <h5 class="text-xs font-semibold text-pearl truncate">${prod.name}</h5>
-        <span class="text-[10px] text-gold/80 block mt-0.5">$${prod.price} · ${prod.volume}</span>
+      <div style="overflow:hidden;">
+        <h5 style="font-size:0.8rem; font-weight:600; color:#fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${prod.name}</h5>
+        <span style="font-size:0.6875rem; color:var(--gold); display:block; margin-top:2px;">$${prod.price} · ${prod.volume}</span>
       </div>
     </div>
   `).join('');
@@ -466,24 +466,24 @@ function updateCartUI() {
   }
 
   bagList.innerHTML = state.cart.map(item => `
-    <div class="bag-item-card">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-lg bg-gold/10 border border-gold/30 flex items-center justify-center text-gold font-serif">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem; border-radius:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <div class="monogram-badge" style="width:2rem; height:2rem; font-size:0.85rem; flex-shrink:0;">
           Æ
         </div>
         <div>
-          <h4 class="text-xs font-semibold text-pearl leading-snug">${item.product.name}</h4>
-          <span class="text-[11px] text-gold/80 block mt-0.5">$${item.product.price} each</span>
+          <h4 style="font-size:0.8rem; font-weight:600; color:#fff; line-height:1.2;">${item.product.name}</h4>
+          <span style="font-size:0.7rem; color:var(--gold); display:block; margin-top:2px;">$${item.product.price} each</span>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <div class="flex items-center border border-white/10 rounded-full bg-black/40">
-          <button class="qty-btn px-2.5 py-0.5 text-xs text-pearl/70 hover:text-white" data-action="dec" data-id="${item.id}">-</button>
-          <span class="text-xs font-mono px-2 text-pearl">${item.qty}</span>
-          <button class="qty-btn px-2.5 py-0.5 text-xs text-pearl/70 hover:text-white" data-action="inc" data-id="${item.id}">+</button>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.15); border-radius:9999px; background:rgba(0,0,0,0.5);">
+          <button class="qty-btn" style="background:none; border:none; color:#fff; padding:0.2rem 0.5rem; cursor:pointer;" data-action="dec" data-id="${item.id}">-</button>
+          <span style="font-size:0.75rem; font-family:monospace; padding:0 0.2rem; color:#fff;">${item.qty}</span>
+          <button class="qty-btn" style="background:none; border:none; color:#fff; padding:0.2rem 0.5rem; cursor:pointer;" data-action="inc" data-id="${item.id}">+</button>
         </div>
-        <button class="remove-btn text-pearl/40 hover:text-rose-400 text-xs ml-2" data-id="${item.id}">✕</button>
+        <button class="remove-btn" style="background:none; border:none; color:rgba(255,255,255,0.4); cursor:pointer; font-size:0.8rem; padding:0.25rem;" data-id="${item.id}">✕</button>
       </div>
     </div>
   `).join('');
