@@ -1,8 +1,7 @@
 import './style.css';
-import { productsData, routineQuizData } from './productsData.js';
+import { realProductsData, scientificMoleculesData, ingredientConflictMatrix } from './productsData.js';
 import { soundEngine } from './audio.js';
 import { Scene3D } from './scene3d.js';
-import confetti from 'canvas-confetti';
 import Lenis from 'lenis';
 
 // =============================================================
@@ -20,18 +19,29 @@ function raf(time) {
 }
 requestAnimationFrame(raf);
 
+// Smooth scroll on anchor link clicks
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    const targetId = this.getAttribute('href');
+    if (targetId && targetId !== '#') {
+      const targetEl = document.querySelector(targetId);
+      if (targetEl) {
+        e.preventDefault();
+        lenis.scrollTo(targetEl, { offset: -80 });
+      }
+    }
+  });
+});
+
 // =============================================================
 // 2. STATE MANAGEMENT
 // =============================================================
 const state = {
-  activeProduct: productsData[0],
+  activeProduct: realProductsData[0],
+  activeMolecule: scientificMoleculesData[0],
   currentCategory: 'all',
-  cart: [],
-  quiz: {
-    type: routineQuizData.skinTypes[0].id,
-    goal: routineQuizData.goals[0].id,
-    climate: routineQuizData.climates[0].id
-  }
+  currentProfile: 'acne',
+  viewMode: 'product' // 'product' | 'molecule'
 };
 
 // =============================================================
@@ -44,7 +54,6 @@ if (container) {
   scene3d = new Scene3D(container, soundEngine);
   scene3d.loadProduct(state.activeProduct);
 
-  // Hotspot Click Hook
   scene3d.callbacks.onHotspotClick = (hotspotData) => {
     const tooltip = document.getElementById('hotspot-tooltip');
     const title = document.getElementById('tooltip-title');
@@ -53,24 +62,20 @@ if (container) {
       title.textContent = hotspotData.title;
       desc.textContent = hotspotData.text;
       tooltip.style.opacity = '1';
+      tooltip.style.visibility = 'visible';
       tooltip.style.pointerEvents = 'auto';
       tooltip.style.transform = 'translateY(0)';
     }
   };
-
-  // Dose Dispense Hook
-  scene3d.callbacks.onDispenseComplete = () => {
-    // Subtle tactile response
-  };
 }
 
-// Tooltip close button
 const tooltipClose = document.getElementById('tooltip-close');
 if (tooltipClose) {
   tooltipClose.addEventListener('click', () => {
     const tooltip = document.getElementById('hotspot-tooltip');
     if (tooltip) {
       tooltip.style.opacity = '0';
+      tooltip.style.visibility = 'hidden';
       tooltip.style.pointerEvents = 'none';
       tooltip.style.transform = 'translateY(8px)';
     }
@@ -78,13 +83,15 @@ if (tooltipClose) {
 }
 
 // =============================================================
-// 4. HERO SECTION 3D CONTROLS
+// 4. 3D CONTROLS
 // =============================================================
 const ctrlRotate = document.getElementById('ctrl-rotate');
-const ctrlXray = document.getElementById('ctrl-xray');
+const ctrlShield = document.getElementById('ctrl-shield');
+const ctrlScanner = document.getElementById('ctrl-scanner');
 const ctrlDispense = document.getElementById('ctrl-dispense');
 const ctrlExplode = document.getElementById('ctrl-explode');
-const moodBtns = document.querySelectorAll('.mood-btn');
+const ctrlToggleView = document.getElementById('ctrl-toggle-view');
+const viewChemMolBtn = document.getElementById('view-chem-molecule-btn');
 
 if (ctrlRotate && scene3d) {
   ctrlRotate.addEventListener('click', () => {
@@ -94,10 +101,17 @@ if (ctrlRotate && scene3d) {
   });
 }
 
-if (ctrlXray && scene3d) {
-  ctrlXray.addEventListener('click', () => {
-    const isXRay = scene3d.toggleXRayMode();
-    ctrlXray.classList.toggle('active', isXRay);
+if (ctrlShield && scene3d) {
+  ctrlShield.addEventListener('click', () => {
+    const isShield = scene3d.toggleUvShield();
+    ctrlShield.classList.toggle('active', isShield);
+  });
+}
+
+if (ctrlScanner && scene3d) {
+  ctrlScanner.addEventListener('click', () => {
+    const isScan = scene3d.toggleLaserScanner();
+    ctrlScanner.classList.toggle('active', isScan);
   });
 }
 
@@ -114,14 +128,29 @@ if (ctrlExplode && scene3d) {
   });
 }
 
-moodBtns.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    moodBtns.forEach((b) => b.classList.remove('active', 'bg-gold/20', 'text-gold', 'border-gold/40'));
-    btn.classList.add('active', 'bg-gold/20', 'text-gold', 'border-gold/40');
-    const mood = btn.dataset.mood;
-    if (scene3d) scene3d.setLightingMood(mood);
+function toggleViewMode() {
+  if (!scene3d) return;
+  if (state.viewMode === 'product') {
+    state.viewMode = 'molecule';
+    scene3d.loadMolecule(state.activeMolecule);
+    if (ctrlToggleView) ctrlToggleView.querySelector('span').textContent = 'View Bottle';
+  } else {
+    state.viewMode = 'product';
+    scene3d.showProductView();
+    if (ctrlToggleView) ctrlToggleView.querySelector('span').textContent = 'View Molecule';
+  }
+}
+
+if (ctrlToggleView) {
+  ctrlToggleView.addEventListener('click', toggleViewMode);
+}
+if (viewChemMolBtn) {
+  viewChemMolBtn.addEventListener('click', () => {
+    state.viewMode = 'molecule';
+    if (scene3d) scene3d.loadMolecule(state.activeMolecule);
+    if (ctrlToggleView) ctrlToggleView.querySelector('span').textContent = 'View Bottle';
   });
-});
+}
 
 // Sound Toggle Header Button
 const soundToggle = document.getElementById('sound-toggle');
@@ -145,32 +174,37 @@ if (soundToggle) {
 // =============================================================
 function updateHeroMeta(prod) {
   state.activeProduct = prod;
+  state.viewMode = 'product';
+
   const tag = document.getElementById('hero-prod-tag');
   const vol = document.getElementById('hero-prod-vol');
   const name = document.getElementById('hero-prod-name');
   const sub = document.getElementById('hero-prod-sub');
-  const price = document.getElementById('hero-prod-price');
+  const ph = document.getElementById('spec-ph');
+  const mw = document.getElementById('spec-mw');
+  const layer = document.getElementById('spec-layer');
+  const base = document.getElementById('spec-base');
+  const mech = document.getElementById('hero-prod-mechanism');
 
   if (tag) tag.textContent = prod.tag;
-  if (vol) vol.textContent = prod.volume;
+  if (vol) vol.textContent = `${prod.brand} · ${prod.volume}`;
   if (name) name.textContent = prod.name;
   if (sub) sub.textContent = prod.subtitle;
-  if (price) price.textContent = `$${prod.price}`;
+  if (ph) ph.textContent = prod.ph;
+  if (mw) mw.textContent = prod.molecularWeight;
+  if (layer) layer.textContent = prod.biochemistry.targetLayer;
+  if (base) base.textContent = prod.vehicleBase.substring(0, 36) + '...';
+  if (mech) mech.textContent = prod.biochemistry.mechanism;
+
+  if (ctrlToggleView) ctrlToggleView.querySelector('span').textContent = 'View Molecule';
 
   if (scene3d) {
     scene3d.loadProduct(prod);
   }
 }
 
-const heroAddBtn = document.getElementById('hero-add-to-bag');
-if (heroAddBtn) {
-  heroAddBtn.addEventListener('click', () => {
-    addToCart(state.activeProduct);
-  });
-}
-
 // =============================================================
-// 6. PRODUCT SHOWROOM & CATEGORY FILTERING
+// 6. REAL PRODUCT SHOWROOM & CATEGORY FILTERING
 // =============================================================
 const productGrid = document.getElementById('product-grid');
 const catPills = document.querySelectorAll('.cat-pill');
@@ -180,79 +214,56 @@ function renderProductGrid() {
   productGrid.innerHTML = '';
 
   const filtered = state.currentCategory === 'all'
-    ? productsData
-    : productsData.filter(p => {
-        if (state.currentCategory === 'serums') return p.category === 'serums';
-        if (state.currentCategory === 'creams') return p.category === 'creams';
-        if (state.currentCategory === 'mists') return p.modelType === 'mist';
-        if (state.currentCategory === 'oils') return p.modelType === 'nectar';
-        return true;
-      });
+    ? realProductsData
+    : realProductsData.filter(p => p.category === state.currentCategory);
 
   filtered.forEach(p => {
     const isSelected = state.activeProduct.id === p.id;
     const card = document.createElement('div');
     card.className = `product-card ${isSelected ? 'selected' : ''}`;
     
-    // Key actives pills
-    const activeTags = (p.actives || [])
+    // Actives pills
+    const activesBadges = (p.activesBreakdown || [])
       .slice(0, 2)
-      .map(a => `<span class="tag-pill" style="font-size:0.6rem; padding:0.15rem 0.5rem; background:rgba(255,255,255,0.04); color:var(--pearl-muted);">${a.name}</span>`)
+      .map(a => `<span class="tag-pill" style="font-size:0.62rem; padding:0.15rem 0.55rem; background:rgba(255,255,255,0.04); color:var(--pearl-muted);">${a.name}</span>`)
       .join('');
 
     card.innerHTML = `
       <div>
         <div class="meta-card-header">
-          <span class="tag-pill">${p.categoryName || 'Cellular Core'}</span>
-          <span class="volume-tag">${p.volume}</span>
+          <span class="tag-pill" style="color:var(--blue-light); border-color:rgba(59,130,246,0.3); background:rgba(59,130,246,0.1);">${p.brand}</span>
+          <span class="volume-tag">pH ${p.ph}</span>
         </div>
         <h3 class="meta-prod-name" style="font-size:1.15rem; margin-top:0.35rem;">${p.name}</h3>
         <p class="meta-prod-sub" style="margin-bottom:0.65rem;">${p.subtitle}</p>
-        <p class="hero-desc" style="font-size:0.75rem; margin-bottom:1rem; line-height:1.5;">${p.description}</p>
+        <p class="hero-desc" style="font-size:0.75rem; margin-bottom:1rem; line-height:1.5;">${p.scientificDescription}</p>
         
         <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1.25rem;">
-          ${activeTags}
+          ${activesBadges}
         </div>
       </div>
 
-      <div class="meta-card-footer">
-        <span class="price-val" style="font-size:1.25rem;">$${p.price}</span>
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-          <button class="inspect-btn cat-pill" data-id="${p.id}" style="padding:0.35rem 0.85rem; font-size:0.65rem;">
-            Inspect 3D
-          </button>
-          <button class="add-card-btn bag-btn" data-id="${p.id}" title="Add to Bag">
-            <svg class="icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-          </button>
-        </div>
+      <div class="meta-card-footer" style="padding-top:0.85rem; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--emerald-light);">${p.volume}</span>
+        <button class="inspect-btn btn-primary" data-id="${p.id}" style="padding:0.45rem 1rem; font-size:0.6875rem;">
+          Load in 3D Lab
+        </button>
       </div>
     `;
 
-    // Click handler to inspect in 3D
     const inspectBtn = card.querySelector('.inspect-btn');
     inspectBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       updateHeroMeta(p);
       renderProductGrid();
       soundEngine.playGlassChime(920, 0.15);
-      // Smooth scroll back to 3D stage
       const hero = document.getElementById('hero-stage');
       if (hero) hero.scrollIntoView({ behavior: 'smooth' });
     });
 
-    // Card click also inspects
     card.addEventListener('click', () => {
       updateHeroMeta(p);
       renderProductGrid();
-    });
-
-    // Add to cart button
-    const addBtn = card.querySelector('.add-card-btn');
-    addBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      addToCart(p);
     });
 
     productGrid.appendChild(card);
@@ -261,8 +272,8 @@ function renderProductGrid() {
 
 catPills.forEach(pill => {
   pill.addEventListener('click', () => {
-    catPills.forEach(p => p.classList.remove('active', 'bg-gold', 'text-black'));
-    pill.classList.add('active', 'bg-gold', 'text-black');
+    catPills.forEach(p => p.classList.remove('active', 'bg-blue'));
+    pill.classList.add('active');
     state.currentCategory = pill.dataset.cat;
     soundEngine.playGlassChime(760, 0.1);
     renderProductGrid();
@@ -272,301 +283,354 @@ catPills.forEach(pill => {
 renderProductGrid();
 
 // =============================================================
-// 7. DIAGNOSTIC QUIZ SYSTEM
+// 7. 3D MOLECULAR CHEMICAL EXPLORER
 // =============================================================
-function initDiagnosticQuiz() {
-  const typesContainer = document.getElementById('quiz-types');
-  const goalsContainer = document.getElementById('quiz-goals');
-  const climatesContainer = document.getElementById('quiz-climates');
+const molPills = document.querySelectorAll('.mol-pill');
+const molCard = document.getElementById('active-molecule-card');
 
-  if (!typesContainer || !goalsContainer || !climatesContainer) return;
+function renderMoleculeDetails(mol) {
+  state.activeMolecule = mol;
+  if (!molCard) return;
 
-  // Render Skin Types
-  typesContainer.innerHTML = routineQuizData.skinTypes.map((t, idx) => `
-    <button class="quiz-opt ${idx === 0 ? 'active' : ''}" data-type="${t.id}">
-      <span class="text-xs font-bold text-pearl block">${t.label}</span>
-      <span class="text-[11px] text-pearl/50 mt-1 block font-light leading-snug">${t.desc}</span>
-    </button>
-  `).join('');
-
-  // Render Goals
-  goalsContainer.innerHTML = routineQuizData.goals.map((g, idx) => `
-    <button class="quiz-opt ${idx === 0 ? 'active' : ''}" data-goal="${g.id}">
-      <span class="text-xs font-bold text-pearl block">${g.label}</span>
-      <span class="text-[11px] text-pearl/50 mt-1 block font-light leading-snug">${g.focus}</span>
-    </button>
-  `).join('');
-
-  // Render Climates
-  climatesContainer.innerHTML = routineQuizData.climates.map((c, idx) => `
-    <button class="quiz-opt ${idx === 0 ? 'active' : ''}" data-climate="${c.id}">
-      <span class="text-xs font-bold text-pearl block">${c.label}</span>
-      <span class="text-[11px] text-pearl/50 mt-1 block font-light leading-snug">${c.detail}</span>
-    </button>
-  `).join('');
-
-  // Click handlers
-  typesContainer.querySelectorAll('.quiz-opt').forEach(btn => {
-    btn.addEventListener('click', () => {
-      typesContainer.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.quiz.type = btn.dataset.type;
-      soundEngine.playGlassChime(600, 0.08);
-      updatePrescription();
-    });
-  });
-
-  goalsContainer.querySelectorAll('.quiz-opt').forEach(btn => {
-    btn.addEventListener('click', () => {
-      goalsContainer.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.quiz.goal = btn.dataset.goal;
-      soundEngine.playGlassChime(720, 0.08);
-      updatePrescription();
-    });
-  });
-
-  climatesContainer.querySelectorAll('.quiz-opt').forEach(btn => {
-    btn.addEventListener('click', () => {
-      climatesContainer.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.quiz.climate = btn.dataset.climate;
-      soundEngine.playGlassChime(840, 0.08);
-      updatePrescription();
-    });
-  });
-
-  updatePrescription();
-}
-
-function updatePrescription() {
-  const prescTitle = document.getElementById('presc-title');
-  const prescItems = document.getElementById('presc-items');
-  if (!prescItems) return;
-
-  // Tailored recommendation logic
-  let selected3 = [];
-  if (state.quiz.goal === 'barrier' || state.quiz.type === 'reactive') {
-    selected3 = [productsData[2] || productsData[0], productsData[0], productsData[1]];
-    if (prescTitle) prescTitle.textContent = 'Cellular Lipid Shield & Redness Calming Ritual';
-  } else if (state.quiz.goal === 'glow') {
-    selected3 = [productsData[2] || productsData[0], productsData[3] || productsData[0], productsData[0]];
-    if (prescTitle) prescTitle.textContent = '24K Luminescence & Cellular Resurfacing Protocol';
-  } else {
-    selected3 = [productsData[0], productsData[1], productsData[2] || productsData[0]];
-    if (prescTitle) prescTitle.textContent = 'Core Cellular Senescence Reversal Prescription';
-  }
-
-  prescItems.innerHTML = selected3.map((prod, idx) => `
-    <div style="padding:0.85rem 1rem; border-radius:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:0.75rem;">
-      <div class="step-badge">
-        0${idx + 1}
+  molCard.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+      <div style="display:flex; flex-direction:column; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1rem;">
+        <div>
+          <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--emerald-light);">${mol.chemicalFormula} · ${mol.molarMass}</span>
+          <h3 style="font-size:1.6rem; font-weight:800; color:#fff; margin-top:0.25rem;">${mol.name}</h3>
+        </div>
+        <div style="display:flex; gap:1rem; margin-top:0.75rem; flex-wrap:wrap;">
+          <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--blue-light);">Solubility: ${mol.solubility}</span>
+          <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--gold);">pKa: ${mol.pKa}</span>
+        </div>
       </div>
-      <div style="overflow:hidden;">
-        <h5 style="font-size:0.8rem; font-weight:600; color:#fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${prod.name}</h5>
-        <span style="font-size:0.6875rem; color:var(--gold); display:block; margin-top:2px;">$${prod.price} · ${prod.volume}</span>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem;">
+        <div style="padding:1rem; border-radius:0.75rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.06);">
+          <span style="font-size:0.6875rem; font-family:var(--font-mono); color:var(--pearl-subtle); text-transform:uppercase;">Biological Function</span>
+          <p style="font-size:0.875rem; color:#fff; font-weight:600; margin-top:0.35rem;">${mol.role}</p>
+        </div>
+        <div style="padding:1rem; border-radius:0.75rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.06);">
+          <span style="font-size:0.6875rem; font-family:var(--font-mono); color:var(--pearl-subtle); text-transform:uppercase;">Clinical Proof</span>
+          <p style="font-size:0.875rem; color:var(--emerald-light); font-weight:600; margin-top:0.35rem;">${mol.clinicalEfficacy}</p>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-top:0.5rem;">
+        <span style="font-size:0.75rem; color:var(--pearl-subtle);">Currently viewing 3D ball-and-stick valence model in hero viewport.</span>
+        <button id="mol-inspect-3d-btn" class="btn-primary" style="padding:0.45rem 1rem; font-size:0.75rem;">
+          Render in 3D Canvas
+        </button>
       </div>
     </div>
-  `).join('');
+  `;
 
-  // Add full ritual button
-  const addRitualBtn = document.getElementById('add-ritual-to-bag');
-  if (addRitualBtn) {
-    addRitualBtn.onclick = () => {
-      selected3.forEach(item => addToCart(item, false));
-      updateCartUI();
-      openCartDrawer();
-      soundEngine.playSwell();
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+  const btn = document.getElementById('mol-inspect-3d-btn');
+  if (btn) {
+    btn.onclick = () => {
+      state.viewMode = 'molecule';
+      if (scene3d) scene3d.loadMolecule(mol);
+      const hero = document.getElementById('hero-stage');
+      if (hero) hero.scrollIntoView({ behavior: 'smooth' });
     };
   }
 }
 
-initDiagnosticQuiz();
+molPills.forEach(pill => {
+  pill.addEventListener('click', () => {
+    molPills.forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const molId = pill.dataset.mol;
+    const mol = scientificMoleculesData.find(m => m.id === molId);
+    if (mol) {
+      renderMoleculeDetails(mol);
+      if (scene3d && state.viewMode === 'molecule') {
+        scene3d.loadMolecule(mol);
+      }
+      soundEngine.playGlassChime(880, 0.12);
+    }
+  });
+});
+
+renderMoleculeDetails(scientificMoleculesData[0]);
 
 // =============================================================
-// 8. LUXURY SHOPPING BAG SYSTEM
+// 8. CUTANEOUS SKIN PENETRATION SIMULATOR
 // =============================================================
-const bagDrawer = document.getElementById('bag-drawer');
-const bagTrigger = document.getElementById('bag-trigger');
-const bagClose = document.getElementById('bag-close');
-const bagBackdrop = document.getElementById('bag-backdrop');
-const bagList = document.getElementById('bag-items-list');
-const bagCount = document.getElementById('bag-count');
-const bagItemTotal = document.getElementById('bag-item-total');
-const bagSubtotal = document.getElementById('bag-subtotal');
-const shippingBar = document.getElementById('shipping-bar');
-const shippingLabel = document.getElementById('shipping-label');
-const shippingPerc = document.getElementById('shipping-perc');
-const checkoutBtn = document.getElementById('bag-checkout-btn');
+const simBtns = document.querySelectorAll('.sim-btn');
+const fluxSc = document.getElementById('flux-sc');
+const fluxSg = document.getElementById('flux-sg');
+const fluxSb = document.getElementById('flux-sb');
+const simName = document.getElementById('sim-active-name');
+const simDesc = document.getElementById('sim-active-desc');
 
-function openCartDrawer() {
-  if (bagDrawer) bagDrawer.classList.add('open');
-  soundEngine.playGlassChime(780, 0.12);
-}
-
-function closeCartDrawer() {
-  if (bagDrawer) bagDrawer.classList.remove('open');
-}
-
-if (bagTrigger) bagTrigger.addEventListener('click', openCartDrawer);
-if (bagClose) bagClose.addEventListener('click', closeCartDrawer);
-if (bagBackdrop) bagBackdrop.addEventListener('click', closeCartDrawer);
-
-function addToCart(product, openDrawer = true) {
-  const existing = state.cart.find(item => item.id === product.id);
-  if (existing) {
-    existing.qty += 1;
-  } else {
-    state.cart.push({ id: product.id, product, qty: 1 });
+const penetrationData = {
+  salicylic: {
+    name: "Salicylic Acid (BHA · 138.12 Da)",
+    sc: "100% Penetration",
+    sg: "88% Active Flux",
+    sb: "Lipophilic Pore Clearance",
+    passSc: true, passSg: true, passSb: true,
+    desc: "Being lipophilic (oil-soluble), salicylic acid dissolves through hydrophobic sebum in the infundibulum pore canal, cleaving intracellular desmosomes to unblock blackheads and reduce micro-comedones."
+  },
+  niacinamide: {
+    name: "Niacinamide (Vitamin B3 · 122.12 Da)",
+    sc: "100% Penetration",
+    sg: "96% Cellular Influx",
+    sb: "Basale Keratinocyte Diffusion",
+    passSc: true, passSg: true, passSb: true,
+    desc: "With a tiny molecular weight of only 122 Da, Niacinamide rapidly crosses the stratum corneum and diffuses into living basal cells to upregulate NAD+ levels and stimulate endogenous ceramide synthesis."
+  },
+  'ha-high': {
+    name: "High Molecular Weight Hyaluronic Acid (1,500 kDa)",
+    sc: "Surface Film Forming",
+    sg: "0% (Blocked by 500-Da Rule)",
+    sb: "0% Penetration",
+    passSc: true, passSg: false, passSb: false,
+    desc: "Exceeding the 500-Dalton rule by 3,000x, high molecular weight HA cannot penetrate the stratum corneum. Instead, it forms a breathable, non-occlusive hydration film on the surface, holding 1,000x its weight in water to prevent trans-epidermal moisture loss (TEWL)."
+  },
+  ceramide: {
+    name: "Ceramide NP (Ceramide 3 · 580 Da)",
+    sc: "Lamellar Bilayer Integration",
+    sg: "Membrane Sealant",
+    sb: "Barrier Lock",
+    passSc: true, passSg: true, passSb: false,
+    desc: "At ~580 Da, Ceramides integrate directly into the intercellular lipid matrix (the 'mortar' of the skin), repairing microscopic fractures in the skin barrier rather than penetrating into living deeper tissues."
   }
+};
 
-  soundEngine.playGlassChime(1100, 0.18);
-  updateCartUI();
-  if (openDrawer) openCartDrawer();
-}
+simBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    simBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 
-function updateCartUI() {
-  const totalCount = state.cart.reduce((sum, i) => sum + i.qty, 0);
-  const subtotal = state.cart.reduce((sum, i) => sum + (i.product.price * i.qty), 0);
+    const activeKey = btn.dataset.active;
+    const data = penetrationData[activeKey];
+    if (!data) return;
 
-  if (bagCount) bagCount.textContent = totalCount;
-  if (bagItemTotal) bagItemTotal.textContent = `(${totalCount} items)`;
-  if (bagSubtotal) bagSubtotal.textContent = `$${subtotal}`;
+    if (simName) simName.textContent = data.name;
+    if (simDesc) simDesc.textContent = data.desc;
 
-  // Free shipping threshold ($200)
-  const freeThreshold = 200;
-  const progress = Math.min(100, Math.round((subtotal / freeThreshold) * 100));
-  if (shippingBar) shippingBar.style.width = `${progress}%`;
-  if (shippingPerc) shippingPerc.textContent = `${progress}%`;
+    if (fluxSc) {
+      fluxSc.textContent = data.sc;
+      fluxSc.className = `flux-status ${data.passSc ? 'status-pass' : 'status-block'}`;
+    }
+    if (fluxSg) {
+      fluxSg.textContent = data.sg;
+      fluxSg.className = `flux-status ${data.passSg ? 'status-pass' : 'status-block'}`;
+    }
+    if (fluxSb) {
+      fluxSb.textContent = data.sb;
+      fluxSb.className = `flux-status ${data.passSb ? 'status-pass' : 'status-block'}`;
+    }
 
-  if (shippingLabel) {
-    if (subtotal >= freeThreshold) {
-      shippingLabel.textContent = 'Complimentary Swiss Courier Courier unlocked!';
-    } else {
-      shippingLabel.textContent = `Add $${freeThreshold - subtotal} for complimentary Swiss Courier shipping`;
+    soundEngine.playGlassChime(1050, 0.1);
+  });
+});
+
+// =============================================================
+// 9. INGREDIENT CONFLICT & SYNERGY COLLIDER
+// =============================================================
+const ingSelectA = document.getElementById('collider-ing-a');
+const ingSelectB = document.getElementById('collider-ing-b');
+const runCollisionBtn = document.getElementById('run-collision-btn');
+const colBadge = document.getElementById('col-status-badge');
+const colSeverity = document.getElementById('col-severity');
+const colTitle = document.getElementById('col-title');
+const colScience = document.getElementById('col-science');
+const colAdvice = document.getElementById('col-advice');
+
+function runCollisionTest() {
+  if (!ingSelectA || !ingSelectB) return;
+  const valA = ingSelectA.value;
+  const valB = ingSelectB.value;
+
+  const match = ingredientConflictMatrix.find(item => 
+    (item.pair[0] === valA && item.pair[1] === valB) ||
+    (item.pair[0] === valB && item.pair[1] === valA)
+  );
+
+  soundEngine.playGlassChime(1300, 0.15);
+
+  if (match) {
+    if (colTitle) colTitle.textContent = `${match.pair[0]} + ${match.pair[1]}`;
+    if (colSeverity) colSeverity.textContent = `Severity / Efficacy: ${match.severity}`;
+    if (colScience) colScience.textContent = match.science;
+    if (colAdvice) colAdvice.textContent = match.recommendation;
+
+    if (colBadge) {
+      colBadge.textContent = match.label;
+      if (match.status === 'caution') {
+        colBadge.className = 'col-badge badge-caution';
+      } else if (match.status === 'synergy') {
+        colBadge.className = 'col-badge badge-synergy';
+      } else {
+        colBadge.className = 'col-badge badge-myth';
+      }
+    }
+  } else {
+    // General safe pairing
+    if (colTitle) colTitle.textContent = `${valA} + ${valB}`;
+    if (colSeverity) colSeverity.textContent = 'Compatibility: Compatible';
+    if (colScience) colScience.textContent = 'No acute biochemical cross-reactivity or formulation destabilization documented in peer-reviewed clinical studies. These ingredients can generally be layered safely.';
+    if (colAdvice) colAdvice.textContent = 'Apply the thinner, water-based product first, followed by the heavier emulsion or cream. Monitor for individual tolerance.';
+    if (colBadge) {
+      colBadge.textContent = 'Safe Layering Synergy';
+      colBadge.className = 'col-badge badge-synergy';
     }
   }
+}
 
-  // Render items
-  if (!bagList) return;
-  if (state.cart.length === 0) {
-    bagList.innerHTML = `
-      <div class="empty-bag-state py-16 text-center text-pearl/50">
-        <div class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-3 text-gold/60">◇</div>
-        <p class="text-sm font-light">Your formulation bag is currently empty.</p>
-        <p class="text-xs text-pearl/40 mt-1">Select a flacon above to begin your cellular ritual.</p>
-      </div>
-    `;
-    return;
+if (runCollisionBtn) {
+  runCollisionBtn.addEventListener('click', runCollisionTest);
+}
+
+// =============================================================
+// 10. INTERACTIVE pH & FREE ACID REACTOR
+// =============================================================
+const phSlider = document.getElementById('ph-slider');
+const phDisplayVal = document.getElementById('ph-display-val');
+const freeAcidPerc = document.getElementById('free-acid-perc');
+const reactorTitle = document.getElementById('reactor-analysis-title');
+const reactorText = document.getElementById('reactor-analysis-text');
+
+if (phSlider) {
+  phSlider.addEventListener('input', (e) => {
+    const ph = parseFloat(e.target.value);
+    if (phDisplayVal) phDisplayVal.textContent = ph.toFixed(1);
+
+    // Henderson-Hasselbalch calculation for Glycolic Acid (pKa = 3.6)
+    const pKa = 3.6;
+    const fraction = 1 / (1 + Math.pow(10, ph - pKa));
+    const percentage = (fraction * 100).toFixed(1);
+
+    if (freeAcidPerc) freeAcidPerc.textContent = `${percentage}%`;
+
+    if (reactorTitle && reactorText) {
+      if (ph < 3.0) {
+        reactorTitle.textContent = `Extreme Acidity Hazard (pH ${ph.toFixed(1)} · ${percentage}% Free Acid)`;
+        reactorText.textContent = `At pH ${ph.toFixed(1)}, the acid is almost entirely un-ionized (${percentage}% free acid). This penetrates so rapidly that it causes caustic protein coagulation and severe dermal blistering unless neutralized immediately by trained dermatologists.`;
+      } else if (ph <= 3.8) {
+        reactorTitle.textContent = `Clinical Peeling Equilibrium (pH ${ph.toFixed(1)} · ${percentage}% Free Acid)`;
+        reactorText.textContent = `Balanced at pH ${ph.toFixed(1)} (exemplified by The Ordinary AHA 30% Peel at pH 3.6). Provides approximately ${percentage}% active free acid for potent keratolytic cell shedding while remaining safely buffered against uncontrolled chemical burns.`;
+      } else if (ph <= 5.0) {
+        reactorTitle.textContent = `Gentle Daily Resurfacing (pH ${ph.toFixed(1)} · ${percentage}% Free Acid)`;
+        reactorText.textContent = `At pH ${ph.toFixed(1)}, free acid is diminished to ${percentage}%. Ideal for slow daily micro-exfoliation without stinging or redness, suitable for sensitive or rosacea-prone skin.`;
+      } else {
+        reactorTitle.textContent = `Acid Inactivation Threshold (pH ${ph.toFixed(1)} · ${percentage}% Free Acid)`;
+        reactorText.textContent = `At pH ${ph.toFixed(1)}, free acid drops to only ${percentage}%. Nearly 99% of the acid molecules are ionized salts incapable of penetrating the lipid barrier, rendering any exfoliating claims chemically inert.`;
+      }
+    }
+  });
+}
+
+// =============================================================
+// 11. DERMATOLOGICAL ROUTINE ARCHITECT
+// =============================================================
+const profileBtns = document.querySelectorAll('.profile-btn');
+const routineCard = document.getElementById('routine-schedule-card');
+
+const routineDatabase = {
+  acne: {
+    title: "Oily, Acne-Prone & Sebum-Congested Protocol",
+    am: [
+      { step: "01", prod: "Gentle Salicylic Acid Foaming Wash", detail: "Dissolves surface sebum without stripping skin lipid mantle." },
+      { step: "02", prod: "Minimalist Niacinamide 10% + Zinc 1%", detail: "Regulates 5-alpha reductase and curbs daytime oil shine." },
+      { step: "03", prod: "The Derma Co 1% Hyaluronic Sunscreen Aqua Gel", detail: "Essential SPF 50 PA++++ protection with zero pore-clogging residue." }
+    ],
+    pm: [
+      { step: "01", prod: "Double Cleanse (Micellar Water / Cleanser)", detail: "Removes organic sunscreen filters and airborne pollution." },
+      { step: "02", prod: "Paula's Choice 2% BHA Liquid Exfoliant", detail: "Lipophilic Salicylic Acid penetrates into pore canal (Use 3x weekly)." },
+      { step: "03", prod: "Lightweight Ceramide Emulsion", detail: "Restores barrier lipids and calms active micro-inflammation." }
+    ]
+  },
+  pigmentation: {
+    title: "Hyperpigmentation, Melasma & PIH Protocol",
+    am: [
+      { step: "01", prod: "Antioxidant Vitamin C Serum (10-15%)", detail: "Scavenges UV-induced reactive oxygen species (ROS)." },
+      { step: "02", prod: "The Derma Co 2% Kojic Acid Face Cream", detail: "Chelates copper ions in tyrosinase to stop melanin synthesis." },
+      { step: "03", prod: "The Derma Co 1% Hyaluronic Sunscreen (Mandatory)", detail: "Prevents UV reactivation of melanocytes." }
+    ],
+    pm: [
+      { step: "01", prod: "Gentle Non-Stripping Cleanser", detail: "Prepares stratum corneum for active absorption." },
+      { step: "02", prod: "Minimalist Niacinamide 10% + Alpha Arbutin", detail: "Inhibits melanosome transfer to surrounding skin cells." },
+      { step: "03", prod: "CeraVe Moisturizing Cream", detail: "MVE technology locks in depigmentation actives overnight." }
+    ]
+  },
+  barrier: {
+    title: "Compromised Barrier, Redness & Eczema-Prone Protocol",
+    am: [
+      { step: "01", prod: "Water Rinse / Ultra-Gentle Hydrating Cleanser", detail: "Preserves natural moisturizing factors (NMF)." },
+      { step: "02", prod: "Hyaluronic Acid + Centella Asiatica Serum", detail: "Provides osmotic moisture cushion to damaged keratinocytes." },
+      { step: "03", prod: "Mineral Physical SPF 50 (Zinc Oxide Base)", detail: "Non-irritating physical photon reflection shield." }
+    ],
+    pm: [
+      { step: "01", prod: "Gentle Cream Cleanser", detail: "Cleanses without emulsifying natural ceramides." },
+      { step: "02", prod: "CeraVe Moisturizing Cream with 3 Ceramides", detail: "Bio-identical Ceramides 1, 3, 6-II repair lipid bilayer fractures." },
+      { step: "03", prod: "Pure Petrolatum / Squalane Slugging (Optional)", detail: "Creates temporary occlusion over severe cracked spots." }
+    ]
   }
+};
 
-  bagList.innerHTML = state.cart.map(item => `
-    <div style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem; border-radius:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);">
-      <div style="display:flex; align-items:center; gap:0.75rem;">
-        <div class="monogram-badge" style="width:2rem; height:2rem; font-size:0.85rem; flex-shrink:0;">
-          Æ
-        </div>
-        <div>
-          <h4 style="font-size:0.8rem; font-weight:600; color:#fff; line-height:1.2;">${item.product.name}</h4>
-          <span style="font-size:0.7rem; color:var(--gold); display:block; margin-top:2px;">$${item.product.price} each</span>
-        </div>
-      </div>
+function renderRoutine(profileKey) {
+  const data = routineDatabase[profileKey];
+  if (!data || !routineCard) return;
 
-      <div style="display:flex; align-items:center; gap:0.5rem;">
-        <div style="display:flex; align-items:center; border:1px solid rgba(255,255,255,0.15); border-radius:9999px; background:rgba(0,0,0,0.5);">
-          <button class="qty-btn" style="background:none; border:none; color:#fff; padding:0.2rem 0.5rem; cursor:pointer;" data-action="dec" data-id="${item.id}">-</button>
-          <span style="font-size:0.75rem; font-family:monospace; padding:0 0.2rem; color:#fff;">${item.qty}</span>
-          <button class="qty-btn" style="background:none; border:none; color:#fff; padding:0.2rem 0.5rem; cursor:pointer;" data-action="inc" data-id="${item.id}">+</button>
-        </div>
-        <button class="remove-btn" style="background:none; border:none; color:rgba(255,255,255,0.4); cursor:pointer; font-size:0.8rem; padding:0.25rem;" data-id="${item.id}">✕</button>
+  const amSteps = data.am.map(s => `
+    <div style="padding:0.75rem 1rem; border-radius:0.65rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); display:flex; gap:0.75rem;">
+      <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--blue-light); font-weight:700;">AM ${s.step}</span>
+      <div>
+        <h5 style="font-size:0.8125rem; font-weight:700; color:#fff;">${s.prod}</h5>
+        <p style="font-size:0.75rem; color:var(--pearl-muted); margin-top:2px;">${s.detail}</p>
       </div>
     </div>
   `).join('');
 
-  // Hook item buttons
-  bagList.querySelectorAll('.qty-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      const action = btn.dataset.action;
-      const target = state.cart.find(i => i.id === id);
-      if (target) {
-        if (action === 'inc') target.qty += 1;
-        if (action === 'dec') {
-          target.qty -= 1;
-          if (target.qty <= 0) {
-            state.cart = state.cart.filter(i => i.id !== id);
-          }
-        }
-        soundEngine.playGlassChime(640, 0.08);
-        updateCartUI();
-      }
-    });
-  });
+  const pmSteps = data.pm.map(s => `
+    <div style="padding:0.75rem 1rem; border-radius:0.65rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); display:flex; gap:0.75rem;">
+      <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--emerald-light); font-weight:700;">PM ${s.step}</span>
+      <div>
+        <h5 style="font-size:0.8125rem; font-weight:700; color:#fff;">${s.prod}</h5>
+        <p style="font-size:0.75rem; color:var(--pearl-muted); margin-top:2px;">${s.detail}</p>
+      </div>
+    </div>
+  `).join('');
 
-  bagList.querySelectorAll('.remove-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id;
-      state.cart = state.cart.filter(i => i.id !== id);
-      soundEngine.playGlassChime(420, 0.08);
-      updateCartUI();
-    });
-  });
+  routineCard.innerHTML = `
+    <div>
+      <h4 style="font-size:1.15rem; font-weight:700; color:#fff; margin-bottom:1.25rem;">${data.title}</h4>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem;">
+        <div>
+          <span style="font-size:0.6875rem; font-family:var(--font-mono); color:var(--blue-light); text-transform:uppercase; display:block; margin-bottom:0.65rem;">☀️ Morning (AM) Layering Sequence</span>
+          <div style="display:flex; flex-direction:column; gap:0.65rem;">
+            ${amSteps}
+          </div>
+        </div>
+        <div>
+          <span style="font-size:0.6875rem; font-family:var(--font-mono); color:var(--emerald-light); text-transform:uppercase; display:block; margin-bottom:0.65rem;">🌙 Evening (PM) Treatment Sequence</span>
+          <div style="display:flex; flex-direction:column; gap:0.65rem;">
+            ${pmSteps}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-if (checkoutBtn) {
-  checkoutBtn.addEventListener('click', () => {
-    if (state.cart.length === 0) return;
-    confetti({
-      particleCount: 150,
-      spread: 100,
-      origin: { y: 0.5 }
-    });
-    soundEngine.playSwell();
-    alert('Thank you for reserving your cellular longevity allocation. A courier dispatch notification has been transmitted.');
-    state.cart = [];
-    updateCartUI();
-    closeCartDrawer();
+profileBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    profileBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const profile = btn.dataset.profile;
+    renderRoutine(profile);
+    soundEngine.playGlassChime(950, 0.1);
   });
-}
+});
+
+renderRoutine('acne');
 
 // =============================================================
-// 9. ANIMATED CLINICAL COUNTERS ON SCROLL
-// =============================================================
-const counters = document.querySelectorAll('.stat-counter');
-let countersTriggered = false;
-
-const counterObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting && !countersTriggered) {
-      countersTriggered = true;
-      counters.forEach(c => {
-        const target = parseFloat(c.dataset.target);
-        let current = 0;
-        const step = target / 40;
-        const interval = setInterval(() => {
-          current += step;
-          if (current >= target) {
-            c.textContent = target;
-            clearInterval(interval);
-          } else {
-            c.textContent = target % 1 === 0 ? Math.round(current) : current.toFixed(1);
-          }
-        }, 30);
-      });
-    }
-  });
-}, { threshold: 0.3 });
-
-const scienceSection = document.getElementById('science');
-if (scienceSection) counterObserver.observe(scienceSection);
-
-// =============================================================
-// 10. CUSTOM MAGNETIC CURSOR
+// 12. CUSTOM MAGNETIC CURSOR
 // =============================================================
 const cursorDot = document.getElementById('cursor-dot');
 const cursorRing = document.getElementById('cursor-ring');
@@ -593,24 +657,10 @@ if (cursorDot && cursorRing) {
   }
   requestAnimationFrame(renderCursor);
 
-  document.querySelectorAll('button, a, .quiz-opt, .product-card').forEach(el => {
+  document.querySelectorAll('button, a, input, select, .product-card').forEach(el => {
     el.addEventListener('mouseenter', () => cursorRing.classList.add('active'));
     el.addEventListener('mouseleave', () => cursorRing.classList.remove('active'));
   });
 }
 
-// =============================================================
-// 11. NEWSLETTER TOAST
-// =============================================================
-const newsForm = document.getElementById('newsletter-form');
-if (newsForm) {
-  newsForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    soundEngine.playGlassChime(1200, 0.2);
-    confetti({ particleCount: 50, spread: 50 });
-    alert('Thank you for subscribing to the VIP Longevity Journal.');
-    newsForm.reset();
-  });
-}
-
-console.log('✨ ÆTHÆRA CELLULAR LABS 3D Initialized Successfully.');
+console.log('✨ DERM-X Molecular Skincare Engine Initialized Successfully.');

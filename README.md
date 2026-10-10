@@ -1,87 +1,92 @@
-# ✨ ÆTHÆRA CELLULAR LABS (3D Luxury Skincare Experience)
+# ⚗️ DERM-X: The Molecular Skincare Knowledge Engine
 
-> **Haute Couture of Cellular Longevity** — An award-winning, interactive 3D single-page experience for an ultra-luxury Swiss cellular skincare maison.
+> **A 100% non-commercial, interactive 3D dermatological science encyclopedia analyzing real market formulations.**  
+> Cut through cosmetic marketing claims. Examine biochemical mechanisms, Dalton permeability, pKa acid ionization, and 3D molecular structures for:  
+> **Minimalist**, **The Derma Co**, **The Ordinary**, **Paula's Choice**, and **CeraVe**.
 
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?style=flat&logo=vite)](https://vitejs.dev/)
 [![Three.js](https://img.shields.io/badge/Three.js-r186-black?style=flat&logo=three.js)](https://threejs.org/)
-[![Web Audio API](https://img.shields.io/badge/Audio-Procedural_Web_Audio-gold?style=flat)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
-[![Status](https://img.shields.io/badge/Design-Awwwards_Caliber-success)](https://awwwards.com)
+[![WebGL](https://img.shields.io/badge/WebGL-3D_Molecular_Simulation-blue?style=flat)](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API)
+[![Web Audio API](https://img.shields.io/badge/Audio-Procedural_Synthesizer-emerald?style=flat)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+[![Status](https://img.shields.io/badge/Purpose-Open_Scientific_Education-success)](https://github.com/DivyangNadapara/aura-skincare-3d)
 
 ---
 
-## 🌟 Key Features
+## 🌟 Real Market Products Analyzed
 
-### 1. High-Fidelity Three.js 3D Viewport Engine
-- **Procedural PBR Materials**: Physically accurate glass refraction (`MeshPhysicalMaterial`), translucent serums, brushed champagne gold, and midnight obsidian frosted glass.
-- **Multiple Skincare Architectures**:
-  - **Celestial Orchid Bio-Serum**: Heavy glass flacon with internal concentrated liquid column, gold knurled collar, rubber bulb, and glass pipette.
-  - **Nocturne Marine Restorative Crème**: Heavy-bottomed frosted obsidian jar with beveled gold screw lid and central medallion.
-  - **Fermented Rose Glacier Hydro-Mist**: Slender fluted glass cylinder with fine atomizer nozzle and spray aperture.
-  - **24K Squalane Radiant Youth Nectar**: Faceted hexagonal crystal flacon with suspended, floating 24K pure gold leaf flakes.
-- **Interactive Controls**:
-  - **360° Tactile Inspection**: Drag to orbit with smooth inertia lerping and auto-rotation.
-  - **Cellular X-Ray / Hologram Mode**: Instantly transitions materials into glowing holographic bioluminescence.
-  - **Precision Dose Dispenser**: Spawns falling liquid droplets with organic fluid physics and ground ripple acoustics.
-  - **Exploded Anatomy View**: Lifts lid and pipette to reveal inner structural components.
-  - **Dynamic Studio Lighting Switcher**: Switch between *Dawn* (warm rose gold), *Midnight* (obsidian sapphire), and *Solar* (bright editorial daylight).
-  - **3D Hotspot Pins**: Interactive billboarding pins revealing scientific formulation dossiers.
+1. **Minimalist Niacinamide 10% + Zinc 1%**:
+   - High-purity Swiss Lonza Vitamin B3 ($122\,\text{Da}$) with European Zinc PCA in a cold-processed EU Aloe Vera base.
+   - 3D Model: Amber apothecary glass flacon with matte black dropper collar and clean typographic label.
+2. **The Derma Co 1% Hyaluronic Sunscreen Aqua Gel**:
+   - Broad-spectrum SPF 50 PA++++ hybrid photoprotection with micro-dispersed mineral filters and 1% multi-molecular HA.
+   - 3D Model: Vibrant cobalt blue pump tube with translucent cap.
+3. **The Ordinary AHA 30% + BHA 2% Peeling Solution**:
+   - 10-minute acid resurfacing facial with Glycolic, Lactic, Tartaric, and Salicylic acids balanced at pH 3.6 with Tasmanian Pepperberry.
+   - 3D Model: Frosted glass dropper with vivid blood-ruby liquid core.
+4. **Paula's Choice Skin Perfecting 2% BHA Liquid Exfoliant**:
+   - Leave-on Salicylic Acid ($138\,\text{Da}$) solubilized in a penetration-enhancing glycol vehicle with Green Tea polyphenols.
+   - 3D Model: Matte dark slate flacon with silver trim.
+5. **The Derma Co 2% Kojic Acid Face Cream**:
+   - Multi-pathway tyrosinase inhibitor complex with 2% Kojic Acid, 1% Alpha Arbutin, and 1% Niacinamide for melasma and PIH.
+   - 3D Model: Clinical white dispenser with gold accent band.
+6. **CeraVe Moisturizing Cream with 3 Essential Ceramides**:
+   - Bio-identical Ceramides 1, 3, 6-II in a 3:1:1 physiologic ratio delivered via patented 24-hour Multivesicular Emulsion (MVE).
+   - 3D Model: Iconic broad white tub with royal blue screw cap.
 
-### 2. Procedural Web Audio Soundscape Engine
-- Zero external audio files or CORS issues — 100% synthesized in real time via the **Web Audio API**.
-- Ambient meditative drones (55Hz / 162Hz harmonic fifth) with lowpass filtration.
-- Crystal glass harmonic chimes on user interaction.
-- Fluid droplet acoustics and major-7th harmonic chord swells upon ritual generation.
+---
 
-### 3. Editorial Luxury UI & Science Features
-- **Real-Time 3D Sync**: Switching category filters or products morphs and transitions the 3D flacon dynamically.
-- **Bespoke Dermal Diagnostic Quiz**: 3-step interactive selector generating personalized AM/PM longevity protocols with compatibility scoring.
-- **Biomarker Proof Counters**: Animated clinical trial statistics (99.4% Barrier Recovery, -44% Micro-Wrinkle Depth, +182% Collagen Synthesis).
-- **Luxury Shopping Bag Drawer**: Slide-out cart with item counter, live threshold progress bar for complimentary Swiss courier shipping ($200), and confetti checkout celebration.
-- **Smooth Inertia Scrolling**: Powered by Lenis.
-- **Magnetic Trailing Cursor**: Responsive cursor dot and lagging ring.
+## 🔬 Unique 3D Visual & Interactive Animations
+
+- 🛡️ **3D UV Photon Deflection Shield**:
+  - Activates a glowing geodesic forcefield dome over the sunscreen and simulates animated ultraviolet photon particle rays deflecting off the barrier.
+- ⚗️ **3D Ball-and-Stick Chemical Molecular Viewer**:
+  - Switch the hero canvas from product view to actual 3D chemical structures. Inspect atoms (Carbon, Oxygen, Nitrogen, Hydrogen) and covalent bonds for Niacinamide ($C_6H_6N_2O$), Salicylic Acid ($C_7H_6O_3$), and Hyaluronic Acid!
+- ⚡ **Holographic Laser Chemical Scanner**:
+  - A volumetric laser beam sweeps vertically across the bottle, displaying active ingredient percentages and vehicle bases in real-time HUD graphics.
+- 💥 **Atomic Deconstruction (Explode into Ions)**:
+  - Disassembles the bottle components outward while releasing an illuminated cloud of chemical active ions.
+- 🧬 **Cutaneous Skin Layer Penetration Simulator**:
+  - Interactive cross-section of the Stratum Corneum, Granulosum, and Basale demonstrating the 500-Dalton rule and lipophilic pore clearance.
+- 🧪 **Active Ingredient Conflict & Synergy Collider**:
+  - Test pairing interactions (e.g. *AHA/BHA + Retinoids* vs *Hyaluronic Acid + Ceramides* vs *Vitamin C + Niacinamide*) with real dermatological mechanisms.
+- 📊 **Interactive pH & Free Acid Bioavailability Reactor**:
+  - Live slider calculating the un-ionized free acid fraction using the Henderson-Hasselbalch equation ($\alpha = \frac{1}{1 + 10^{(pH - pKa)}}$).
+- 📋 **Evidence-Based Routine Architect**:
+  - Unbiased AM/PM layering schedules based on skin conditions (Acne, Hyperpigmentation, Impaired Barrier) with exact wait times.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Core**: Vanilla JavaScript (ES Modules), HTML5, CSS3
-- **3D Engine**: [Three.js](https://threejs.org/)
-- **Smooth Scroll**: [Lenis](https://lenis.darkroom.engineering/)
-- **Animation & Effects**: [GSAP](https://greensock.com/), [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
-- **Audio Engine**: Native Web Audio API
+- **Core**: Vanilla JavaScript (ES Modules), HTML5, Modern CSS3
+- **3D Graphics**: [Three.js](https://threejs.org/) (Custom PBR shaders, procedural geometry, instanced particles)
+- **Smooth Inertia Scrolling**: [Lenis](https://lenis.darkroom.engineering/)
+- **Audio Synthesis**: Native Web Audio API (Harmonic drones, acoustic droplets, resonant chimes)
 - **Build Tool**: [Vite](https://vitejs.dev/)
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Running Locally
 
-### Prerequisites
-- Node.js (v18+)
-- npm or pnpm
-
-### Installation
 ```bash
+# Clone repository
 git clone https://github.com/DivyangNadapara/aura-skincare-3d.git
 cd aura-skincare-3d
-npm install
-```
 
-### Development Server
-```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
-Open your browser at `http://localhost:5173`.
 
-### Production Build
-```bash
-npm run build
-npm run preview
-```
+Open `http://localhost:5173` in your browser.
 
 ---
 
-## 🏛️ Credits & License
+## 📜 Scientific References & Acknowledgements
 
-Designed and developed for **ÆTHÆRA CELLULAR LABS SWITZERLAND**.  
-Repository: [DivyangNadapara/aura-skincare-3d](https://github.com/DivyangNadapara/aura-skincare-3d)
-
+- British Journal of Dermatology (BJD)
+- Journal of the American Academy of Dermatology (JAAD)
+- Contact Dermatitis Clinical Database
+- Formulations cross-referenced with manufacturer Certificates of Analysis (CoA) and INCI declarations.

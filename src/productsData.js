@@ -1,293 +1,344 @@
-export const productsData = [
+// DERM-X: Real Market Skincare Formulations Knowledge Database
+// Objective: Dermatological education, molecular analysis, and biochemical mechanisms.
+// Zero commercial bias — pure formulation science.
+
+export const realProductsData = [
   {
-    id: "serum-orchid",
-    name: "Celestial Orchid Bio-Serum",
+    id: "minimalist-niacinamide-10",
+    name: "Minimalist Niacinamide 10% + Zinc 1%",
+    brand: "Minimalist",
+    brandOrigin: "Jaipur, India",
     category: "serums",
-    categoryName: "Cellular Serums",
-    price: 185,
+    categoryName: "Barrier & Sebum Regulating Serum",
+    keyActives: "10% Niacinamide (Lonza, Switzerland) + 1% Zinc PCA + EU Aloe Vera",
+    ph: "5.5 - 6.0",
     volume: "30ml / 1.0 fl. oz.",
-    tag: "Awwwards Highlight",
-    subtitle: "Tri-Peptide Cellular Activation Concentrate",
-    description: "An ultra-potent bio-fermented concentrate formulated to reverse cellular senescence. Harnesses rare Swiss Alpine Orchid stem cells and seven distinct molecular weights of hyaluronic acid for multidimensional epidermal dermal renewal.",
-    modelType: "serum",
-    liquidColor: 0xf5c99e,
-    emissiveColor: 0x4a2a12,
-    accentColor: "#d4a373",
-    bottleType: "dropper",
-    clinical: {
-      metric1: "99.4%",
-      label1: "Barrier Recovery in 48h",
-      metric2: "-44%",
-      label2: "Micro-Wrinkle Depth (28d)",
-      metric3: "+182%",
-      label3: "Fibroblast Collagen Yield"
-    },
-    actives: [
-      { name: "Alpine Orchid Stem Cells", desc: "Sourced at 3,100m elevation; stimulates mitochondrial longevity gene pathways." },
-      { name: "Hexapeptide-8 Matrix", desc: "Bio-engineered neurotransmitter inhibitor visibly softening expression micro-tensions." },
-      { name: "Heptameric Hyaluronic Acid", desc: "7 molecular weights penetrating down to 120μm into stratum basale." },
-      { name: "Fermented Resveratrol 2%", desc: "Stabilized polyphenolic shield neutralizing 99.8% of free oxygen radicals." }
-    ],
-    sensory: {
-      scent: "Subtle cold-pressed White Damask Rose, Bergamot & Silver Birch",
-      texture: "Silky, viscous honey-light drop that melts instantly with zero tackiness",
-      finish: "Luminous glass-skin hydration veil with soft-focus blurring"
-    },
-    ritual: {
-      morning: "Apply 3-4 drops directly onto cleansed skin before lighter emulsions.",
-      evening: "Press 5 drops into face, neck, and decolletage; seal with Nocturne Crème.",
-      frequency: "Twice daily morning and night ritual"
-    },
-    reviews: {
-      rating: 4.96,
-      count: 342,
-      quote: "The texture is unlike anything in dermatology. Within 3 nights, my barrier fatigue completely cleared."
-    }
-  },
-  {
-    id: "cream-marine",
-    name: "Nocturne Deep Marine Crème",
-    category: "creams",
-    categoryName: "Barrier Creams",
-    price: 210,
-    volume: "50ml / 1.7 fl. oz.",
-    tag: "Intensive Biomimetic",
-    subtitle: "Restorative Marine Lipid Cloud Soufflé",
-    description: "Formulated with Antarctic glycoproteins harvested under polar conditions, this whipped restorative balm mirrors the skin's lipid mantle to lock hydration and accelerate overnight dermal repair.",
-    modelType: "cream",
+    molecularWeight: "Niacinamide: 122.12 g/mol | Zinc PCA: 321.6 g/mol",
+    modelType: "minimalist-dropper",
     liquidColor: 0xffffff,
-    emissiveColor: 0x0f2b26,
-    accentColor: "#52b788",
-    bottleType: "jar",
-    clinical: {
-      metric1: "+215%",
-      label1: "Epidermal Hydration (72h)",
-      metric2: "98.2%",
-      label2: "Transepidermal Lipid Retention",
-      metric3: "100%",
-      label3: "Zero Pore Congestion in Trials"
+    emissiveColor: 0x222222,
+    accentColor: "#22c55e",
+    bottleType: "apothecary-amber",
+    tag: "Cult Favorite · Sebum Regulator",
+    subtitle: "High-Purity Lonza Vitamin B3 with European Zinc PCA",
+    scientificDescription: "Formulated with ultra-pure Grade Niacinamide from Lonza (Switzerland) with verified residual nicotinic acid content below 100ppm to eliminate flushing. Zinc PCA inhibits 5-alpha reductase to regulate sebum production and reduce Propionibacterium acnes colonization.",
+    biochemistry: {
+      mechanism: "Niacinamide acts as a precursor to NAD+/NADH coenzymes essential for cellular ATP production, DNA repair, and synthesis of epidermal ceramides, free fatty acids, and cholesterol.",
+      targetLayer: "Stratum Basale & Sebaceous Glandular Ducts",
+      daltonRating: "122 Da (Ultra-High Trans-Epidermal Permeability)",
+      comedogenicRating: "0 (Non-comedogenic)"
     },
-    actives: [
-      { name: "Antarctic Glycoprotein Complex", desc: "Cryo-protective peptide that shields cellular membranes from extreme thermal stress." },
-      { name: "Ceramide NP/AP/EOP (5%)", desc: "Bio-identical skin lipid stack matching human epidermal barrier ratios 3:1:1." },
-      { name: "Bio-Fermented Chlorella", desc: "High-density micro-algae rich in amino acids for nocturnal micro-capillary recovery." },
-      { name: "Purified Phyto-Squalane", desc: "Pure olive-derived lipid promoting deep, velvet-like non-comedogenic slip." }
+    activesBreakdown: [
+      { name: "Niacinamide (10%)", desc: "Pharmaceutical grade Vitamin B3; upregulates SPT (serine palmitoyltransferase) enzyme to boost natural ceramide synthesis by +34%." },
+      { name: "Zinc PCA (1%)", desc: "Zinc combined with L-Pyrrolidone Carboxylic Acid; potent physiological astringent and 5-alpha reductase inhibitor reducing sebum excretion rate." },
+      { name: "EUK-134 (0.01%)", desc: "Manganese-based biomimetic antioxidant that mimics natural catalase and superoxide dismutase enzymes to neutralize peroxynitrite radicals." },
+      { name: "Centella Asiatica Extract", desc: "Rich in madecassoside and asiatic acid; down-regulates pro-inflammatory cytokines TNF-alpha and IL-1beta." }
     ],
-    sensory: {
-      scent: "Grounding Hinoki Cypress, Vetiver & crushed Sea Botanicals",
-      texture: "Decadent whipped soufflé that transforms upon warmth into an osmotic cushion",
-      finish: "Cashmere satin matte-glow, non-greasy breathable protective shield"
-    },
-    ritual: {
-      morning: "Warm a pearl-sized portion between fingertips and press into dry zones.",
-      evening: "Generously massage upward in lymphatic strokes as the final night sealing step.",
-      frequency: "Evening essential; dry climates twice daily"
-    },
-    reviews: {
-      rating: 4.98,
-      count: 289,
-      quote: "Feels like waking up with brand new skin. The glass packaging is a sculptural work of art."
-    }
+    vehicleBase: "Aloe Barbadensis Leaf Juice (Cold-processed EU standard base instead of plain deionized water)",
+    conflictsWith: ["Direct Vitamin C (L-Ascorbic Acid) at pH < 3.5 in simultaneous application"],
+    idealPairsWith: ["Hyaluronic Acid", "Salicylic Acid", "Ceramides", "Retinol"],
+    dermatologistNote: "Ideal for oily, combination, and acne-prone skin with post-inflammatory erythema (PIE). Can be safely paired with retinoids at night to mitigate barrier dryness."
   },
   {
-    id: "mist-glacier",
-    name: "Fermented Rose Glacier Hydro-Mist",
-    category: "mists",
-    categoryName: "Hydro-Mists",
-    price: 95,
-    volume: "100ml / 3.4 fl. oz.",
-    tag: "Cellular Refresh",
-    subtitle: "Micro-Atomized Alpine Mineral Mist",
-    description: "An ethereal micro-fine aerosol mist of high-altitude Swiss glacier water, bio-fermented Galactomyces, and organic Damascena rose hydrosol that replenishes cellular electrolytes instantaneously.",
-    modelType: "mist",
-    liquidColor: 0xfcb4c8,
-    emissiveColor: 0x3a0d1d,
-    accentColor: "#f472b6",
-    bottleType: "fluted",
-    clinical: {
-      metric1: "+148%",
-      label1: "Instant Skin Moisture Surge",
-      metric2: "99.1%",
-      label2: "Pollutant Neutralization",
-      metric3: "12μm",
-      label3: "Micro-Droplet Atomization"
+    id: "derma-co-hyaluronic-sunscreen",
+    name: "The Derma Co 1% Hyaluronic Sunscreen Aqua Gel",
+    brand: "The Derma Co",
+    brandOrigin: "Gurugram, India",
+    category: "sunscreens",
+    categoryName: "Broad Spectrum Hybrid Photoprotection",
+    keyActives: "1% Multi-Molecular Hyaluronic Acid + Vitamin E + Titanium Dioxide + Organic UV Filters",
+    ph: "6.0 - 6.5",
+    volume: "50g / 1.76 oz.",
+    molecularWeight: "HA Polymer: 50 - 1,500 kDa | UV Filters: 228 - 627 g/mol",
+    modelType: "dermaco-pump",
+    liquidColor: 0x93c5fd,
+    emissiveColor: 0x1d4ed8,
+    accentColor: "#3b82f6",
+    bottleType: "blue-pump-tube",
+    tag: "Derm-Approved · Zero White Cast",
+    subtitle: "SPF 50 PA++++ Hybrid Chemical & Physical Blue Light Shield",
+    scientificDescription: "An ultra-lightweight aqua gel matrix engineered to provide PA++++ critical wavelength protection (λc ≥ 370nm). Incorporates encapsulated organic filters with micro-fine mineral shields suspended in an osmotic hyaluronic gel network.",
+    biochemistry: {
+      mechanism: "Absorbs, reflects, and scatters incident photon energy in both UVA (320-400nm) and UVB (290-320nm) spectra. Neutralizes reactive oxygen species (ROS) induced by high-energy visible blue light (HEV 400-500nm).",
+      targetLayer: "Stratum Corneum Surface (Shield Barrier Layer)",
+      daltonRating: "Non-penetrating topical shield (Photostable)",
+      comedogenicRating: "1 (Safe for acne-prone skin)"
     },
-    actives: [
-      { name: "Swiss Glacier Water (Mineral-Rich)", desc: "Naturally filtered through crystalline granite; rich in calcium, potassium, and silica." },
-      { name: "Fermented Galactomyces Filtrate", desc: "Yeast bio-ferment refining pore texture and illuminating micro-circulation." },
-      { name: "Damask Rose Centifolia Hydrosol", desc: "Steam-distilled fresh petals with natural calming and soothing bio-flavonoids." },
-      { name: "Micro-Zinc PCA", desc: "Balances cutaneous sebum production while calming dermal redness." }
+    activesBreakdown: [
+      { name: "Multi-Molecular Hyaluronic Acid (1%)", desc: "Dual-weight HA network providing surface hygroscopic moisture retention without greasy occlusion." },
+      { name: "Vitamin E (Tocopheryl Acetate)", desc: "Lipophilic chain-breaking antioxidant terminating lipid peroxidation in cell membranes exposed to sun." },
+      { name: "Zinc Oxide & Titanium Dioxide", desc: "Micro-dispersed physical blockers refracting and scattering UV photons across the entire spectrum." },
+      { name: "Tinosorb M & Octinoxate", desc: "Photostable organic UV absorbers with microfine organic particle technology providing high extinction coefficients." }
     ],
-    sensory: {
-      scent: "Crisp dew-kissed morning petals and ozone glacial air",
-      texture: "Ultra-fine cloud that settles like weightless morning dew",
-      finish: "Instant dewy hydration refresh, sets makeup or revives tired dermis"
-    },
-    ritual: {
-      morning: "Mist 3 pumps across face post-cleansing before applying serums.",
-      evening: "Use between serum and cream steps to sandwich moisture into the skin.",
-      frequency: "Anytime refresh throughout the day as environmental shield"
-    },
-    reviews: {
-      rating: 4.92,
-      count: 194,
-      quote: "The mist nozzle creates a literal cloud. It's the most luxurious sensory mist I have ever experienced."
-    }
+    vehicleBase: "Ultra-Lightweight Aqua Gel with volatile silicones for instantaneous non-sticky dermal flash-off",
+    conflictsWith: ["Heavy silicone oils prior to application (may compromise even film formation)"],
+    idealPairsWith: ["Antioxidant Serums (Vitamin C, Niacinamide) in morning routines"],
+    dermatologistNote: "Apply 2 finger-lengths as the final AM step. Reapply every 2 hours during continuous UV exposure or after heavy perspiration."
   },
   {
-    id: "oil-squalane",
-    name: "24K Squalane Radiant Youth Nectar",
-    category: "oils",
-    categoryName: "Botanical Elixirs",
-    price: 165,
+    id: "the-ordinary-aha-bha-peeling",
+    name: "The Ordinary AHA 30% + BHA 2% Peeling Solution",
+    brand: "The Ordinary",
+    brandOrigin: "DECIEM, Toronto, Canada",
+    category: "exfoliants",
+    categoryName: "Chemical Exfoliant Peeling Solution",
+    keyActives: "30% Alpha Hydroxy Acids (Glycolic, Lactic, Tartaric, Citric) + 2% Salicylic Acid",
+    ph: "3.5 - 3.7 (pKa Balanced)",
     volume: "30ml / 1.0 fl. oz.",
-    tag: "Liquid Gold",
-    subtitle: "Infused 24-Karat Colloidal Botanical Elixir",
-    description: "A jewel-like crystalline elixir featuring suspended 24-karat gold flakes and ultra-clarified sugarcane squalane. Delivers luminous light reflection while bathing skin cells in essential omega-3, 6, and 9 lipids.",
-    modelType: "oil",
-    liquidColor: 0xf59e0b,
-    emissiveColor: 0x451a03,
-    accentColor: "#fbbf24",
-    bottleType: "crystal",
-    clinical: {
-      metric1: "100%",
-      label1: "Non-Comedogenic Test Rating",
-      metric2: "24h",
-      label2: "Mirror-Glow Dermal Retention",
-      metric3: "+79%",
-      label3: "Skin Elasticity Index (4w)"
+    molecularWeight: "Glycolic: 76.05 Da | Lactic: 90.08 Da | Salicylic: 138.12 Da",
+    modelType: "ordinary-dropper",
+    liquidColor: 0x991b1b,
+    emissiveColor: 0x450a0a,
+    accentColor: "#ef4444",
+    bottleType: "blood-red-dropper",
+    tag: "Legendary Resurfacer · 10-Min Wash-Off",
+    subtitle: "High-Concentration Epidermal Chemical Peel with Tasmanian Pepperberry",
+    scientificDescription: "An intensive clinical-grade home acid peel balancing water-soluble AHAs with oil-soluble Salicylic Acid. Calibrated precisely at pH 3.6 to maintain optimal free acid value (FAV) equal to pKa of glycolic acid (3.6) for maximal keratolytic efficacy with Tasmanian Pepperberry to mitigate acid-induced neuro-sensory stinging.",
+    biochemistry: {
+      mechanism: "Cleaves calcium-dependent desmosomes (protein bridges) binding stratum corneum corneocytes, accelerating cell desquamation. Salicylic acid lipophilicity enables penetrative dissolution of intra-follicular lipid plugs.",
+      targetLayer: "Stratum Corneum & Infundibulum Pores",
+      daltonRating: "76 - 138 Da (High cutaneous acid flux)",
+      comedogenicRating: "0 (Keratolytic decongestant)"
     },
-    actives: [
-      { name: "Pure 24K Gold Suspension", desc: "Colloidal gold micro-leaf that deflects ambient light while aiding cellular micro-circulation." },
-      { name: "Sugarcane Phyto-Squalane (100%)", desc: "Sustainable biomimetic emollients mimicking human sebum with zero pore clog risk." },
-      { name: "Cold-Pressed Rosehip CO2 Extract", desc: "Rich in natural trans-retinoic acid, lycopene, and beta-carotene for tone clarity." },
-      { name: "Sea Buckthorn Supercritical Oil", desc: "Omega-7 rich Arctic botanical restoring elasticity to stressed cellular networks." }
+    activesBreakdown: [
+      { name: "Glycolic Acid (AHA)", desc: "Smallest alpha hydroxy acid molecule (76 Da); penetrates deeply to break ionic bonds holding dead keratinocytes." },
+      { name: "Salicylic Acid (BHA 2%)", desc: "Oil-soluble beta hydroxy acid; dissolves intracellular cement within sebaceous follicles to purge blackheads." },
+      { name: "Tasmanian Pepperberry (Polygodial)", desc: "Botanical active containing polygodial; inhibits TRPV1 vanilloid receptor activation to reduce acute acid erythema." },
+      { name: "Black Carrot Extract", desc: "Rich in anthocyanins; provides characteristic deep blood-ruby color and supplemental radical scavenging." }
     ],
-    sensory: {
-      scent: "Golden amber, wild neroli blossom, and warm solar resin",
-      texture: "Liquid liquid-silk dry oil with non-greasy rapid epidermal absorption",
-      finish: "Gleaming high-fashion editorial glow with subtle warm radiance"
-    },
-    ritual: {
-      morning: "Blend 1 drop into foundation or tap on cheekbones as a bio-luminizer.",
-      evening: "Gently warm 3 drops in palms and press as the crown jewel of your evening ritual.",
-      frequency: "Daily evening, or whenever radiant luster is desired"
-    },
-    reviews: {
-      rating: 4.99,
-      count: 412,
-      quote: "The 24K gold flakes melt into the skin leaving a halo-like glow that lasts all day without oiliness."
-    }
+    vehicleBase: "Aqueous gel buffer with Sodium Hyaluronate crosspolymer for controlled acid delivery",
+    conflictsWith: ["Direct Acids", "Pure Retinoids", "L-Ascorbic Acid", "Copper Peptides", "Physical Scrubs"],
+    idealPairsWith: ["Centella / Cica Soothing Lotions", "Barrier Recovery Ceramides (Post-wash)"],
+    dermatologistNote: "STRICT MAXIMUM: 10 minutes on dry skin only. Wash off with lukewarm water. Never use on broken or compromised skin barriers. Mandatory SPF 50 the following days."
   },
   {
-    id: "serum-bakuchiol",
-    name: "Bakuchiol & Resveratrol Concentrate",
-    category: "serums",
-    categoryName: "Cellular Serums",
-    price: 175,
-    volume: "30ml / 1.0 fl. oz.",
-    tag: "Phyto-Retinol Pioneer",
-    subtitle: "Night Cellular Micro-Resurfacing Elixir",
-    description: "A revolutionary 100% plant-based alternative to traditional retinol. Provides all the collagen-stimulating, skin-refining benefits of vitamin A with zero phototoxicity, flaking, or barrier compromise.",
-    modelType: "serum",
-    liquidColor: 0x60a5fa,
-    emissiveColor: 0x172554,
-    accentColor: "#60a5fa",
-    bottleType: "dropper",
-    clinical: {
-      metric1: "0%",
-      label1: "Irritation or Peeling Reported",
-      metric2: "89%",
-      label2: "Cellular Turnover Acceleration",
-      metric3: "-52%",
-      label3: "Surface Post-Blemish Discoloration"
+    id: "paulas-choice-2-bha-liquid",
+    name: "Paula's Choice Skin Perfecting 2% BHA Liquid Exfoliant",
+    brand: "Paula's Choice",
+    brandOrigin: "Seattle, Washington, USA",
+    category: "exfoliants",
+    categoryName: "Pore-Clearing Liquid Exfoliant",
+    keyActives: "2% Salicylic Acid + Methylpropanediol + Camellia Sinensis (Green Tea) Leaf Extract",
+    ph: "3.2 - 3.8",
+    volume: "118ml / 4.0 fl. oz.",
+    molecularWeight: "Salicylic Acid: 138.12 Da",
+    modelType: "paulas-bottle",
+    liquidColor: 0xe2e8f0,
+    emissiveColor: 0x334155,
+    accentColor: "#94a3b8",
+    bottleType: "grey-flacon",
+    tag: "Global Holy Grail · Blackhead Dissolver",
+    subtitle: "Leave-On Salicylic Acid Exfoliant in Penetration-Enhancing Vehicle",
+    scientificDescription: "Recognized as the gold standard in leave-on beta hydroxy acid formulations. Formulated with 2% unneutralized Salicylic Acid solubilized in a specialized methylpropanediol and butylene glycol delivery system that enhances follicular sebum penetration without harsh drying alcohol.",
+    biochemistry: {
+      mechanism: "Lipophilic salicylic acid diffuses through hydrophobic sebum, dissolves lipid cross-linkages in follicular comedones, and suppresses NF-kappaB inflammatory pathways in the pore lining.",
+      targetLayer: "Follicular Canal & Stratum Corneum",
+      daltonRating: "138 Da (Lipophilic intra-pore penetration)",
+      comedogenicRating: "0 (Clears comedones)"
     },
-    actives: [
-      { name: "99% Pure Babchi Bakuchiol (2%)", desc: "Ayurvedic phyto-active binding directly to retinoic acid receptor sites without irritation." },
-      { name: "Pure Trans-Resveratrol", desc: "Super-potent botanical antioxidant that shields against photo-induced oxidative aging." },
-      { name: "Astaxanthin Micro-Algae", desc: "Red carotenoid shown in clinical studies to be 6,000x stronger than Vitamin C." },
-      { name: "Blue Tansy Chamazulene", desc: "Deep indigo botanical oil that immediately calms thermal inflammation and reactivity." }
+    activesBreakdown: [
+      { name: "Salicylic Acid (2%)", desc: "Oil-soluble keratolytic and anti-inflammatory agent that clears debris, dead cells, and oxidized sebum inside pores." },
+      { name: "Methylpropanediol", desc: "Glycol penetration enhancer that increases skin absorption of salicylic acid while providing hydration." },
+      { name: "Green Tea Extract (EGCG)", desc: "Potent polyphenol antioxidant that soothes redness and inhibits matrix metalloproteinases." },
+      { name: "Sodium Hydroxide Buffer", desc: "Precisely adjusts formulation pH to 3.5 to preserve ~60% free acid bio-availability." }
     ],
-    sensory: {
-      scent: "Herbaceous blue tansy, calming wild chamomile and cooling cedar",
-      texture: "Silky aquatic sapphire emulsion that absorbs into a weightless veil",
-      finish: "Calm, refined, velvety cushion with zero redness"
-    },
-    ritual: {
-      morning: "Safe for morning use under SPF due to non-phototoxic plant nature.",
-      evening: "Apply 4 drops to clean skin before creams for overnight resurfacing.",
-      frequency: "Daily evening ritual"
-    },
-    reviews: {
-      rating: 4.95,
-      count: 215,
-      quote: "As someone who could never tolerate retinoids, this completely transformed my skin texture in 3 weeks."
-    }
+    vehicleBase: "Alcohol-free hydrating glycol fluid",
+    conflictsWith: ["Strong prescription tretinoin on same night", "High concentration chemical peels"],
+    idealPairsWith: ["Niacinamide serums", "Hydrating Hyaluronic toners", "Lightweight gel moisturizers"],
+    dermatologistNote: "Apply with fingers or cotton pad after cleansing. Do not rinse. Introduce gradually: 2-3 times per week initially before progressing to nightly use."
   },
   {
-    id: "cream-ceramide",
-    name: "Velvet Barrier Micro-Emulsion",
+    id: "derma-co-2-kojic-acid-cream",
+    name: "The Derma Co 2% Kojic Acid Face Cream",
+    brand: "The Derma Co",
+    brandOrigin: "Gurugram, India",
     category: "creams",
-    categoryName: "Barrier Creams",
-    price: 160,
-    volume: "50ml / 1.7 fl. oz.",
-    tag: "Urban Shield",
-    subtitle: "Anti-Pollution Dermal Fortification Gel-Crème",
-    description: "Engineered specifically for urban dwellers facing particulate matter and blue light stress. Micro-emulsified liposomes create an invisible breathable second-skin shield that prevents particulate matter penetration.",
-    modelType: "cream",
-    liquidColor: 0xdcfce7,
-    emissiveColor: 0x064e3b,
-    accentColor: "#34d399",
-    bottleType: "jar",
-    clinical: {
-      metric1: "97.8%",
-      label1: "Blue Light & PM2.5 Shielding",
-      metric2: "+160%",
-      label2: "Lipid Matrix Resilience",
-      metric3: "48h",
-      label3: "Continuous Osmotic Hydration"
+    categoryName: "Melanin Inhibiting Depigmentation Emulsion",
+    keyActives: "2% Kojic Acid + 1% Alpha Arbutin + 1% Niacinamide + Tetrahydrocurcumin",
+    ph: "5.0 - 5.5",
+    volume: "30g / 1.05 oz.",
+    molecularWeight: "Kojic: 142.11 Da | Alpha Arbutin: 272.25 Da",
+    modelType: "dermaco-kojic-cream",
+    liquidColor: 0xfef08a,
+    emissiveColor: 0x854d0e,
+    accentColor: "#eab308",
+    bottleType: "clinical-pump",
+    tag: "Targeted PIH & Melasma Solution",
+    subtitle: "Multi-Pathway Tyrosinase Inhibitor Complex for Post-Acne Marks",
+    scientificDescription: "A clinical multi-targeted depigmentation formulation that attacks melanogenesis at four distinct enzymatic steps: tyrosinase copper chelation, competitive active site inhibition, melanosome transfer blockade, and antioxidant oxidation prevention.",
+    biochemistry: {
+      mechanism: "Kojic acid binds to the copper ions in the active catalytic center of tyrosinase enzyme, preventing conversion of L-DOPA to dopaquinone, while Alpha Arbutin competitively inhibits tyrosinase activity.",
+      targetLayer: "Epidermal Melanocytes in Stratum Basale",
+      daltonRating: "142 Da (Reaches basal melanocyte layer)",
+      comedogenicRating: "1 (Lightweight emulsion)"
     },
-    actives: [
-      { name: "Pure Ectoin (2%)", desc: "Extremolyte amino-acid molecule forming hydration shells around cellular membranes." },
-      { name: "Centella Asiatica (Madecassoside)", desc: "Isolated triterpene providing instant soothing to environmentally challenged skin." },
-      { name: "Phytosterol Lipid Stack", desc: "Plant sterols that mimic natural sebum to repair micro-tears in the epidermal barrier." },
-      { name: "Silver Fir Needle Extract", desc: "Wild-harvested evergreen extract that neutralizes urban oxidative stress." }
+    activesBreakdown: [
+      { name: "Kojic Acid (2%)", desc: "Fungal metabolite from Aspergillus oryzae; chelates essential copper cofactor in tyrosinase." },
+      { name: "Alpha Arbutin (1%)", desc: "Alpha-glucoside of hydroquinone; competitive inhibitor of tyrosinase with exceptional stability." },
+      { name: "Niacinamide (1%)", desc: "Blocks transfer of melanin-filled melanosomes from melanocytes to surrounding keratinocytes by up to 68%." },
+      { name: "Tetrahydrocurcumin", desc: "Hydrogenated colorless turmeric active providing superior tyrosinase inhibition without yellow staining." }
     ],
-    sensory: {
-      scent: "Subtle crisp alpine pine, iced green tea and crushed mint leaf",
-      texture: "Cooling gel-crème that breaks into a refreshing watery wave upon skin touch",
-      finish: "Zero-shine natural satin finish, perfectly primed for clean makeup"
+    vehicleBase: "Liposomal delivery cream base with cetearyl octanoate",
+    conflictsWith: ["Heavy oxidizing agents that may degrade Kojic acid stability"],
+    idealPairsWith: ["Broad Spectrum SPF 50+ (Critical: sun exposure reverses tyrosinase inhibition)", "Gentle Hydrating Cleansers"],
+    dermatologistNote: "Highly effective for post-inflammatory hyperpigmentation (PIH) and melasma patches. Best used twice daily for minimum 6-8 weeks for visible tone harmonization."
+  },
+  {
+    id: "cerave-moisturizing-cream",
+    name: "CeraVe Moisturizing Cream with 3 Essential Ceramides",
+    brand: "CeraVe",
+    brandOrigin: "L'Oréal Dermatological Beauty, USA/France",
+    category: "creams",
+    categoryName: "Lipid Matrix Barrier Restorative",
+    keyActives: "Ceramides 1 (EOP), 3 (NP), 6-II (AP) + Phytosphingosine + MVE Multivesicular Emulsion",
+    ph: "5.0 - 5.5",
+    volume: "340g / 12 oz.",
+    molecularWeight: "Ceramides: 500 - 700 Da | Phytosphingosine: 317 Da",
+    modelType: "cerave-tub",
+    liquidColor: 0xf8fafc,
+    emissiveColor: 0x1e3a8a,
+    accentColor: "#2563eb",
+    bottleType: "clinical-tub",
+    tag: "Dermatologist #1 Choice · Eczema Safe",
+    subtitle: "Patented MVE Technology Providing 24-Hour Controlled-Release Lipid Matrix",
+    scientificDescription: "Developed with dermatologists to restore the natural cutaneous barrier using bio-identical skin lipids in the physiologic 3:1:1 ratio. Features patented Multivesicular Emulsion (MVE) delivery technology consisting of concentric lipid-water spheres that break down sequentially over 24 hours.",
+    biochemistry: {
+      mechanism: "Reconstructs the lipid lamellae (brick and mortar architecture) of the stratum corneum, locking in natural moisturizing factors (NMF) and preventing trans-epidermal water loss (TEWL).",
+      targetLayer: "Stratum Corneum Intercellular Lipid Lamellae",
+      daltonRating: "Lamellar membrane lipid integration",
+      comedogenicRating: "0 (Accepted by National Eczema Association)"
     },
-    ritual: {
-      morning: "Massage 2 pumps onto face and neck as your primary environmental armor.",
-      evening: "Layer generously on dehydrated areas after intense travel or weather exposure.",
-      frequency: "Ideal daily morning barrier shield"
-    },
-    reviews: {
-      rating: 4.94,
-      count: 178,
-      quote: "My redness from city commuting completely disappeared. The light gel texture is perfection."
-    }
+    activesBreakdown: [
+      { name: "Ceramide NP (Ceramide 3)", desc: "Reinforces skin barrier resilience and reduces transepidermal moisture evaporation." },
+      { name: "Ceramide AP (Ceramide 6-II)", desc: "Supports natural cellular desquamation and smoothens rough, cracked skin texture." },
+      { name: "Ceramide EOP (Ceramide 1)", desc: "Long-chain omega-hydroxy fatty acid ceramide binding the entire bilayer together into tight sheets." },
+      { name: "Phytosphingosine", desc: "Precursor lipid with natural anti-microbial and anti-inflammatory properties that defends against skin pathogens." }
+    ],
+    vehicleBase: "MVE multivesicular spheres suspended in rich non-greasy petrolatum-glycerin matrix",
+    conflictsWith: ["None (Universally compatible barrier restorative)"],
+    idealPairsWith: ["All active acids, retinoids, benzoyl peroxide, and drying treatments"],
+    dermatologistNote: "The universal baseline barrier repair cream. Safe for face and body, sensitive skin, eczema, and psoriasis. Use immediately after cleansing on damp skin."
   }
 ];
 
-export const routineQuizData = {
-  skinTypes: [
-    { id: "dehydrated", label: "Dehydrated & Depleted", desc: "Tightness, dull complexion, impaired lipid barrier" },
-    { id: "aging", label: "Loss of Firmness & Longevity", desc: "Fine lines, elasticity reduction, cellular fatigue" },
-    { id: "reactive", label: "Reactive & Sensitive", desc: "Redness, flaking, thermal heat sensitivity" },
-    { id: "combination", label: "Combination & Uneven", desc: "T-zone congestion, uneven tone, enlarged pores" }
-  ],
-  goals: [
-    { id: "regeneration", label: "Cellular Longevity & Repair", focus: "Stimulate collagen and cellular repair pathways" },
-    { id: "barrier", label: "Intensive Barrier Fortification", focus: "Rebuild lipid mantle and protect against trans-epidermal moisture loss" },
-    { id: "glow", label: "Mirror-Glass Radiance & Clarity", focus: "Refine micro-texture and deflect ambient light" },
-    { id: "calming", label: "Deep Cutaneous Calming", focus: "Cool micro-inflammation and neutralize oxidative free radicals" }
-  ],
-  climates: [
-    { id: "urban", label: "Urban & High-Pollution", detail: "Heavy smog, blue light screens, air conditioning" },
-    { id: "arid", label: "Arid & Desert Heated", detail: "Low humidity, high evaporative moisture loss" },
-    { id: "temperate", label: "Temperate & Seasonal", detail: "Fluctuating seasonal moisture and sun exposure" },
-    { id: "extreme", label: "Alpine & Sub-Zero", detail: "Harsh winds, severe thermal shifts, high UV index" }
-  ]
-};
+export const scientificMoleculesData = [
+  {
+    id: "niacinamide",
+    name: "Niacinamide (Vitamin B3)",
+    chemicalFormula: "C₆H₆N₂O",
+    molarMass: "122.12 g/mol",
+    solubility: "Water-soluble (Hydrophilic)",
+    pKa: "3.35 (Weak base)",
+    role: "Cellular ATP & Ceramide Synthesis Upregulator",
+    clinicalEfficacy: "Reduces sebum excretion by 30-40%, diminishes PIH in 4 weeks, upregulates collagen by +54%.",
+    atoms: [
+      { element: "N", x: 0, y: 1.2, z: 0, color: 0x3b82f6, radius: 0.18, label: "Nitrogen (Ring)" },
+      { element: "C", x: 1.0, y: 0.6, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 2" },
+      { element: "C", x: 1.0, y: -0.8, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 3" },
+      { element: "C", x: 0, y: -1.4, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 4" },
+      { element: "C", x: -1.0, y: -0.8, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 5" },
+      { element: "C", x: -1.0, y: 0.6, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 6" },
+      { element: "C", x: 2.2, y: -1.5, z: 0.2, color: 0x475569, radius: 0.22, label: "Carbonyl C" },
+      { element: "O", x: 3.1, y: -1.0, z: 0.4, color: 0xef4444, radius: 0.2, label: "Oxygen =O" },
+      { element: "N", x: 2.3, y: -2.8, z: 0.1, color: 0x3b82f6, radius: 0.18, label: "Amide NH₂" }
+    ],
+    bonds: [
+      [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0],
+      [2, 6], [6, 7], [6, 8]
+    ]
+  },
+  {
+    id: "salicylic-acid",
+    name: "Salicylic Acid (Beta Hydroxy Acid)",
+    chemicalFormula: "C₇H₆O₃",
+    molarMass: "138.12 g/mol",
+    solubility: "Lipophilic (Oil-soluble)",
+    pKa: "2.97 (Carboxylic Acid)",
+    role: "Desmolytic Pores & Sebum Keratolytic",
+    clinicalEfficacy: "Penetrates sebum plugs, clears open/closed comedones, reduces inflammatory papules by 47%.",
+    atoms: [
+      { element: "C", x: 0, y: 1.1, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 1" },
+      { element: "C", x: 1.0, y: 0.5, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 2" },
+      { element: "C", x: 1.0, y: -0.9, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 3" },
+      { element: "C", x: 0, y: -1.6, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 4" },
+      { element: "C", x: -1.0, y: -0.9, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 5" },
+      { element: "C", x: -1.0, y: 0.5, z: 0, color: 0x475569, radius: 0.22, label: "Carbon 6" },
+      { element: "C", x: 0, y: 2.4, z: 0, color: 0x475569, radius: 0.22, label: "Carboxyl C" },
+      { element: "O", x: -1.0, y: 3.1, z: 0, color: 0xef4444, radius: 0.2, label: "Carbonyl =O" },
+      { element: "O", x: 1.1, y: 3.0, z: 0, color: 0xef4444, radius: 0.2, label: "Hydroxyl -OH" },
+      { element: "O", x: 2.2, y: 1.2, z: 0, color: 0xef4444, radius: 0.2, label: "Phenolic -OH" }
+    ],
+    bonds: [
+      [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0],
+      [0, 6], [6, 7], [6, 8], [1, 9]
+    ]
+  },
+  {
+    id: "hyaluronic-acid",
+    name: "Hyaluronic Acid (D-Glucuronic + GlcNAc)",
+    chemicalFormula: "(C₁₄H₂₁NO₁₁)ₙ",
+    molarMass: "50 kDa - 2,000 kDa",
+    solubility: "Highly Hydrophilic (Binds 1000x its weight in water)",
+    pKa: "3.0 - 4.0",
+    role: "Osmotic Hydration & Viscoelastic Matrix Scaffold",
+    clinicalEfficacy: "Increases stratum corneum moisture by +96%, reduces transepidermal water loss, accelerates wound re-epithelialization.",
+    atoms: [
+      { element: "C", x: -1.5, y: 0.5, z: 0, color: 0x475569, radius: 0.22, label: "Glucuronic C1" },
+      { element: "C", x: -0.8, y: 1.4, z: 0.2, color: 0x475569, radius: 0.22, label: "C2" },
+      { element: "C", x: 0.4, y: 1.2, z: 0, color: 0x475569, radius: 0.22, label: "C3" },
+      { element: "C", x: 0.8, y: 0, z: -0.2, color: 0x475569, radius: 0.22, label: "C4" },
+      { element: "O", x: 0, y: -0.8, z: 0, color: 0xef4444, radius: 0.2, label: "Ring Oxygen" },
+      { element: "C", x: -1.2, y: -0.7, z: 0, color: 0x475569, radius: 0.22, label: "C5" },
+      { element: "C", x: 2.1, y: -0.2, z: 0, color: 0x475569, radius: 0.22, label: "GlcNAc C1" },
+      { element: "N", x: 2.6, y: 0.8, z: 0.2, color: 0x3b82f6, radius: 0.18, label: "Acetamido N" },
+      { element: "O", x: 3.5, y: -0.6, z: 0, color: 0xef4444, radius: 0.2, label: "Hydroxyl O" }
+    ],
+    bonds: [
+      [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0],
+      [3, 6], [6, 7], [6, 8]
+    ]
+  }
+];
+
+export const ingredientConflictMatrix = [
+  {
+    pair: ["AHA / BHA", "Retinoids (Retinol / Tretinoin)"],
+    status: "caution",
+    label: "High Irritation Risk (Do Not Layer Concurrently)",
+    severity: "High",
+    science: "Both increase cellular turnover through distinct pathways. Concurrent application overwhelms the stratum corneum, causing acute barrier disruption, burning, erythema, and increased transepidermal water loss (TEWL).",
+    recommendation: "Alternate nights (e.g. BHA on Monday/Thursday, Retinoid on Tuesday/Friday/Sunday). Always follow with a ceramide cream."
+  },
+  {
+    pair: ["Direct Vitamin C (L-Ascorbic Acid)", "Niacinamide (High Dose)"],
+    status: "myth-busted",
+    label: "Safe to Pair (Old Chemistry Myth Debunked)",
+    severity: "Negligible",
+    science: "The historic belief that Vitamin C and Niacinamide cancel each other or form yellow niacin comes from 1960s experiments conducted at unphysiologically high temperatures (>80°C) over weeks. Under ambient human skin conditions, modern stabilized serums can be applied together.",
+    recommendation: "Allow 2-3 minutes between applications if skin is prone to temporary acidic flushing."
+  },
+  {
+    pair: ["Salicylic Acid (BHA)", "Benzoyl Peroxide (BPO)"],
+    status: "caution",
+    label: "Severe Barrier Dehydration Hazard",
+    severity: "Moderate-High",
+    science: "Benzoyl peroxide is a potent oxidizing antimicrobial, while salicylic acid is a lipophilic keratolytic. Using them simultaneously causes extreme peeling, lipid depletion, and contact dermatitis.",
+    recommendation: "Use Salicylic Acid in morning/alternate days, and Benzoyl Peroxide strictly as a localized short-contact spot treatment."
+  },
+  {
+    pair: ["Hyaluronic Acid", "Ceramides (NP, AP, EOP)"],
+    status: "synergy",
+    label: "Gold Standard Barrier Synergy (100% Recommended)",
+    severity: "Optimal",
+    science: "Hyaluronic acid acts as an internal hygroscopic water reservoir, while ceramides construct the hydrophobic lipid mortar that seals that water inside the stratum corneum, preventing evaporative moisture loss.",
+    recommendation: "Apply Hyaluronic Acid onto slightly damp skin first, then immediately seal with a ceramide cream (e.g. CeraVe)."
+  },
+  {
+    pair: ["Kojic Acid", "Alpha Arbutin"],
+    status: "synergy",
+    label: "Dual Tyrosinase Blockade Synergy",
+    severity: "Optimal",
+    science: "Kojic acid chelates the copper co-factor of tyrosinase, while Alpha Arbutin competitively occupies the active enzyme binding site. This two-prong attack yields significantly superior melasma and PIH clearance than either alone.",
+    recommendation: "Apply twice daily followed religiously by SPF 50+ sunscreen in the morning."
+  }
+];
