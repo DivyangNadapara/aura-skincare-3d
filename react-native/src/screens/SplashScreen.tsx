@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,142 +7,210 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const NAME = 'DIVYANG';
-const SAMSUNG_BLUE = '#2C7BFE';
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// ────────────────────────────────────────────────────────────
+// NASA PUBLIC DOMAIN — Solar System Planets 4K visualization
+// Source: Scientific Visualization Studio — svs.gsfc.nasa.gov
+// Free to use with credit (US Govt / Public Domain)
+// ────────────────────────────────────────────────────────────
+const SOLAR_SYSTEM_VIDEO =
+  'https://svs.gsfc.nasa.gov/vis/a030000/a030700/a030710/planets3x3_pluto_colorMercury_axis_tilt_1080p.mp4';
+
+const NAME   = 'DIVYANG';
+const BLUE   = '#2C7BFE';
+const LETTER_STAGGER  = 90;   // ms between each letter
+const LETTER_DURATION = 520;
 
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
-  // One animated value per letter
+  const [videoReady, setVideoReady] = useState(false);
+
+  // ── Letter animations ─────────────────────────────────────
   const letterAnims = useRef(
     NAME.split('').map(() => ({
-      opacity: new Animated.Value(0),
-      translateY: new Animated.Value(40),
-      scale: new Animated.Value(0.6),
+      opacity:    new Animated.Value(0),
+      translateY: new Animated.Value(50),
+      scale:      new Animated.Value(0.4),
     }))
   ).current;
 
-  // Glow line width (sweeps across under the name)
-  const glowLineWidth = useRef(new Animated.Value(0)).current;
+  // ── Glow line under name ───────────────────────────────────
+  const glowWidth   = useRef(new Animated.Value(0)).current;
+  const glowOpacity = useRef(new Animated.Value(0)).current;
 
-  // Tagline below
-  const taglineOpacity = useRef(new Animated.Value(0)).current;
-  const taglineTranslateY = useRef(new Animated.Value(16)).current;
-
-  // Dot pulse beneath glow line
-  const dotScale = useRef(new Animated.Value(0)).current;
+  // ── Dot at line tip ────────────────────────────────────────
+  const dotScale   = useRef(new Animated.Value(0)).current;
   const dotOpacity = useRef(new Animated.Value(0)).current;
 
-  // Full screen fade out at end
-  const screenOpacity = useRef(new Animated.Value(1)).current;
+  // ── Tagline ────────────────────────────────────────────────
+  const taglineOpacity    = useRef(new Animated.Value(0)).current;
+  const taglineTranslateY = useRef(new Animated.Value(20)).current;
+
+  // ── Video dark overlay (fades in to partially obscure video) ─
+  const overlayOpacity = useRef(new Animated.Value(0.15)).current;
+
+  // ── Full screen fade-out ───────────────────────────────────
+  const screenOpacity = useRef(new Animated.Value(0)).current; // starts transparent
+
+  // ── Screen fade-IN when video is ready ────────────────────
+  const screenFadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     StatusBar.setHidden(true);
 
-    const LETTER_STAGGER = 80;   // ms between each letter appearing
-    const LETTER_DURATION = 500; // ms for each letter animation
+    // Phase 1: fade in the whole screen once video loads
+    Animated.timing(screenFadeIn, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
 
-    // Animate each letter sequentially with stagger
-    const letterSequence = NAME.split('').map((_, i) =>
+    // Phase 2: stagger letters after a short pause
+    const totalLetterTime = NAME.length * LETTER_STAGGER + LETTER_DURATION;
+    const LETTER_START_DELAY = 600; // let video render first
+
+    const letterAnim = NAME.split('').map((_, i) =>
       Animated.parallel([
         Animated.timing(letterAnims[i].opacity, {
           toValue: 1,
           duration: LETTER_DURATION,
-          delay: i * LETTER_STAGGER,
+          delay: LETTER_START_DELAY + i * LETTER_STAGGER,
           useNativeDriver: true,
         }),
         Animated.spring(letterAnims[i].translateY, {
           toValue: 0,
-          tension: 80,
-          friction: 8,
-          delay: i * LETTER_STAGGER,
+          tension: 70,
+          friction: 7,
+          delay: LETTER_START_DELAY + i * LETTER_STAGGER,
           useNativeDriver: true,
         }),
         Animated.spring(letterAnims[i].scale, {
           toValue: 1,
-          tension: 100,
+          tension: 90,
           friction: 8,
-          delay: i * LETTER_STAGGER,
+          delay: LETTER_START_DELAY + i * LETTER_STAGGER,
           useNativeDriver: true,
         }),
       ])
     );
 
-    const totalLetterDuration = NAME.length * LETTER_STAGGER + LETTER_DURATION;
+    // Phase 3: glow line sweeps in after all letters
+    const glowAnim = Animated.parallel([
+      Animated.timing(glowWidth, {
+        toValue: SCREEN_WIDTH * 0.62,
+        duration: 600,
+        delay: LETTER_START_DELAY + totalLetterTime + 100,
+        useNativeDriver: false,
+      }),
+      Animated.timing(glowOpacity, {
+        toValue: 1,
+        duration: 300,
+        delay: LETTER_START_DELAY + totalLetterTime + 100,
+        useNativeDriver: false,
+      }),
+    ]);
 
-    // Glow line sweep after letters appear
-    const glowLine = Animated.timing(glowLineWidth, {
-      toValue: SCREEN_WIDTH * 0.65,
-      duration: 500,
-      delay: totalLetterDuration + 100,
-      useNativeDriver: false,
-    });
-
-    // Dot burst
+    // Phase 4: dot pulse at end of line
     const dotAnim = Animated.parallel([
       Animated.spring(dotScale, {
         toValue: 1,
-        tension: 120,
-        friction: 6,
-        delay: totalLetterDuration + 500,
+        tension: 130,
+        friction: 5,
+        delay: LETTER_START_DELAY + totalLetterTime + 600,
         useNativeDriver: true,
       }),
       Animated.timing(dotOpacity, {
         toValue: 1,
         duration: 200,
-        delay: totalLetterDuration + 500,
+        delay: LETTER_START_DELAY + totalLetterTime + 600,
         useNativeDriver: true,
       }),
     ]);
 
-    // Tagline fade in
-    const tagline = Animated.parallel([
+    // Phase 5: tagline emerges
+    const tagAnim = Animated.parallel([
       Animated.timing(taglineOpacity, {
         toValue: 1,
-        duration: 600,
-        delay: totalLetterDuration + 600,
+        duration: 700,
+        delay: LETTER_START_DELAY + totalLetterTime + 750,
         useNativeDriver: true,
       }),
       Animated.timing(taglineTranslateY, {
         toValue: 0,
-        duration: 600,
-        delay: totalLetterDuration + 600,
+        duration: 700,
+        delay: LETTER_START_DELAY + totalLetterTime + 750,
         useNativeDriver: true,
       }),
     ]);
 
-    // Fade out entire screen
-    const fadeOut = Animated.timing(screenOpacity, {
+    // Phase 6: darken overlay slightly as exit approaches
+    const darkenAnim = Animated.timing(overlayOpacity, {
+      toValue: 0.72,
+      duration: 700,
+      delay: LETTER_START_DELAY + totalLetterTime + 1800,
+      useNativeDriver: false,
+    });
+
+    // Phase 7: full fade out → app
+    const fadeOut = Animated.timing(screenFadeIn, {
       toValue: 0,
       duration: 600,
-      delay: totalLetterDuration + 1600,
+      delay: LETTER_START_DELAY + totalLetterTime + 2500,
       useNativeDriver: true,
     });
 
-    Animated.sequence([
-      Animated.parallel([...letterSequence, glowLine, dotAnim, tagline]),
+    Animated.parallel([
+      ...letterAnim,
+      glowAnim,
+      dotAnim,
+      tagAnim,
+      darkenAnim,
       fadeOut,
-    ]).start(() => {
-      StatusBar.setHidden(false);
-      onFinish();
+    ]).start(({ finished }) => {
+      if (finished) {
+        StatusBar.setHidden(false);
+        onFinish();
+      }
     });
   }, []);
 
   return (
-    <Animated.View style={[styles.container, { opacity: screenOpacity }]}>
+    <Animated.View style={[styles.root, { opacity: screenFadeIn }]}>
       <StatusBar hidden />
 
-      {/* Background ambient glow */}
-      <View style={styles.ambientGlow} />
+      {/* ── NASA Solar System Video (full-screen background) ── */}
+      <Video
+        source={{ uri: SOLAR_SYSTEM_VIDEO }}
+        style={styles.video}
+        resizeMode={ResizeMode.COVER}
+        shouldPlay
+        isLooping
+        isMuted
+        onLoad={() => setVideoReady(true)}
+        onError={() => setVideoReady(true)} // fallback — still show name
+      />
 
-      {/* Main content */}
+      {/* ── Dark gradient overlay on top of video ── */}
+      <Animated.View
+        style={[
+          styles.overlay,
+          { opacity: overlayOpacity },
+        ]}
+      />
+
+      {/* ── Blue bottom-glow radial ── */}
+      <View style={styles.blueGlow} />
+
+      {/* ── Main Centered Content ── */}
       <View style={styles.content}>
 
-        {/* NAME letters */}
+        {/* NAME: D I V Y A N G — letter by letter */}
         <View style={styles.nameRow}>
           {NAME.split('').map((letter, i) => (
             <Animated.Text
@@ -150,10 +218,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
               style={[
                 styles.nameLetter,
                 {
-                  opacity: letterAnims[i].opacity,
+                  opacity:   letterAnims[i].opacity,
                   transform: [
                     { translateY: letterAnims[i].translateY },
-                    { scale: letterAnims[i].scale },
+                    { scale:      letterAnims[i].scale },
                   ],
                 },
               ]}
@@ -163,121 +231,135 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           ))}
         </View>
 
-        {/* Glow sweep line */}
-        <View style={styles.glowLineContainer}>
-          <Animated.View style={[styles.glowLine, { width: glowLineWidth }]} />
-          {/* Dot at end of line */}
+        {/* ── Glow line + dot ── */}
+        <View style={styles.lineRow}>
+          <Animated.View
+            style={[
+              styles.glowLine,
+              {
+                width:   glowWidth,
+                opacity: glowOpacity,
+              },
+            ]}
+          />
           <Animated.View
             style={[
               styles.glowDot,
               {
-                opacity: dotOpacity,
+                opacity:   dotOpacity,
                 transform: [{ scale: dotScale }],
               },
             ]}
           />
         </View>
 
-        {/* Tagline */}
+        {/* ── Tagline ── */}
         <Animated.Text
           style={[
             styles.tagline,
             {
-              opacity: taglineOpacity,
+              opacity:   taglineOpacity,
               transform: [{ translateY: taglineTranslateY }],
             },
           ]}
         >
-          Daily Rhythm
+          DAILY  RHYTHM
         </Animated.Text>
       </View>
 
-      {/* Bottom signature dot */}
-      <Animated.View style={[styles.bottomDot, { opacity: taglineOpacity }]} />
+      {/* ── Bottom credit ── */}
+      <Animated.Text style={[styles.credit, { opacity: taglineOpacity }]}>
+        Solar system imagery · NASA SVS · Public Domain
+      </Animated.Text>
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ambientGlow: {
+  video: {
     position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: SAMSUNG_BLUE,
-    opacity: 0.06,
-    top: '30%',
+    top: 0,
+    left: 0,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000',
+  },
+  blueGlow: {
+    position: 'absolute',
+    bottom: -60,
     alignSelf: 'center',
+    width: 340,
+    height: 200,
+    borderRadius: 200,
+    backgroundColor: BLUE,
+    opacity: 0.10,
   },
   content: {
     alignItems: 'center',
+    zIndex: 10,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   nameLetter: {
-    fontSize: 52,
+    fontSize: 58,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 8,
-    textShadowColor: SAMSUNG_BLUE,
+    letterSpacing: 10,
+    textShadowColor: BLUE,
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+    textShadowRadius: 28,
   },
-  glowLineContainer: {
+  lineRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 3,
-    marginBottom: 20,
+    height: 4,
+    marginBottom: 22,
   },
   glowLine: {
     height: 2,
-    backgroundColor: SAMSUNG_BLUE,
-    borderRadius: 1,
-    shadowColor: SAMSUNG_BLUE,
+    backgroundColor: BLUE,
+    borderRadius: 2,
+    shadowColor: BLUE,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowRadius: 12,
+    elevation: 10,
   },
   glowDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: SAMSUNG_BLUE,
-    marginLeft: 3,
-    shadowColor: SAMSUNG_BLUE,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: BLUE,
+    marginLeft: 4,
+    shadowColor: BLUE,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowRadius: 14,
+    elevation: 12,
   },
   tagline: {
-    fontSize: 13,
-    fontWeight: '400',
-    color: '#6B7280',
-    letterSpacing: 4,
-    textTransform: 'uppercase',
+    fontSize: 12,
+    fontWeight: '300',
+    color: 'rgba(255,255,255,0.55)',
+    letterSpacing: 6,
   },
-  bottomDot: {
+  credit: {
     position: 'absolute',
-    bottom: 48,
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: SAMSUNG_BLUE,
-    shadowColor: SAMSUNG_BLUE,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 4,
+    bottom: 36,
+    fontSize: 9,
+    color: 'rgba(255,255,255,0.18)',
+    letterSpacing: 1,
   },
 });
