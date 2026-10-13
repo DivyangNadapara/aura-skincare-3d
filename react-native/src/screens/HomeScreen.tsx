@@ -133,3 +133,4 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     </SafeAreaView>
   );
 };
+
