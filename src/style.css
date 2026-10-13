@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SAMSUNG ONE UI 6 / 7 DESIGN SYSTEM - CLOCK & ALARM
+   SAMSUNG ONE UI 6 / 7 DESIGN SYSTEM - CLOCK, ALARMS & NOTES ECOSYSTEM
    Pure AMOLED Black (#000000) with Signature Samsung Blue & Orange Accents
    ========================================================================== */
 
@@ -96,10 +96,41 @@ body {
   transition: all 0.3s ease;
 }
 
+/* Branch Switcher in Banner */
+.branch-pill-group {
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px;
+  border-radius: var(--samsung-radius-pill);
+  gap: 2px;
+}
+
+.branch-pill {
+  padding: 5px 12px;
+  border-radius: var(--samsung-radius-pill);
+  border: none;
+  background: transparent;
+  color: #8E93A6;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.branch-pill:hover {
+  color: #fff;
+}
+
+.branch-pill.active {
+  background: var(--samsung-accent);
+  color: #FFFFFF;
+}
+
 .banner-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .pill-btn {
@@ -217,7 +248,6 @@ body.fullscreen-mode .punch-hole-camera {
   font-size: 13.5px;
 }
 
-/* Samsung Centered Punch-Hole Camera */
 .punch-hole-camera {
   width: 12px;
   height: 12px;
@@ -300,6 +330,19 @@ body.fullscreen-mode .punch-hole-camera {
   font-weight: 700;
 }
 
+/* BRANCH VIEW CONTAINERS */
+.branch-view-container {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  height: calc(100% - 40px);
+  position: relative;
+}
+
+.branch-view-container.active {
+  display: flex;
+}
+
 /* SAMSUNG TOP ACTION BAR */
 .samsung-top-actions {
   height: 48px;
@@ -355,7 +398,7 @@ body.fullscreen-mode .punch-hole-camera {
 
 /* SAMSUNG LARGE ONE UI VIEWING AREA HEADER */
 .samsung-large-header {
-  padding: 6px 10px 22px;
+  padding: 4px 10px 18px;
 }
 
 .samsung-main-title {
@@ -375,14 +418,15 @@ body.fullscreen-mode .punch-hole-camera {
   letter-spacing: -0.1px;
 }
 
-/* SAMSUNG ALARM CARD LIST */
+/* ==========================================================================
+   ALARM BRANCH STYLES
+   ========================================================================== */
 .samsung-card-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* SAMSUNG ONE UI CARD */
 .samsung-card {
   background: var(--samsung-card);
   border: 1px solid var(--samsung-card-border);
@@ -418,7 +462,6 @@ body.fullscreen-mode .punch-hole-camera {
   padding-right: 12px;
 }
 
-/* Time & Period */
 .samsung-time-row {
   display: flex;
   align-items: baseline;
@@ -432,7 +475,6 @@ body.fullscreen-mode .punch-hole-camera {
   letter-spacing: -0.8px;
   line-height: 1;
   color: #ffffff;
-  transition: color 0.2s ease;
 }
 
 .samsung-card.is-inactive .samsung-time-digits {
@@ -444,14 +486,12 @@ body.fullscreen-mode .punch-hole-camera {
   font-weight: 700;
   color: var(--samsung-accent);
   text-transform: uppercase;
-  transition: color 0.2s ease;
 }
 
 .samsung-card.is-inactive .samsung-time-period {
   color: #4B5061;
 }
 
-/* Card Label */
 .samsung-card-label {
   font-size: 13px;
   font-weight: 400;
@@ -463,7 +503,6 @@ body.fullscreen-mode .punch-hole-camera {
   color: #5B6070;
 }
 
-/* SAMSUNG DAYS CHIPS ROW (S M T W T F S) */
 .samsung-days-row {
   display: flex;
   align-items: center;
@@ -481,7 +520,6 @@ body.fullscreen-mode .punch-hole-camera {
   font-weight: 600;
   background: #252834;
   color: #6C7182;
-  transition: all 0.2s ease;
 }
 
 .samsung-card.is-active .samsung-day-chip.active {
@@ -495,7 +533,6 @@ body.fullscreen-mode .punch-hole-camera {
   color: #8E93A4;
 }
 
-/* SAMSUNG ONE UI SWITCH */
 .samsung-switch {
   position: relative;
   display: inline-block;
@@ -542,7 +579,6 @@ body.fullscreen-mode .punch-hole-camera {
   background-color: #FFFFFF;
 }
 
-/* Samsung Accordion Drawer */
 .samsung-card-drawer {
   max-height: 0;
   overflow: hidden;
@@ -592,18 +628,417 @@ body.fullscreen-mode .punch-hole-camera {
   font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.samsung-delete-btn:hover {
-  background: rgba(255, 59, 48, 0.22);
 }
 
 .bottom-scroll-spacer {
-  height: 80px;
+  height: 84px;
 }
 
-/* SAMSUNG 4-TAB BOTTOM NAVIGATION BAR */
+/* ==========================================================================
+   NOTES BRANCH STYLES (Samsung Notes One UI)
+   ========================================================================== */
+
+/* Search Box */
+.samsung-search-box {
+  background: #161924;
+  border: 1px solid #232738;
+  border-radius: 18px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.samsung-search-box .search-icon {
+  font-size: 14px;
+  color: #6C7284;
+}
+
+.samsung-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+  font-family: var(--font-samsung);
+  flex: 1;
+}
+
+.samsung-search-input::placeholder {
+  color: #555A6C;
+}
+
+.search-clear-btn {
+  background: transparent;
+  border: none;
+  color: #8D92A4;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+/* Filter Chips */
+.notes-category-chips-row {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.notes-category-chips-row::-webkit-scrollbar {
+  display: none;
+}
+
+.notes-chip {
+  padding: 6px 14px;
+  border-radius: var(--samsung-radius-pill);
+  border: 1px solid #242838;
+  background: #161924;
+  color: #8D92A4;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notes-chip.active {
+  background: var(--samsung-accent);
+  border-color: var(--samsung-accent);
+  color: #FFFFFF;
+}
+
+/* Notes Cards List */
+.samsung-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual Samsung Note Card */
+.samsung-note-card {
+  background: var(--samsung-card);
+  border: 1px solid var(--samsung-card-border);
+  border-radius: 22px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.2s var(--transition-samsung);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.samsung-note-card:hover {
+  background: var(--samsung-card-hover);
+  border-color: #2E3345;
+}
+
+.note-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.note-cat-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--samsung-radius-pill);
+  background: #252837;
+  color: #9AA0B3;
+  border: 1px solid #30354A;
+}
+
+.note-pin-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--samsung-accent);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.note-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.25;
+}
+
+/* Image Thumbnails in Note Card */
+.note-images-gallery {
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.note-thumb-preview {
+  height: 90px;
+  flex: 1;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #141620;
+}
+
+.note-card-snippet {
+  font-size: 12.5px;
+  color: #9DA3B5;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.note-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 11px;
+  color: #646A7E;
+}
+
+.note-img-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #8D92A4;
+}
+
+/* Samsung Notes Floating Action Button (FAB) */
+.samsung-fab-btn {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--samsung-accent);
+  border: none;
+  box-shadow: 0 8px 24px var(--samsung-accent-glow);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  transition: all 0.2s var(--transition-samsung);
+}
+
+.samsung-fab-btn:hover {
+  transform: scale(1.08);
+}
+
+.samsung-fab-btn .fab-icon {
+  font-size: 22px;
+}
+
+/* ==========================================================================
+   MODAL 2: SAMSUNG NOTE EDITOR FULL MODAL
+   ========================================================================= */
+
+.samsung-note-editor-sheet {
+  width: 100%;
+  height: 100%;
+  background: #0E1118;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.samsung-editor-header {
+  height: 54px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #1C202C;
+  background: #11141E;
+}
+
+.samsung-editor-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.editor-title-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #232736;
+  padding: 8px 0;
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 800;
+  font-family: var(--font-samsung);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.editor-title-input:focus {
+  border-bottom-color: var(--samsung-accent);
+}
+
+.editor-category-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.editor-cat-pill {
+  padding: 5px 12px;
+  border-radius: var(--samsung-radius-pill);
+  border: 1px solid #262A3B;
+  background: #181B26;
+  color: #8D92A4;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.editor-cat-pill.active {
+  background: var(--samsung-accent);
+  border-color: var(--samsung-accent);
+  color: #FFFFFF;
+}
+
+/* Attachment Toolbar */
+.editor-attachment-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #151824;
+  border: 1px solid #232738;
+  border-radius: 16px;
+  padding: 8px 14px;
+}
+
+.toolbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: var(--samsung-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tool-btn:hover {
+  background: rgba(44, 123, 254, 0.15);
+}
+
+.tool-btn-danger {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(255, 59, 48, 0.12);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  color: #FF453A;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Images Tray in Editor */
+.editor-images-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #151824;
+  border: 1px solid #232738;
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.tray-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #8D92A4;
+  text-transform: uppercase;
+}
+
+.images-thumbnails-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.editor-thumb-box {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 14px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #0E1018;
+}
+
+.editor-thumb-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-thumb {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Multiline Content Textarea */
+.editor-content-textarea {
+  flex: 1;
+  min-height: 260px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #D3D8E8;
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: var(--font-samsung);
+  resize: none;
+}
+
+.editor-content-textarea::placeholder {
+  color: #4C5264;
+}
+
+/* ==========================================================================
+   SAMSUNG 4-TAB BOTTOM NAVIGATION BAR
+   ========================================================================== */
+
 .samsung-bottom-navbar {
   position: absolute;
   bottom: 0;
@@ -653,7 +1088,6 @@ body.fullscreen-mode .punch-hole-camera {
   font-weight: 700;
 }
 
-/* Samsung Home Pill Indicator */
 .samsung-home-pill {
   position: absolute;
   bottom: 6px;
@@ -674,7 +1108,7 @@ body.fullscreen-mode .punch-hole-camera {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(8px);
   z-index: 50;
   opacity: 0;
@@ -720,7 +1154,6 @@ body.fullscreen-mode .punch-hole-camera {
   border-radius: 2px;
 }
 
-/* Samsung Header with Cancel & Save */
 .samsung-modal-header {
   padding: 8px 24px 16px;
   display: flex;
@@ -760,7 +1193,7 @@ body.fullscreen-mode .punch-hole-camera {
   gap: 14px;
 }
 
-/* SAMSUNG 3-WHEEL TIME PICKER */
+/* 3-WHEEL TIME PICKER */
 .samsung-wheel-picker-card {
   background: #1A1D29;
   border-radius: 24px;
@@ -843,7 +1276,6 @@ body.fullscreen-mode .punch-hole-camera {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
 }
 
 .step-micro:hover {
@@ -860,7 +1292,6 @@ body.fullscreen-mode .punch-hole-camera {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .period-pill-btn.active {
@@ -868,7 +1299,6 @@ body.fullscreen-mode .punch-hole-camera {
   color: #FFFFFF;
 }
 
-/* SAMSUNG FORM CARDS */
 .samsung-form-card {
   background: #1A1D29;
   border-radius: 22px;
@@ -901,7 +1331,6 @@ body.fullscreen-mode .punch-hole-camera {
   font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .samsung-day-btn.active {
@@ -924,7 +1353,6 @@ body.fullscreen-mode .punch-hole-camera {
   font-size: 14px;
   font-family: var(--font-samsung);
   outline: none;
-  transition: border-color 0.2s ease;
 }
 
 .samsung-text-input:focus {
@@ -976,12 +1404,6 @@ body.fullscreen-mode .punch-hole-camera {
   font-weight: 700;
   font-family: var(--font-samsung);
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.samsung-primary-btn:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
 }
 
 /* ==========================================================================
