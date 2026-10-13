@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, Switch, LayoutAnimation, Platform, UIMana
 import { AlarmItem } from '../types/alarm';
 import { DayPills } from './DayPills';
 
-// Enable layout animation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -22,149 +21,96 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete 
     setIsExpanded(!isExpanded);
   };
 
-  // Category badge color schemes
-  const getCategoryTheme = () => {
-    switch (alarm.category) {
-      case 'Morning Routine':
-        return {
-          bg: 'bg-amber-500/10',
-          border: 'border-amber-500/30',
-          text: 'text-amber-400',
-        };
-      case 'Deep Work':
-        return {
-          bg: 'bg-cyan-500/10',
-          border: 'border-cyan-500/30',
-          text: 'text-cyan-400',
-        };
-      case 'Recovery':
-      default:
-        return {
-          bg: 'bg-purple-500/10',
-          border: 'border-purple-500/30',
-          text: 'text-purple-400',
-        };
-    }
-  };
-
-  const categoryTheme = getCategoryTheme();
-
   return (
     <View
-      className={`rounded-2xl mb-4 transition-all duration-200 border ${
+      className={`rounded-[26px] mb-3.5 transition-all overflow-hidden ${
         alarm.isEnabled
-          ? 'bg-slate-900/90 border-slate-700/80 shadow-lg shadow-emerald-950/20'
-          : 'bg-slate-900/40 border-slate-800/40 opacity-75'
+          ? 'bg-[#1C1F2B] border border-[#272B3B]'
+          : 'bg-[#14161F] border border-[#1A1C25] opacity-70'
       }`}
     >
-      {/* Top Accent Glow Bar when Active */}
-      {alarm.isEnabled && (
-        <View className="h-0.5 w-full bg-gradient-to-r from-emerald-500/60 via-cyan-500/40 to-transparent rounded-t-2xl" />
-      )}
-
-      {/* Main Touchable Surface */}
+      {/* Main Clickable Card Surface */}
       <TouchableOpacity
         activeOpacity={0.88}
         onPress={toggleExpand}
         className="p-5"
       >
-        {/* Top Meta Row: Category Pill & Sound hint */}
-        <View className="flex-row items-center justify-between mb-3">
-          <View
-            className={`px-2.5 py-1 rounded-full border ${categoryTheme.bg} ${categoryTheme.border}`}
-          >
-            <Text className={`text-xs font-medium tracking-wide ${categoryTheme.text}`}>
-              {alarm.category}
-            </Text>
-          </View>
-
-          {alarm.isEnabled && (
-            <View className="flex-row items-center space-x-1.5 gap-1.5">
-              <View className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <Text className="text-[11px] text-slate-400 font-mono">Active</Text>
+        <View className="flex-row items-center justify-between">
+          
+          {/* Left Column: Time, Label, and Days */}
+          <View className="flex-1 pr-3">
+            
+            {/* Digital Time & Period */}
+            <View className="flex-row items-baseline mb-1">
+              <Text
+                className={`text-4xl font-bold font-sans tracking-tight ${
+                  alarm.isEnabled ? 'text-white' : 'text-[#6C7182]'
+                }`}
+              >
+                {alarm.time}
+              </Text>
+              <Text
+                className={`text-sm font-semibold ml-2 uppercase ${
+                  alarm.isEnabled ? 'text-[#2C7BFE]' : 'text-[#4B5061]'
+                }`}
+              >
+                {alarm.period}
+              </Text>
             </View>
-          )}
-        </View>
 
-        {/* Middle Row: Digital Time & Interactive Toggle */}
-        <View className="flex-row items-baseline justify-between mb-2">
-          <View className="flex-row items-baseline">
+            {/* Alarm Label / Purpose */}
             <Text
-              className={`text-4xl font-bold tracking-tight font-sans ${
-                alarm.isEnabled ? 'text-white' : 'text-slate-500'
+              className={`text-sm mb-3.5 font-normal ${
+                alarm.isEnabled ? 'text-[#CBD0DF]' : 'text-[#5B6070]'
               }`}
             >
-              {alarm.time.split(' ')[0]}
+              {alarm.label}
             </Text>
-            <Text
-              className={`text-sm font-semibold ml-1.5 tracking-wider uppercase ${
-                alarm.isEnabled ? 'text-emerald-400' : 'text-slate-600'
-              }`}
-            >
-              {alarm.time.split(' ')[1]}
-            </Text>
+
+            {/* Days Chips Row (Samsung S M T W T F S) */}
+            <DayPills
+              selectedDays={alarm.days}
+              isAlarmEnabled={alarm.isEnabled}
+            />
           </View>
 
-          {/* iOS / Android Native Switch */}
-          <Switch
-            value={alarm.isEnabled}
-            onValueChange={(val) => onToggle(alarm.id, val)}
-            trackColor={{ false: '#1e293b', true: '#10b981' }}
-            thumbColor={alarm.isEnabled ? '#ffffff' : '#64748b'}
-            ios_backgroundColor="#1e293b"
-          />
-        </View>
-
-        {/* Label & Protocol Name */}
-        <Text
-          className={`text-sm font-medium mb-3.5 ${
-            alarm.isEnabled ? 'text-slate-200' : 'text-slate-500'
-          }`}
-        >
-          {alarm.label}
-        </Text>
-
-        {/* Bottom Row: Days Active Pills & Expand Hint */}
-        <View className="flex-row items-center justify-between pt-1 border-t border-slate-800/40">
-          <DayPills
-            selectedDays={alarm.days}
-            isAlarmEnabled={alarm.isEnabled}
-          />
-
-          <Text className="text-xs text-slate-500">
-            {isExpanded ? 'Collapse ▲' : 'Edit ▼'}
-          </Text>
+          {/* Right Column: Samsung One UI Switch */}
+          <View className="items-center justify-center pl-2">
+            <Switch
+              value={alarm.isEnabled}
+              onValueChange={(val) => onToggle(alarm.id, val)}
+              trackColor={{ false: '#2E3240', true: '#2C7BFE' }}
+              thumbColor={alarm.isEnabled ? '#FFFFFF' : '#8A8F9E'}
+              ios_backgroundColor="#2E3240"
+            />
+          </View>
         </View>
       </TouchableOpacity>
 
-      {/* Expanded Quick-Edit Drawer */}
+      {/* Expanded Quick Settings Drawer (Samsung Style) */}
       {isExpanded && (
-        <View className="px-5 pb-5 pt-1 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
+        <View className="px-5 pb-5 pt-2 border-t border-[#252937] bg-[#151722]">
           <View className="flex-row justify-between items-center py-2.5">
-            <Text className="text-xs text-slate-400">Tone</Text>
-            <Text className="text-xs text-slate-200 font-medium">{alarm.sound}</Text>
+            <Text className="text-xs text-[#82889A]">Alarm sound</Text>
+            <Text className="text-xs text-[#E1E5F2] font-medium">{alarm.sound}</Text>
           </View>
 
-          <View className="flex-row justify-between items-center py-2.5 border-t border-slate-800/40">
-            <Text className="text-xs text-slate-400">Haptic Vibration</Text>
-            <Text className="text-xs text-emerald-400 font-medium">
-              {alarm.vibration ? 'Synchronized Pulse' : 'Off'}
-            </Text>
+          <View className="flex-row justify-between items-center py-2.5 border-t border-[#1F2230]">
+            <Text className="text-xs text-[#82889A]">Vibration pattern</Text>
+            <Text className="text-xs text-[#2C7BFE] font-medium">{alarm.vibration}</Text>
           </View>
 
-          <View className="flex-row justify-between items-center py-2.5 border-t border-slate-800/40">
-            <Text className="text-xs text-slate-400">Snooze (5 min)</Text>
-            <Text className="text-xs text-slate-300 font-medium">
-              {alarm.snoozeEnabled ? 'Enabled' : 'Disabled'}
-            </Text>
+          <View className="flex-row justify-between items-center py-2.5 border-t border-[#1F2230]">
+            <Text className="text-xs text-[#82889A]">Snooze</Text>
+            <Text className="text-xs text-[#E1E5F2] font-medium">{alarm.snooze}</Text>
           </View>
 
           {onDelete && (
             <TouchableOpacity
               onPress={() => onDelete(alarm.id)}
-              className="mt-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded-xl items-center"
+              className="mt-3 py-2.5 bg-[#FF3B30]/15 rounded-2xl items-center"
             >
-              <Text className="text-xs text-rose-400 font-medium">Delete Alarm</Text>
+              <Text className="text-xs text-[#FF453A] font-semibold">Delete</Text>
             </TouchableOpacity>
           )}
         </View>

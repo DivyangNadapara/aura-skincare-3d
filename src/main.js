@@ -1,7 +1,7 @@
 import './style.css';
 
-// Web Audio API Synthesizer for tactile UI clicks
-class AudioFeedback {
+// Web Audio API Synthesizer with Samsung Galaxy Tactile UI Click
+class SamsungAudioFeedback {
   constructor() {
     this.ctx = null;
     this.enabled = true;
@@ -33,29 +33,32 @@ class AudioFeedback {
       const now = this.ctx.currentTime;
 
       if (type === 'toggle') {
+        // Samsung soft tactile switch pop
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(420, now + 0.05);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
-      } else if (type === 'tap') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.04);
-        gain.gain.setValueAtTime(0.08, now);
+        osc.frequency.setValueAtTime(650, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.04);
+        gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
         osc.start(now);
         osc.stop(now + 0.04);
-      } else if (type === 'success') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now); // C5
-        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      } else if (type === 'tap') {
+        // Samsung subtle button tap
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.03);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
         osc.start(now);
-        osc.stop(now + 0.22);
+        osc.stop(now + 0.03);
+      } else if (type === 'save') {
+        // Samsung chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.setValueAtTime(880.00, now + 0.06); // A5
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
       }
     } catch (e) {
       // Audio autoplay policy fallback
@@ -63,53 +66,57 @@ class AudioFeedback {
   }
 }
 
-const audio = new AudioFeedback();
+const audio = new SamsungAudioFeedback();
 
-// Pre-built Example Alarms
-const DAYS_OF_WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+// Samsung Days sequence: Sunday through Saturday
+const SAMSUNG_DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
+// 3 Pre-built Samsung Alarms
 let alarms = [
   {
     id: 'alarm-1',
-    time: '07:30',
+    time: '7:30',
     period: 'AM',
+    hour: 7,
+    minute: 30,
     label: 'Morning Sunlight & Hydration',
     category: 'Morning Routine',
-    categoryClass: 'morning',
-    days: [0, 1, 2, 3, 4, 5, 6], // Every day
+    days: [0, 1, 2, 3, 4, 5, 6], // Every day (Sun - Sat)
     isEnabled: true,
     isExpanded: false,
-    sound: 'Binaural Theta Wave (432Hz)',
-    vibration: 'Gradual Escalation',
-    snooze: '5 min',
+    sound: 'Morning Flower',
+    vibration: 'Basic call',
+    snooze: '5 minutes, 3 times',
   },
   {
     id: 'alarm-2',
-    time: '01:30',
+    time: '1:30',
     period: 'PM',
+    hour: 1,
+    minute: 30,
     label: 'Afternoon Focus & Supplements',
     category: 'Deep Work',
-    categoryClass: 'deep-work',
-    days: [0, 1, 2, 3, 4], // Weekdays
+    days: [1, 2, 3, 4, 5], // Mon - Fri (Weekdays)
     isEnabled: true,
     isExpanded: false,
-    sound: 'Solar Flare Pulse',
-    vibration: 'Double Pulse',
-    snooze: 'Disabled',
+    sound: 'Over the Horizon (Samsung Brand)',
+    vibration: 'Heartbeat',
+    snooze: '5 minutes, 3 times',
   },
   {
     id: 'alarm-3',
     time: '10:15',
     period: 'PM',
+    hour: 10,
+    minute: 15,
     label: 'Cortisol Drop & Night Protocol',
     category: 'Recovery',
-    categoryClass: 'recovery',
-    days: [0, 1, 2, 3, 4, 5, 6], // Every day active
+    days: [0, 1, 2, 3, 4, 5, 6], // Every day
     isEnabled: false,
     isExpanded: false,
-    sound: 'Subtle Dawn Harmonics',
-    vibration: 'Gentle Ripple',
-    snooze: 'Disabled',
+    sound: 'Homecoming',
+    vibration: 'Ticktock',
+    snooze: 'Off',
   },
 ];
 
@@ -117,8 +124,7 @@ let alarms = [
 let newAlarmHour = 7;
 let newAlarmMin = 30;
 let newAlarmPeriod = 'AM';
-let newAlarmCategory = 'Morning Routine';
-let newAlarmDays = [0, 1, 2, 3, 4]; // default weekdays
+let newAlarmDays = [1, 2, 3, 4, 5]; // default weekdays
 
 // Toast Helper
 function showToast(message) {
@@ -132,30 +138,24 @@ function showToast(message) {
   toast.classList.add('show');
   setTimeout(() => {
     toast.classList.remove('show');
-  }, 2400);
+  }, 2200);
 }
 
-// Update Header Meta
-function updateHeaderMeta() {
+// Update Header Subtitle
+function updateHeaderSubtitle() {
   const activeCount = alarms.filter(a => a.isEnabled).length;
-  const countTag = document.getElementById('active-alarms-count');
-  const routineCount = document.getElementById('routine-count');
-  const nextAlarmDisplay = document.getElementById('next-alarm-display');
-
-  if (countTag) countTag.textContent = `${activeCount} Active`;
-  if (routineCount) routineCount.textContent = `${alarms.length} Schedules`;
-
-  if (nextAlarmDisplay) {
+  const subtitleEl = document.getElementById('samsung-alarm-subtitle');
+  if (subtitleEl) {
     if (activeCount === 0) {
-      nextAlarmDisplay.textContent = 'All alarms paused';
+      subtitleEl.textContent = 'All alarms off';
     } else {
-      nextAlarmDisplay.textContent = 'Next alarm in 4h 15m';
+      subtitleEl.textContent = 'Next alarm in 4 hours 15 minutes';
     }
   }
 }
 
-// Render Alarm Cards
-function renderAlarmCards() {
+// Render Samsung Alarm Cards
+function renderSamsungAlarmCards() {
   const container = document.getElementById('alarm-cards-list');
   if (!container) return;
 
@@ -163,90 +163,66 @@ function renderAlarmCards() {
 
   alarms.forEach((alarm) => {
     const card = document.createElement('article');
-    card.className = `alarm-card ${alarm.isEnabled ? 'is-active' : 'is-inactive'} ${alarm.isExpanded ? 'is-expanded' : ''}`;
+    card.className = `samsung-card ${alarm.isEnabled ? 'is-active' : 'is-inactive'} ${alarm.isExpanded ? 'is-expanded' : ''}`;
     card.dataset.id = alarm.id;
 
-    // Render Days Pills
-    const daysHtml = DAYS_OF_WEEK.map((dayLabel, index) => {
-      const isHighlighted = alarm.days.includes(index);
-      return `<span class="day-pill ${isHighlighted ? 'highlighted' : ''}">${dayLabel}</span>`;
+    // Render Samsung Day Chips (S M T W T F S)
+    const daysHtml = SAMSUNG_DAYS.map((dayLabel, index) => {
+      const isSelected = alarm.days.includes(index);
+      return `<span class="samsung-day-chip ${isSelected ? 'active' : ''}">${dayLabel}</span>`;
     }).join('');
 
     card.innerHTML = `
-      <div class="card-main-surface">
-        
-        <!-- Top Meta Row -->
-        <div class="card-meta-row">
-          <span class="category-tag ${alarm.categoryClass}">
-            ${alarm.category}
-          </span>
-          ${
-            alarm.isEnabled
-              ? `<div class="active-pulse-indicator">
-                  <span class="dot"></span>
-                  <span>Active</span>
-                 </div>`
-              : ''
-          }
-        </div>
-
-        <!-- Time & Toggle Row -->
-        <div class="card-time-row">
-          <div class="digital-time">
-            <span>${alarm.time}</span>
-            <span class="period">${alarm.period}</span>
+      <div class="samsung-card-inner">
+        <!-- Left: Time, Label, Days -->
+        <div class="card-left-info">
+          <div class="samsung-time-row">
+            <span class="samsung-time-digits">${alarm.time}</span>
+            <span class="samsung-time-period">${alarm.period}</span>
           </div>
 
-          <label class="switch-control" onclick="event.stopPropagation();">
-            <input type="checkbox" ${alarm.isEnabled ? 'checked' : ''} class="alarm-toggle-input" data-id="${alarm.id}">
-            <span class="slider round"></span>
-          </label>
-        </div>
+          <div class="samsung-card-label">${alarm.label}</div>
 
-        <!-- Label -->
-        <div class="card-label">${alarm.label}</div>
-
-        <!-- Footer Row -->
-        <div class="card-footer-row">
-          <div class="day-pills-group">
+          <div class="samsung-days-row">
             ${daysHtml}
           </div>
-          <div class="expand-hint-btn">
-            <span>${alarm.isExpanded ? 'Collapse' : 'Edit'}</span>
-            <span class="expand-chevron">▾</span>
-          </div>
         </div>
 
+        <!-- Right: Samsung One UI Switch -->
+        <label class="samsung-switch" onclick="event.stopPropagation();">
+          <input type="checkbox" ${alarm.isEnabled ? 'checked' : ''} class="alarm-toggle-input" data-id="${alarm.id}">
+          <span class="samsung-switch-track"></span>
+        </label>
       </div>
 
-      <!-- Accordion Drawer (Tap to Edit Mode) -->
-      <div class="card-expanded-drawer">
-        <div class="drawer-inner">
-          <div class="drawer-info-row">
-            <span class="drawer-info-label">Acoustic Tone</span>
-            <span class="drawer-info-value">${alarm.sound}</span>
+      <!-- Samsung Accordion Drawer (Tap to Edit Mode) -->
+      <div class="samsung-card-drawer">
+        <div class="samsung-drawer-inner">
+          <div class="drawer-row">
+            <span class="drawer-row-label">Alarm sound</span>
+            <span class="drawer-row-val">${alarm.sound}</span>
           </div>
-          <div class="drawer-info-row">
-            <span class="drawer-info-label">Haptic Vibration</span>
-            <span class="drawer-info-value" style="color: var(--emerald-light)">${alarm.vibration}</span>
+          <div class="drawer-row">
+            <span class="drawer-row-label">Vibration</span>
+            <span class="drawer-row-val accent">${alarm.vibration}</span>
           </div>
-          <div class="drawer-info-row">
-            <span class="drawer-info-label">Snooze Window</span>
-            <span class="drawer-info-value">${alarm.snooze}</span>
+          <div class="drawer-row">
+            <span class="drawer-row-label">Snooze</span>
+            <span class="drawer-row-val">${alarm.snooze}</span>
           </div>
-          <button class="delete-protocol-btn" data-delete-id="${alarm.id}">
-            Delete Protocol
+          <button class="samsung-delete-btn" data-delete-id="${alarm.id}">
+            Delete
           </button>
         </div>
       </div>
     `;
 
     // Event: Tap Card to Expand
-    const surface = card.querySelector('.card-main-surface');
-    surface.addEventListener('click', () => {
+    const inner = card.querySelector('.samsung-card-inner');
+    inner.addEventListener('click', () => {
       audio.playClick('tap');
       alarm.isExpanded = !alarm.isExpanded;
-      renderAlarmCards();
+      renderSamsungAlarmCards();
     });
 
     // Event: Toggle Switch
@@ -254,21 +230,21 @@ function renderAlarmCards() {
     toggleInput.addEventListener('change', (e) => {
       audio.playClick('toggle');
       alarm.isEnabled = e.target.checked;
-      renderAlarmCards();
-      updateHeaderMeta();
-      showToast(`${alarm.label} is now ${alarm.isEnabled ? 'Active' : 'Paused'}`);
+      renderSamsungAlarmCards();
+      updateHeaderSubtitle();
+      showToast(`${alarm.label} is now ${alarm.isEnabled ? 'On' : 'Off'}`);
     });
 
-    // Event: Delete Button inside drawer
-    const deleteBtn = card.querySelector('.delete-protocol-btn');
+    // Event: Delete
+    const deleteBtn = card.querySelector('.samsung-delete-btn');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         audio.playClick('tap');
         alarms = alarms.filter(a => a.id !== alarm.id);
-        renderAlarmCards();
-        updateHeaderMeta();
-        showToast('Protocol removed');
+        renderSamsungAlarmCards();
+        updateHeaderSubtitle();
+        showToast('Alarm deleted');
       });
     }
 
@@ -289,12 +265,28 @@ function closeCreateModal() {
   if (modal) modal.classList.remove('is-open');
 }
 
-// Update Modal Time Display
-function updateModalTimeDisplay() {
+// Update Modal 3-Wheel Time Display
+function updateModalWheelDisplay() {
   const hourEl = document.getElementById('val-hour');
   const minEl = document.getElementById('val-min');
+  const hPrev = document.getElementById('h-prev');
+  const hNext = document.getElementById('h-next');
+  const mPrev = document.getElementById('m-prev');
+  const mNext = document.getElementById('m-next');
+
   if (hourEl) hourEl.textContent = newAlarmHour.toString().padStart(2, '0');
   if (minEl) minEl.textContent = newAlarmMin.toString().padStart(2, '0');
+
+  // Preview digits above and below (Samsung wheel effect)
+  const prevH = newAlarmHour === 1 ? 12 : newAlarmHour - 1;
+  const nextH = newAlarmHour === 12 ? 1 : newAlarmHour + 1;
+  if (hPrev) hPrev.textContent = prevH.toString().padStart(2, '0');
+  if (hNext) hNext.textContent = nextH.toString().padStart(2, '0');
+
+  const prevM = (newAlarmMin - 5 + 60) % 60;
+  const nextM = (newAlarmMin + 5) % 60;
+  if (mPrev) mPrev.textContent = prevM.toString().padStart(2, '0');
+  if (mNext) mNext.textContent = nextM.toString().padStart(2, '0');
 
   const amBtn = document.getElementById('btn-period-am');
   const pmBtn = document.getElementById('btn-period-pm');
@@ -304,21 +296,51 @@ function updateModalTimeDisplay() {
   }
 }
 
+// Save Alarm Handler
+function saveAlarmAction() {
+  const nameInput = document.getElementById('input-alarm-name');
+  const toneSelect = document.getElementById('select-alarm-tone');
+  const vibrationToggle = document.getElementById('modal-vibration-toggle');
+
+  const label = (nameInput?.value.trim()) || 'Alarm';
+  const sound = toneSelect?.value || 'Over the Horizon (Samsung Brand)';
+  const vibration = vibrationToggle?.checked ? 'Basic call' : 'Off';
+
+  const newAlarm = {
+    id: `alarm-${Date.now()}`,
+    time: `${newAlarmHour}:${newAlarmMin.toString().padStart(2, '0')}`,
+    period: newAlarmPeriod,
+    hour: newAlarmHour,
+    minute: newAlarmMin,
+    label,
+    category: 'Morning Routine',
+    days: newAlarmDays.length > 0 ? [...newAlarmDays] : [0, 1, 2, 3, 4, 5, 6],
+    isEnabled: true,
+    isExpanded: false,
+    sound,
+    vibration,
+    snooze: '5 minutes, 3 times',
+  };
+
+  alarms.unshift(newAlarm);
+  audio.playClick('save');
+  renderSamsungAlarmCards();
+  updateHeaderSubtitle();
+  closeCreateModal();
+  showToast(`Alarm saved: ${newAlarm.time} ${newAlarm.period}`);
+
+  if (nameInput) nameInput.value = '';
+}
+
 // Setup Event Listeners
 function setupEventListeners() {
-  // Top right "+" button to open modal
-  const openModalBtn = document.getElementById('btn-open-create-modal');
-  if (openModalBtn) {
-    openModalBtn.addEventListener('click', openCreateModal);
-  }
+  // Top right "+" button
+  document.getElementById('btn-open-create-modal')?.addEventListener('click', openCreateModal);
 
-  // Close modal button
-  const closeModalBtn = document.getElementById('btn-close-modal');
-  if (closeModalBtn) {
-    closeModalBtn.addEventListener('click', closeCreateModal);
-  }
+  // Close modal button (Cancel on header)
+  document.getElementById('btn-close-modal')?.addEventListener('click', closeCreateModal);
 
-  // Backdrop click to close modal
+  // Backdrop click to close
   const modalBackdrop = document.getElementById('modal-backdrop');
   if (modalBackdrop) {
     modalBackdrop.addEventListener('click', (e) => {
@@ -330,50 +352,39 @@ function setupEventListeners() {
   document.getElementById('btn-hour-up')?.addEventListener('click', () => {
     audio.playClick('tap');
     newAlarmHour = newAlarmHour >= 12 ? 1 : newAlarmHour + 1;
-    updateModalTimeDisplay();
+    updateModalWheelDisplay();
   });
   document.getElementById('btn-hour-down')?.addEventListener('click', () => {
     audio.playClick('tap');
     newAlarmHour = newAlarmHour <= 1 ? 12 : newAlarmHour - 1;
-    updateModalTimeDisplay();
+    updateModalWheelDisplay();
   });
 
   document.getElementById('btn-min-up')?.addEventListener('click', () => {
     audio.playClick('tap');
     newAlarmMin = newAlarmMin >= 55 ? 0 : newAlarmMin + 5;
-    updateModalTimeDisplay();
+    updateModalWheelDisplay();
   });
   document.getElementById('btn-min-down')?.addEventListener('click', () => {
     audio.playClick('tap');
     newAlarmMin = newAlarmMin <= 0 ? 55 : newAlarmMin - 5;
-    updateModalTimeDisplay();
+    updateModalWheelDisplay();
   });
 
   // AM/PM buttons
   document.getElementById('btn-period-am')?.addEventListener('click', () => {
     audio.playClick('tap');
     newAlarmPeriod = 'AM';
-    updateModalTimeDisplay();
+    updateModalWheelDisplay();
   });
   document.getElementById('btn-period-pm')?.addEventListener('click', () => {
     audio.playClick('tap');
     newAlarmPeriod = 'PM';
-    updateModalTimeDisplay();
+    updateModalWheelDisplay();
   });
 
-  // Category Pills in Modal
-  const categoryPills = document.querySelectorAll('.cat-pill');
-  categoryPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      audio.playClick('tap');
-      categoryPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      newAlarmCategory = pill.dataset.cat;
-    });
-  });
-
-  // Repeat Day Buttons in Modal
-  const dayBtns = document.querySelectorAll('.day-select-btn');
+  // Repeat Day Buttons in Modal (S M T W T F S)
+  const dayBtns = document.querySelectorAll('.samsung-day-btn');
   dayBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       audio.playClick('tap');
@@ -387,69 +398,58 @@ function setupEventListeners() {
         btn.classList.add('active');
       }
 
-      // Update summary text
+      // Update Samsung summary text
       const summary = document.getElementById('repeat-summary');
       if (summary) {
         if (newAlarmDays.length === 7) summary.textContent = 'Every day';
-        else if (newAlarmDays.length === 5 && !newAlarmDays.includes(5) && !newAlarmDays.includes(6)) summary.textContent = 'Weekdays';
-        else if (newAlarmDays.length === 2 && newAlarmDays.includes(5) && newAlarmDays.includes(6)) summary.textContent = 'Weekends';
+        else if (newAlarmDays.length === 5 && !newAlarmDays.includes(0) && !newAlarmDays.includes(6)) summary.textContent = 'Every weekday';
+        else if (newAlarmDays.length === 2 && newAlarmDays.includes(0) && newAlarmDays.includes(6)) summary.textContent = 'Weekends';
         else if (newAlarmDays.length === 0) summary.textContent = 'Never';
-        else summary.textContent = `${newAlarmDays.length} days / wk`;
+        else summary.textContent = `${newAlarmDays.length} days selected`;
       }
     });
   });
 
-  // Save Alarm CTA
-  const saveBtn = document.getElementById('btn-save-alarm');
-  if (saveBtn) {
-    saveBtn.addEventListener('click', () => {
-      const nameInput = document.getElementById('input-alarm-name');
-      const toneSelect = document.getElementById('select-alarm-tone');
-      const vibrationToggle = document.getElementById('modal-vibration-toggle');
+  // Sound select listener
+  const soundSelect = document.getElementById('select-alarm-tone');
+  soundSelect?.addEventListener('change', (e) => {
+    const label = document.getElementById('selected-sound-name');
+    if (label) label.textContent = e.target.value.split(' ')[0];
+  });
 
-      const label = (nameInput?.value.trim()) || 'Circadian Focus Protocol';
-      const sound = toneSelect?.value || 'Binaural Theta Wave (432Hz)';
-      const vibration = vibrationToggle?.checked ? 'Gradual Escalation' : 'Off';
+  // Save Buttons (Both Header & Bottom)
+  document.getElementById('btn-save-alarm')?.addEventListener('click', saveAlarmAction);
+  document.getElementById('btn-save-alarm-header')?.addEventListener('click', saveAlarmAction);
 
-      let catClass = 'morning';
-      if (newAlarmCategory === 'Deep Work') catClass = 'deep-work';
-      else if (newAlarmCategory === 'Recovery') catClass = 'recovery';
-      else if (newAlarmCategory === 'Circadian Sync') catClass = 'circadian';
+  // Samsung Bottom Tabs
+  const bottomTabs = document.querySelectorAll('.samsung-tab-item');
+  bottomTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      audio.playClick('tap');
+      bottomTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      showToast(`Switched to ${tab.dataset.tab}`);
+    });
+  });
 
-      const newAlarm = {
-        id: `alarm-${Date.now()}`,
-        time: `${newAlarmHour.toString().padStart(2, '0')}:${newAlarmMin.toString().padStart(2, '0')}`,
-        period: newAlarmPeriod,
-        label,
-        category: newAlarmCategory,
-        categoryClass: catClass,
-        days: newAlarmDays.length > 0 ? [...newAlarmDays] : [0, 1, 2, 3, 4, 5, 6],
-        isEnabled: true,
-        isExpanded: false,
-        sound,
-        vibration,
-        snooze: '5 min',
-      };
-
-      alarms.unshift(newAlarm);
-      audio.playClick('success');
-      renderAlarmCards();
-      updateHeaderMeta();
-      closeCreateModal();
-      showToast(`Added: ${label} (${newAlarm.time} ${newAlarm.period})`);
-
-      // Reset name input
-      if (nameInput) nameInput.value = '';
+  // Samsung Theme Color Toggle: Samsung Blue (#2C7BFE) vs Samsung Clock Orange (#FF7700)
+  const colorToggle = document.getElementById('toggle-color-theme');
+  if (colorToggle) {
+    colorToggle.addEventListener('click', () => {
+      audio.playClick('tap');
+      document.body.classList.toggle('theme-samsung-orange');
+      const isOrange = document.body.classList.contains('theme-samsung-orange');
+      document.getElementById('theme-color-label').textContent = isOrange ? 'Samsung Orange' : 'Samsung Blue';
     });
   }
 
-  // Frame Mode Toggle (Responsive Fit vs Phone Frame)
+  // Frame Mode Toggle
   const toggleFrameBtn = document.getElementById('toggle-frame-mode');
   if (toggleFrameBtn) {
     toggleFrameBtn.addEventListener('click', () => {
       document.body.classList.toggle('fullscreen-mode');
       const isFullscreen = document.body.classList.contains('fullscreen-mode');
-      document.getElementById('frame-mode-text').textContent = isFullscreen ? 'Mobile Frame View' : 'Fit Screen View';
+      document.getElementById('frame-mode-text').textContent = isFullscreen ? 'Samsung Frame View' : 'Fit Screen View';
       document.getElementById('frame-mode-icon').textContent = isFullscreen ? '💻' : '📱';
       audio.playClick('tap');
     });
@@ -461,21 +461,22 @@ function setupEventListeners() {
     audioToggle.addEventListener('click', () => {
       audio.enabled = !audio.enabled;
       audioToggle.classList.toggle('active', audio.enabled);
-      document.getElementById('audio-status-text').textContent = audio.enabled ? 'Haptic Sound ON' : 'Haptic Sound OFF';
+      document.getElementById('audio-status-text').textContent = audio.enabled ? 'Galaxy Sound ON' : 'Galaxy Sound OFF';
       audio.playClick('tap');
     });
   }
 }
 
-// React Native Code Tabs Viewer
+// Code Tabs Viewer
 const CODE_SNIPPETS = {
-  screen: `// react-native/src/screens/AlarmScreen.tsx
+  screen: `// react-native/src/screens/AlarmScreen.tsx (Samsung One UI 6 / 7)
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { INITIAL_ALARMS } from '../data/mockAlarms';
 import { AlarmItem } from '../types/alarm';
 import { AlarmCard } from '../components/AlarmCard';
 import { CreateAlarmModal } from '../components/CreateAlarmModal';
+import { SamsungBottomNav } from '../components/BottomNav';
 
 export const AlarmScreen: React.FC = () => {
   const [alarms, setAlarms] = useState<AlarmItem[]>(INITIAL_ALARMS);
@@ -485,44 +486,42 @@ export const AlarmScreen: React.FC = () => {
     setAlarms(prev => prev.map(a => a.id === id ? { ...a, isEnabled } : a));
   };
 
-  const handleSaveNewAlarm = (newAlarmData: Omit<AlarmItem, 'id'>) => {
-    const newAlarm: AlarmItem = { ...newAlarmData, id: \`alarm-\${Date.now()}\` };
-    setAlarms(prev => [...prev, newAlarm]);
-  };
-
   return (
-    <SafeAreaView className="flex-1 bg-[#090D14]">
-      <StatusBar barStyle="light-content" backgroundColor="#090D14" />
-      <View className="flex-1 px-5 pt-3">
-        {/* Header Area */}
-        <View className="flex-row items-center justify-between mb-4">
-          <View>
-            <Text className="text-2xl font-bold tracking-tight text-white">Daily Rhythm & Alarms</Text>
-            <View className="flex-row items-center space-x-2 gap-2 mt-1.5">
-              <View className="flex-row items-center px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25">
-                <View className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-                <Text className="text-xs font-medium text-emerald-400 font-mono">Next alarm in 4h 15m</Text>
-              </View>
-            </View>
+    <SafeAreaView className="flex-1 bg-[#000000]">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <View className="flex-1">
+        {/* Samsung Top Action Bar */}
+        <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
+          <View />
+          <View className="flex-row items-center space-x-5 gap-5">
+            <TouchableOpacity><Text className="text-xl text-[#9EA3B5]">🔍</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsModalOpen(true)}><Text className="text-2xl font-light text-white leading-none">+</Text></TouchableOpacity>
+            <TouchableOpacity><Text className="text-xl text-[#9EA3B5] font-bold">⋮</Text></TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => setIsModalOpen(true)} className="w-11 h-11 rounded-2xl bg-slate-800 border border-slate-700 items-center justify-center">
-            <Text className="text-white text-2xl font-light">+</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Scrollable Cards */}
-        <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Samsung One UI Header */}
+        <View className="px-6 pt-2 pb-6">
+          <Text className="text-3xl font-bold tracking-tight text-white font-sans">Alarm</Text>
+          <Text className="text-sm text-[#8D92A4] mt-1 font-normal">Next alarm in 4 hours 15 minutes</Text>
+        </View>
+
+        {/* Alarm Cards List */}
+        <ScrollView showsVerticalScrollIndicator={false} className="flex-1 px-4">
           {alarms.map(alarm => (
             <AlarmCard key={alarm.id} alarm={alarm} onToggle={handleToggleAlarm} />
           ))}
         </ScrollView>
+
+        {/* Samsung Bottom Navigation Bar (4 Tabs) */}
+        <SamsungBottomNav activeTab="Alarm" />
       </View>
-      <CreateAlarmModal visible={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveNewAlarm} />
+      <CreateAlarmModal visible={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={a => setAlarms([ { ...a, id: \`alarm-\${Date.now()}\` }, ...alarms ])} />
     </SafeAreaView>
   );
 };`,
 
-  card: `// react-native/src/components/AlarmCard.tsx
+  card: `// react-native/src/components/AlarmCard.tsx (Samsung One UI 6 / 7)
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Switch } from 'react-native';
 import { AlarmItem } from '../types/alarm';
@@ -532,103 +531,125 @@ export const AlarmCard: React.FC<{ alarm: AlarmItem; onToggle: (id: string, val:
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <View className={\`rounded-2xl mb-4 border transition-all \${alarm.isEnabled ? 'bg-slate-900/90 border-slate-700/80 shadow-lg' : 'bg-slate-900/40 border-slate-800/40 opacity-75'}\`}>
-      {alarm.isEnabled && <View className="h-0.5 w-full bg-gradient-to-r from-emerald-500/60 to-transparent rounded-t-2xl" />}
+    <View className={\`rounded-[26px] mb-3.5 transition-all overflow-hidden \${alarm.isEnabled ? 'bg-[#1C1F2B] border border-[#272B3B]' : 'bg-[#14161F] border border-[#1A1C25] opacity-70'}\`}>
       <TouchableOpacity activeOpacity={0.88} onPress={() => setIsExpanded(!isExpanded)} className="p-5">
-        <View className="flex-row items-center justify-between mb-3">
-          <View className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
-            <Text className="text-xs font-medium text-emerald-400">{alarm.category}</Text>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1 pr-3">
+            <View className="flex-row items-baseline mb-1">
+              <Text className={\`text-4xl font-bold font-sans tracking-tight \${alarm.isEnabled ? 'text-white' : 'text-[#6C7182]'}\`}>{alarm.time}</Text>
+              <Text className={\`text-sm font-semibold ml-2 uppercase \${alarm.isEnabled ? 'text-[#2C7BFE]' : 'text-[#4B5061]'}\`}>{alarm.period}</Text>
+            </View>
+            <Text className={\`text-sm mb-3.5 font-normal \${alarm.isEnabled ? 'text-[#CBD0DF]' : 'text-[#5B6070]'}\`}>{alarm.label}</Text>
+            <DayPills selectedDays={alarm.days} isAlarmEnabled={alarm.isEnabled} />
           </View>
+          <Switch value={alarm.isEnabled} onValueChange={v => onToggle(alarm.id, v)} trackColor={{ false: '#2E3240', true: '#2C7BFE' }} thumbColor={alarm.isEnabled ? '#FFFFFF' : '#8A8F9E'} />
         </View>
-        <View className="flex-row items-baseline justify-between mb-2">
-          <View className="flex-row items-baseline">
-            <Text className={\`text-4xl font-bold \${alarm.isEnabled ? 'text-white' : 'text-slate-500'}\`}>{alarm.time.split(' ')[0]}</Text>
-            <Text className={\`text-sm font-semibold ml-1.5 \${alarm.isEnabled ? 'text-emerald-400' : 'text-slate-600'}\`}>{alarm.time.split(' ')[1]}</Text>
-          </View>
-          <Switch value={alarm.isEnabled} onValueChange={v => onToggle(alarm.id, v)} trackColor={{ false: '#1e293b', true: '#10b981' }} thumbColor={alarm.isEnabled ? '#ffffff' : '#64748b'} />
-        </View>
-        <Text className={\`text-sm font-medium mb-3.5 \${alarm.isEnabled ? 'text-slate-200' : 'text-slate-500'}\`}>{alarm.label}</Text>
-        <DayPills selectedDays={alarm.days} isAlarmEnabled={alarm.isEnabled} />
       </TouchableOpacity>
     </View>
   );
 };`,
 
-  modal: `// react-native/src/components/CreateAlarmModal.tsx
+  modal: `// react-native/src/components/CreateAlarmModal.tsx (Samsung 3-Wheel Picker)
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, ScrollView } from 'react-native';
-import { AlarmItem, DAYS_OF_WEEK } from '../types/alarm';
+import { AlarmItem, SAMSUNG_DAYS, SAMSUNG_SOUNDS } from '../types/alarm';
 
 export const CreateAlarmModal: React.FC<{ visible: boolean; onClose: () => void; onSave: (alarm: Omit<AlarmItem, 'id'>) => void }> = ({ visible, onClose, onSave }) => {
-  const [hour, setHour] = useState(7);
-  const [minute, setMinute] = useState(30);
+  const [selectedHour, setSelectedHour] = useState(7);
+  const [selectedMinute, setSelectedMinute] = useState(30);
   const [period, setPeriod] = useState<'AM' | 'PM'>('AM');
   const [label, setLabel] = useState('');
-  const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4]);
+  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/80">
-        <View className="bg-slate-900 border-t border-slate-800 rounded-t-3xl max-h-[90%] pb-8 pt-3 px-6">
-          <View className="items-center mb-4"><View className="w-12 h-1.5 rounded-full bg-slate-700/60" /></View>
-          <Text className="text-xl font-bold text-white mb-4">Create New Alarm</Text>
-          <TextInput value={label} onChangeText={setLabel} placeholder="Alarm Name / Purpose" placeholderTextColor="#64748b" className="bg-slate-950 border border-slate-800 text-white rounded-xl px-4 py-3 mb-4" />
-          <TouchableOpacity onPress={() => onSave({ time: \`\${hour}:\${minute} \${period}\`, hour, minute, period, label: label || 'Protocol', category: 'Morning Routine', days: selectedDays, isEnabled: true, sound: 'Binaural Theta Wave', vibration: true })} className="bg-emerald-500 rounded-xl py-4 items-center">
-            <Text className="text-black font-bold text-base">Save Alarm</Text>
-          </TouchableOpacity>
+      <View className="flex-1 justify-end bg-black/85">
+        <View className="bg-[#12141D] border-t border-[#232736] rounded-t-[32px] max-h-[92%] pb-8 pt-3 px-6">
+          <View className="flex-row items-center justify-between mb-6">
+            <TouchableOpacity onPress={onClose}><Text className="text-base text-[#8E94A7]">Cancel</Text></TouchableOpacity>
+            <Text className="text-lg font-bold text-white">Add alarm</Text>
+            <TouchableOpacity onPress={() => onSave({ time: \`\${selectedHour}:\${selectedMinute.toString().padStart(2, '0')}\`, period, hour: selectedHour, minute: selectedMinute, label: label || 'Alarm', category: 'Morning Routine', days: selectedDays, isEnabled: true, sound: 'Morning Flower', volume: 80, vibration: 'Basic call', snooze: '5 min' })}><Text className="text-base text-[#2C7BFE] font-bold">Save</Text></TouchableOpacity>
+          </View>
+          {/* Samsung 3-Wheel Time Picker */}
+          <View className="bg-[#1A1D29] rounded-[24px] p-5 mb-5 items-center">
+            <Text className="text-5xl font-bold text-white">{selectedHour} : {selectedMinute.toString().padStart(2, '0')} {period}</Text>
+          </View>
         </View>
       </View>
     </Modal>
   );
 };`,
 
-  pills: `// react-native/src/components/DayPills.tsx
+  nav: `// react-native/src/components/BottomNav.tsx (Samsung 4 Tabs)
 import React from 'react';
-import { View, Text } from 'react-native';
-import { DAYS_OF_WEEK } from '../types/alarm';
+import { View, Text, TouchableOpacity } from 'react-native';
 
-export const DayPills: React.FC<{ selectedDays: number[]; isAlarmEnabled?: boolean }> = ({ selectedDays, isAlarmEnabled = true }) => (
-  <View className="flex-row items-center space-x-1.5 gap-1.5">
-    {DAYS_OF_WEEK.map(day => {
-      const isSelected = selectedDays.includes(day.id);
-      const bg = isSelected ? (isAlarmEnabled ? 'bg-emerald-500/15 border-emerald-500/40' : 'bg-slate-800 border-slate-700') : 'bg-slate-800/40 border-slate-700/40';
-      const text = isSelected ? (isAlarmEnabled ? 'text-emerald-400 font-semibold' : 'text-slate-400') : 'text-slate-500';
-      return (
-        <View key={day.id} className={\`w-6 h-6 rounded-full items-center justify-center border \${bg}\`}>
-          <Text className={\`text-[11px] \${text}\`}>{day.label}</Text>
-        </View>
-      );
-    })}
-  </View>
-);`,
+export const SamsungBottomNav: React.FC<{ activeTab?: string }> = ({ activeTab = 'Alarm' }) => {
+  const tabs = [
+    { id: 'Alarm', label: 'Alarm', icon: '⏰' },
+    { id: 'WorldClock', label: 'World clock', icon: '🌐' },
+    { id: 'Stopwatch', label: 'Stopwatch', icon: '⏱️' },
+    { id: 'Timer', label: 'Timer', icon: '⏳' },
+  ];
 
-  types: `// react-native/src/types/alarm.ts
-export type AlarmCategory = 'Morning Routine' | 'Deep Work' | 'Recovery' | 'Circadian Sync' | 'Mindfulness';
+  return (
+    <View className="flex-row items-center justify-around py-3.5 bg-[#0C0E14] border-t border-[#1C1F2B]">
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id;
+        return (
+          <TouchableOpacity key={tab.id} className="items-center justify-center flex-1">
+            <Text className="text-lg mb-1">{tab.icon}</Text>
+            <Text className={\`text-[11px] \${isActive ? 'text-[#2C7BFE] font-bold' : 'text-[#6F7485]'}\`}>{tab.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};`,
 
-export interface AlarmItem {
-  id: string;
-  time: string; // e.g. "07:30 AM"
-  hour: number;
-  minute: number;
-  period: 'AM' | 'PM';
-  label: string;
-  category: AlarmCategory;
-  days: number[]; // 0 = Mon, ..., 6 = Sun
-  isEnabled: boolean;
-  sound: string;
-  vibration: boolean;
-  snoozeEnabled?: boolean;
+  flutter: `// flutter/lib/alarm_screen.dart (Samsung One UI 6 / 7 for Flutter)
+import 'package:flutter/material.dart';
+
+class SamsungAlarmScreen extends StatefulWidget {
+  const SamsungAlarmScreen({Key? key}) : super(key: key);
+  @override
+  State<SamsungAlarmScreen> createState() => _SamsungAlarmScreenState();
 }
 
-export const DAYS_OF_WEEK = [
-  { id: 0, label: 'M', full: 'Mon' },
-  { id: 1, label: 'T', full: 'Tue' },
-  { id: 2, label: 'W', full: 'Wed' },
-  { id: 3, label: 'T', full: 'Thu' },
-  { id: 4, label: 'F', full: 'Fri' },
-  { id: 5, label: 'S', full: 'Sat' },
-  { id: 6, label: 'S', full: 'Sun' },
-];`,
+class _SamsungAlarmScreenState extends State<SamsungAlarmScreen> {
+  static const Color samsungBlue = Color(0xFF2C7BFE);
+  static const Color samsungBgBlack = Color(0xFF000000);
+  static const Color samsungCardBg = Color(0xFF1C1F2B);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: samsungBgBlack,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Samsung Top Action Bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(icon: const Icon(Icons.search, color: Color(0xFF9EA3B5)), onPressed: () {}),
+                IconButton(icon: const Icon(Icons.add, color: Colors.white), onPressed: () {}),
+                IconButton(icon: const Icon(Icons.more_vert, color: Color(0xFF9EA3B5)), onPressed: () {}),
+              ],
+            ),
+            // Large Samsung Header
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              child: Text('Alarm', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+            ),
+            // Alarm list and bottom navigation...
+          ],
+        ),
+      ),
+    );
+  }
+}`,
 };
 
 function setupCodeTabs() {
@@ -658,7 +679,7 @@ function updateClock() {
   const clock = document.getElementById('status-clock');
   if (clock) {
     const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
+    const hours = now.getHours();
     const minutes = now.getMinutes().toString().padStart(2, '0');
     clock.textContent = `${hours}:${minutes}`;
   }
@@ -666,8 +687,8 @@ function updateClock() {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-  renderAlarmCards();
-  updateHeaderMeta();
+  renderSamsungAlarmCards();
+  updateHeaderSubtitle();
   setupEventListeners();
   setupCodeTabs();
   updateClock();
@@ -677,12 +698,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   if (params.get('openModal') === 'true') {
     openCreateModal();
+    updateModalWheelDisplay();
   }
   if (params.get('expandCard')) {
     const idx = parseInt(params.get('expandCard'), 10);
     if (alarms[idx]) {
       alarms[idx].isExpanded = true;
-      renderAlarmCards();
+      renderSamsungAlarmCards();
     }
+  }
+  if (params.get('theme') === 'orange') {
+    document.body.classList.add('theme-samsung-orange');
+    const label = document.getElementById('theme-color-label');
+    if (label) label.textContent = 'Samsung Orange';
   }
 });

@@ -12,6 +12,7 @@ import { INITIAL_ALARMS } from '../data/mockAlarms';
 import { AlarmItem } from '../types/alarm';
 import { AlarmCard } from '../components/AlarmCard';
 import { CreateAlarmModal } from '../components/CreateAlarmModal';
+import { SamsungBottomNav } from '../components/BottomNav';
 
 export const AlarmScreen: React.FC = () => {
   const [alarms, setAlarms] = useState<AlarmItem[]>(INITIAL_ALARMS);
@@ -35,86 +36,67 @@ export const AlarmScreen: React.FC = () => {
       ...newAlarmData,
       id: `alarm-${Date.now()}`,
     };
-    setAlarms((prev) => [...prev, newAlarm]);
+    setAlarms((prev) => [newAlarm, ...prev]);
   };
 
-  // Dynamic calculation for "Next alarm in Xh Ym"
-  const nextAlarmCountdown = useMemo(() => {
-    const activeAlarms = alarms.filter((a) => a.isEnabled);
-    if (activeAlarms.length === 0) return 'All alarms paused';
-    // Returns subtle next alarm computation string
-    return 'Next alarm in 4h 15m';
+  // Dynamic next alarm computation
+  const nextAlarmSubtitle = useMemo(() => {
+    const active = alarms.filter((a) => a.isEnabled);
+    if (active.length === 0) return 'All alarms off';
+    return 'Next alarm in 4 hours 15 minutes';
   }, [alarms]);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#090D14]">
-      <StatusBar barStyle="light-content" backgroundColor="#090D14" />
-
-      {/* Atmospheric Background Ambient Glow Accents */}
-      <View
-        pointerEvents="none"
-        className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl -mr-20 -mt-20"
-      />
-      <View
-        pointerEvents="none"
-        className="absolute bottom-40 left-0 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl -ml-20"
-      />
+    <SafeAreaView className="flex-1 bg-[#000000]">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
       {/* Main Container */}
-      <View className="flex-1 px-5 pt-3">
+      <View className="flex-1">
         
-        {/* HEADER AREA */}
-        <View className="flex-row items-center justify-between mb-4">
-          <View>
-            <Text className="text-2xl font-bold tracking-tight text-white font-sans">
-              Daily Rhythm & Alarms
-            </Text>
+        {/* SAMSUNG TOP ACTION BAR */}
+        <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
+          <View />
+          
+          <View className="flex-row items-center space-x-5 gap-5">
+            {/* Search Icon */}
+            <TouchableOpacity activeOpacity={0.7} className="p-1">
+              <Text className="text-xl text-[#9EA3B5]">🔍</Text>
+            </TouchableOpacity>
 
-            {/* Subtle Sub-Badge: Next Alarm Indicator */}
-            <View className="flex-row items-center space-x-2 gap-2 mt-1.5">
-              <View className="flex-row items-center px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25">
-                <View className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-                <Text className="text-xs font-medium text-emerald-400 font-mono tracking-tight">
-                  {nextAlarmCountdown}
-                </Text>
-              </View>
-              <Text className="text-xs text-slate-500 font-mono">
-                {alarms.filter((a) => a.isEnabled).length} active
-              </Text>
-            </View>
+            {/* Plus Icon (Add Alarm) */}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setIsModalOpen(true)}
+              className="p-1"
+            >
+              <Text className="text-2xl font-light text-white leading-none">+</Text>
+            </TouchableOpacity>
+
+            {/* Overflow Menu (3-dots) */}
+            <TouchableOpacity activeOpacity={0.7} className="p-1">
+              <Text className="text-xl text-[#9EA3B5] font-bold">⋮</Text>
+            </TouchableOpacity>
           </View>
+        </View>
 
-          {/* Top Right "+" Quick Add Button */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setIsModalOpen(true)}
-            className="w-11 h-11 rounded-2xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 items-center justify-center shadow-md shadow-black/40 active:scale-95 transition-transform"
-          >
-            <Text className="text-white text-2xl font-light leading-none -mt-0.5">
-              +
-            </Text>
-          </TouchableOpacity>
+        {/* SAMSUNG LARGE ONE UI HEADER */}
+        <View className="px-6 pt-2 pb-6">
+          <Text className="text-3xl font-bold tracking-tight text-white font-sans">
+            Alarm
+          </Text>
+          <Text className="text-sm text-[#8D92A4] mt-1 font-normal">
+            {nextAlarmSubtitle}
+          </Text>
         </View>
 
         {/* ALARM CARD LIST SCROLLVIEW */}
         <ScrollView
           showsVerticalScrollIndicator={false}
+          className="flex-1 px-4"
           contentContainerStyle={{
-            paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-            paddingTop: 8,
+            paddingBottom: Platform.OS === 'ios' ? 30 : 20,
           }}
         >
-          {/* Section Subtitle */}
-          <View className="flex-row items-center justify-between mb-3 px-1">
-            <Text className="text-xs uppercase font-mono tracking-wider text-slate-400">
-              Personalized Circadian Protocols
-            </Text>
-            <Text className="text-xs font-mono text-slate-500">
-              {alarms.length} Routines
-            </Text>
-          </View>
-
-          {/* Render Alarm Cards */}
           {alarms.map((alarm) => (
             <AlarmCard
               key={alarm.id}
@@ -123,17 +105,13 @@ export const AlarmScreen: React.FC = () => {
               onDelete={handleDeleteAlarm}
             />
           ))}
-
-          {/* Bottom Spacing & Motivational Micro-Insight */}
-          <View className="mt-4 p-4 rounded-xl border border-slate-800/60 bg-slate-900/30 items-center">
-            <Text className="text-xs text-slate-400 text-center leading-relaxed">
-              ⚡ Consistency Anchor: Aligning your wake-up time within a 20-minute window optimizes natural cortisol release and sleep architecture.
-            </Text>
-          </View>
         </ScrollView>
+
+        {/* SAMSUNG BOTTOM NAVIGATION BAR (4 TABS) */}
+        <SamsungBottomNav activeTab="Alarm" />
       </View>
 
-      {/* CREATE NEW ALARM BOTTOM SHEET MODAL */}
+      {/* SAMSUNG CREATE ALARM MODAL */}
       <CreateAlarmModal
         visible={isModalOpen}
         onClose={() => setIsModalOpen(false)}

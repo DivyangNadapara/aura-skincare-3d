@@ -3,33 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Daily Rhythm & Alarms | Mobile Screen Experience</title>
+    <title>Samsung One UI | Clock & Alarm Screen</title>
     
     <!-- Google Fonts: Inter / Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body>
+  <body class="samsung-one-ui">
     <!-- Top Bar Controls (Simulation controls) -->
     <aside class="desktop-banner">
       <div class="banner-inner">
         <div class="banner-badge">
-          <span class="status-pulse"></span>
-          <span>React Native (Expo + NativeWind) & Flutter Specification</span>
+          <span class="samsung-dot"></span>
+          <span>Samsung Galaxy One UI 6 / 7 Clock Design System</span>
         </div>
         <div class="banner-actions">
+          <!-- Samsung Accent Color Switcher: Samsung One UI Blue vs Samsung Clock Orange -->
+          <button id="toggle-color-theme" class="pill-btn highlight" title="Switch between Samsung One UI Blue and Samsung Clock Orange">
+            <span id="theme-color-dot" class="color-dot blue"></span>
+            <span id="theme-color-label">Samsung Blue</span>
+          </button>
           <button id="toggle-frame-mode" class="pill-btn" title="Toggle between mobile device frame and full responsive view">
             <span id="frame-mode-icon">📱</span>
             <span id="frame-mode-text">Fit Screen View</span>
           </button>
-          <button id="audio-feedback-toggle" class="pill-btn active" title="Toggle tactile sound clicks">
+          <button id="audio-feedback-toggle" class="pill-btn active" title="Toggle Samsung tactile click sounds">
             <span>🔊</span>
-            <span id="audio-status-text">Haptic Sound ON</span>
+            <span id="audio-status-text">Galaxy Sound ON</span>
           </button>
-          <a href="#code-viewer" id="view-code-btn" class="pill-btn highlight">
+          <a href="#code-viewer" id="view-code-btn" class="pill-btn">
             <span>📦</span>
             <span>View RN Code</span>
           </a>
@@ -40,235 +45,288 @@
     <!-- Main Viewport Shell -->
     <main class="device-viewport-wrapper" id="viewport-wrapper">
       
-      <!-- Realistic Mobile Device Frame -->
-      <div class="mobile-frame" id="mobile-frame">
+      <!-- Realistic Samsung Galaxy Flagship Phone Frame -->
+      <div class="mobile-frame samsung-galaxy-frame" id="mobile-frame">
         
-        <!-- Physical Mobile Bezel Elements -->
-        <div class="hardware-buttons">
-          <div class="btn-volume-up"></div>
-          <div class="btn-volume-down"></div>
-          <div class="btn-power"></div>
-        </div>
-
         <!-- Phone Screen Surface -->
         <div class="screen-surface">
           
-          <!-- iOS/Android Status Bar -->
-          <header class="status-bar">
-            <span class="status-time" id="status-clock">09:41</span>
+          <!-- Samsung One UI Status Bar (with Galaxy Punch-Hole Camera) -->
+          <header class="status-bar samsung-status-bar">
+            <span class="status-time" id="status-clock">9:41</span>
             
-            <!-- Dynamic Island / Speaker Pill -->
-            <div class="dynamic-island">
-              <span class="sensor-camera"></span>
+            <!-- Samsung Galaxy Centered Punch-Hole Camera -->
+            <div class="punch-hole-camera">
+              <span class="lens-dot"></span>
             </div>
 
             <div class="status-indicators">
-              <span class="network-bars">
-                <i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i>
+              <!-- Sound icon -->
+              <span class="samsung-indicator-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
               </span>
-              <span class="wifi-icon">
-                <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor">
+              <!-- Wifi -->
+              <span class="samsung-indicator-icon">
+                <svg width="14" height="11" viewBox="0 0 15 11" fill="currentColor">
                   <path d="M7.5 10.5C8.05 10.5 8.5 10.05 8.5 9.5C8.5 8.95 8.05 8.5 7.5 8.5C6.95 8.5 6.5 8.95 6.5 9.5C6.5 10.05 6.95 10.5 7.5 10.5ZM11.75 6.25C10.55 5.05 8.95 4.3 7.5 4.3C6.05 4.3 4.45 5.05 3.25 6.25L4.3 7.3C5.2 6.4 6.3 5.8 7.5 5.8C8.7 5.8 9.8 6.4 10.7 7.3L11.75 6.25ZM13.85 4.15C12.15 2.45 9.9 1.5 7.5 1.5C5.1 1.5 2.85 2.45 1.15 4.15L2.2 5.2C3.65 3.75 5.5 2.9 7.5 2.9C9.5 2.9 11.35 3.75 12.8 5.2L13.85 4.15Z" />
                 </svg>
               </span>
-              <span class="battery-indicator">
-                <span class="battery-level"></span>
+              <!-- 5G / Signal -->
+              <span class="network-bars">
+                <i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i>
+              </span>
+              <!-- Battery -->
+              <span class="samsung-battery">
+                <span class="battery-fill"></span>
+                <span class="battery-pct">85%</span>
               </span>
             </div>
           </header>
 
-          <!-- MOBILE SCREEN CONTENT SCROLLER -->
-          <div class="mobile-scroll-container" id="scroll-container">
-            
-            <!-- Atmospheric Ambient Glow Blobs -->
-            <div class="glow-orb glow-top-right"></div>
-            <div class="glow-orb glow-bottom-left"></div>
-
-            <!-- SECTION 1: HEADER AREA -->
-            <section class="screen-header">
-              <div class="header-main-row">
-                <div class="header-copy">
-                  <h1 class="screen-title">Daily Rhythm & Alarms</h1>
-                  
-                  <!-- Subtle sub-badge: next alarm indicator -->
-                  <div class="sub-badge-row">
-                    <div class="sub-badge">
-                      <span class="badge-pulse-dot"></span>
-                      <span id="next-alarm-display">Next alarm in 4h 15m</span>
-                    </div>
-                    <span class="active-count-tag" id="active-alarms-count">2 Active</span>
-                  </div>
-                </div>
-
-                <!-- Top right "+" button to quickly add a new alarm -->
-                <button id="btn-open-create-modal" class="add-alarm-btn" aria-label="Add new alarm">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Section Sub-Tracker Header -->
-              <div class="sub-tracker-header">
-                <span class="section-label">Circadian Protocols</span>
-                <span class="routine-meta" id="routine-count">3 Schedules</span>
-              </div>
-            </section>
-
-            <!-- SECTION 2: ALARM CARD LIST CONTAINER -->
-            <section class="alarm-cards-list" id="alarm-cards-list">
-              <!-- Cards rendered dynamically from data -->
-            </section>
-
-            <!-- Circadian Health Insight Footer Card -->
-            <div class="circadian-insight-card">
-              <div class="insight-icon">⚡</div>
-              <div class="insight-text">
-                <span class="insight-title">Consistency Anchor</span>
-                <p>Waking within a 20-minute window daily anchors your suprachiasmatic nucleus (SCN), elevating daytime dopamine and nighttime melatonin onset.</p>
-              </div>
+          <!-- SAMSUNG TOP ACTION BAR -->
+          <div class="samsung-top-actions">
+            <div class="actions-empty-left"></div>
+            <div class="actions-right-cluster">
+              <!-- Search Icon -->
+              <button class="samsung-action-btn" id="btn-search-alarms" aria-label="Search alarms">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+              <!-- Plus Icon (Add Alarm) -->
+              <button class="samsung-action-btn plus-btn" id="btn-open-create-modal" aria-label="Add new alarm">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <!-- Overflow 3-dots -->
+              <button class="samsung-action-btn" id="btn-overflow-menu" aria-label="More options">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="1.5"></circle>
+                  <circle cx="12" cy="5" r="1.5"></circle>
+                  <circle cx="12" cy="19" r="1.5"></circle>
+                </svg>
+              </button>
             </div>
+          </div>
 
-            <!-- Bottom Home Navigation Bar Indicator -->
-            <div class="home-indicator"></div>
+          <!-- SAMSUNG SCROLLABLE AREA -->
+          <div class="mobile-scroll-container samsung-scroll" id="scroll-container">
+            
+            <!-- SAMSUNG LARGE ONE UI VIEWING AREA HEADER -->
+            <section class="samsung-large-header">
+              <h1 class="samsung-main-title">Alarm</h1>
+              <p class="samsung-sub-title" id="samsung-alarm-subtitle">Next alarm in 4 hours 15 minutes</p>
+            </section>
+
+            <!-- SAMSUNG ALARM CARDS LIST -->
+            <section class="samsung-card-list" id="alarm-cards-list">
+              <!-- Rendered dynamically -->
+            </section>
+
+            <!-- Bottom Spacing for Navigation Bar -->
+            <div class="bottom-scroll-spacer"></div>
 
           </div>
 
-          <!-- SECTION 4: BOTTOM ACTION / ADD MODAL BOTTOM SHEET -->
+          <!-- SAMSUNG 4-TAB BOTTOM NAVIGATION BAR -->
+          <nav class="samsung-bottom-navbar">
+            <button class="samsung-tab-item active" data-tab="Alarm">
+              <div class="tab-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="13" r="8"></circle>
+                  <polyline points="12 9 12 13 15 15"></polyline>
+                  <path d="M5 3L2 6"></path>
+                  <path d="M22 6L19 3"></path>
+                </svg>
+              </div>
+              <span class="tab-label">Alarm</span>
+            </button>
+
+            <button class="samsung-tab-item" data-tab="WorldClock">
+              <div class="tab-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              </div>
+              <span class="tab-label">World clock</span>
+            </button>
+
+            <button class="samsung-tab-item" data-tab="Stopwatch">
+              <div class="tab-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="14" r="8"></circle>
+                  <line x1="12" y1="2" x2="12" y2="6"></line>
+                  <line x1="12" y1="14" x2="15" y2="11"></line>
+                </svg>
+              </div>
+              <span class="tab-label">Stopwatch</span>
+            </button>
+
+            <button class="samsung-tab-item" data-tab="Timer">
+              <div class="tab-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 2h4"></path>
+                  <path d="M12 14v4"></path>
+                  <path d="M4 2v20"></path>
+                  <path d="M20 2v20"></path>
+                  <path d="M4 6h16"></path>
+                  <path d="M4 18h16"></path>
+                </svg>
+              </div>
+              <span class="tab-label">Timer</span>
+            </button>
+          </nav>
+
+          <!-- Samsung Home Navigation Pill Indicator -->
+          <div class="samsung-home-pill"></div>
+
+          <!-- SAMSUNG "ADD ALARM" MODAL BOTTOM SHEET -->
           <div class="modal-backdrop" id="modal-backdrop">
-            <div class="bottom-sheet" id="bottom-sheet">
+            <div class="bottom-sheet samsung-sheet" id="bottom-sheet">
               
-              <!-- Grab Handle -->
+              <!-- Samsung Drag Handle -->
               <div class="sheet-handle-bar">
                 <div class="handle"></div>
               </div>
 
-              <!-- Modal Header -->
-              <div class="sheet-header">
-                <div>
-                  <h2 class="sheet-title">Create New Alarm</h2>
-                  <p class="sheet-subtitle">Define your circadian trigger</p>
-                </div>
-                <button id="btn-close-modal" class="sheet-close-btn" aria-label="Close modal">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
+              <!-- Samsung Modal Header (Cancel on Left, Save on Right) -->
+              <div class="samsung-modal-header">
+                <button id="btn-close-modal" class="samsung-header-text-btn cancel">Cancel</button>
+                <h2 class="samsung-modal-title">Add alarm</h2>
+                <button id="btn-save-alarm-header" class="samsung-header-text-btn save">Save</button>
               </div>
 
-              <!-- Sheet Body / Scrollable Form -->
-              <div class="sheet-content">
+              <!-- Modal Content -->
+              <div class="sheet-content samsung-sheet-content">
                 
-                <!-- 1. TIME WHEEL / SELECTOR -->
-                <div class="time-picker-card">
-                  <span class="time-picker-tag">Rhythm Target Time</span>
+                <!-- 1. SAMSUNG 3-WHEEL TIME PICKER -->
+                <div class="samsung-wheel-picker-card">
+                  <div class="picker-selection-highlight"></div>
                   
-                  <div class="time-selector-row">
-                    
-                    <!-- Hours -->
-                    <div class="stepper-col">
-                      <button class="step-btn" id="btn-hour-up" aria-label="Increase hour">▲</button>
-                      <span class="digital-val" id="val-hour">07</span>
-                      <button class="step-btn" id="btn-hour-down" aria-label="Decrease hour">▼</button>
+                  <div class="wheel-columns-wrapper">
+                    <!-- Hours Column -->
+                    <div class="wheel-col hour-col">
+                      <div class="wheel-items" id="wheel-hours">
+                        <span class="wheel-item dim" id="h-prev">06</span>
+                        <span class="wheel-item active" id="val-hour">07</span>
+                        <span class="wheel-item dim" id="h-next">08</span>
+                      </div>
+                      <div class="stepper-micro-btns">
+                        <button class="step-micro" id="btn-hour-up" aria-label="Hour up">▲</button>
+                        <button class="step-micro" id="btn-hour-down" aria-label="Hour down">▼</button>
+                      </div>
                     </div>
 
-                    <span class="time-colon">:</span>
+                    <span class="wheel-colon">:</span>
 
-                    <!-- Minutes -->
-                    <div class="stepper-col">
-                      <button class="step-btn" id="btn-min-up" aria-label="Increase minute">▲</button>
-                      <span class="digital-val" id="val-min">30</span>
-                      <button class="step-btn" id="btn-min-down" aria-label="Decrease minute">▼</button>
+                    <!-- Minutes Column -->
+                    <div class="wheel-col minute-col">
+                      <div class="wheel-items" id="wheel-minutes">
+                        <span class="wheel-item dim" id="m-prev">25</span>
+                        <span class="wheel-item active" id="val-min">30</span>
+                        <span class="wheel-item dim" id="m-next">35</span>
+                      </div>
+                      <div class="stepper-micro-btns">
+                        <button class="step-micro" id="btn-min-up" aria-label="Minute up">▲</button>
+                        <button class="step-micro" id="btn-min-down" aria-label="Minute down">▼</button>
+                      </div>
                     </div>
 
-                    <!-- AM/PM Toggle -->
-                    <div class="period-toggle-group">
-                      <button class="period-btn active" id="btn-period-am">AM</button>
-                      <button class="period-btn" id="btn-period-pm">PM</button>
+                    <!-- AM / PM Column -->
+                    <div class="wheel-col period-col">
+                      <div class="wheel-items">
+                        <button class="period-pill-btn active" id="btn-period-am">AM</button>
+                        <button class="period-pill-btn" id="btn-period-pm">PM</button>
+                      </div>
                     </div>
-
                   </div>
                 </div>
 
-                <!-- 2. ALARM NAME / PURPOSE INPUT FIELD -->
-                <div class="form-group">
-                  <label for="input-alarm-name" class="form-label">Alarm Name / Purpose</label>
-                  <div class="input-wrapper">
-                    <input 
-                      type="text" 
-                      id="input-alarm-name" 
-                      class="custom-input" 
-                      placeholder="e.g., Morning Sunlight & Hydration" 
-                      maxlength="45"
-                    />
+                <!-- 2. SAMSUNG REPEAT DAY CHIPS (S M T W T F S) -->
+                <div class="samsung-form-card">
+                  <div class="form-card-title">Repeat</div>
+                  <div class="samsung-days-selector" id="modal-days-bar">
+                    <button class="samsung-day-btn" data-day="0">S</button>
+                    <button class="samsung-day-btn active" data-day="1">M</button>
+                    <button class="samsung-day-btn active" data-day="2">T</button>
+                    <button class="samsung-day-btn active" data-day="3">W</button>
+                    <button class="samsung-day-btn active" data-day="4">T</button>
+                    <button class="samsung-day-btn active" data-day="5">F</button>
+                    <button class="samsung-day-btn" data-day="6">S</button>
+                  </div>
+                  <div class="samsung-repeat-summary" id="repeat-summary">Every weekday</div>
+                </div>
+
+                <!-- 3. ALARM NAME (Samsung Row) -->
+                <div class="samsung-form-card">
+                  <div class="form-card-title">Alarm name</div>
+                  <input 
+                    type="text" 
+                    id="input-alarm-name" 
+                    class="samsung-text-input" 
+                    placeholder="Morning Sunlight & Hydration" 
+                    maxlength="40"
+                  />
+                </div>
+
+                <!-- 4. ALARM SOUND (Samsung Tone Row) -->
+                <div class="samsung-form-card">
+                  <div class="form-card-row">
+                    <div>
+                      <span class="card-row-title">Alarm sound</span>
+                      <span class="card-row-sub" id="selected-sound-name">Over the Horizon</span>
+                    </div>
+                    <div class="custom-select-wrapper">
+                      <select id="select-alarm-tone" class="samsung-tone-select">
+                        <option value="Over the Horizon (Samsung Brand)">Over the Horizon (Samsung Brand)</option>
+                        <option value="Morning Flower">Morning Flower</option>
+                        <option value="Homecoming">Homecoming</option>
+                        <option value="Breeze">Breeze</option>
+                        <option value="Daybreak">Daybreak</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
-                <!-- 3. CATEGORY SELECTOR PILLS -->
-                <div class="form-group">
-                  <label class="form-label">Category Tag</label>
-                  <div class="category-pills-row" id="category-pills-container">
-                    <button class="cat-pill active" data-cat="Morning Routine">Morning Routine</button>
-                    <button class="cat-pill" data-cat="Deep Work">Deep Work</button>
-                    <button class="cat-pill" data-cat="Recovery">Recovery</button>
-                    <button class="cat-pill" data-cat="Circadian Sync">Circadian Sync</button>
-                    <button class="cat-pill" data-cat="Mindfulness">Mindfulness</button>
+                <!-- 5. VIBRATION (Samsung Toggle Row) -->
+                <div class="samsung-form-card">
+                  <div class="form-card-row">
+                    <div>
+                      <span class="card-row-title">Vibration</span>
+                      <span class="card-row-sub">Basic call</span>
+                    </div>
+                    <label class="samsung-switch">
+                      <input type="checkbox" id="modal-vibration-toggle" checked />
+                      <span class="samsung-switch-track"></span>
+                    </label>
                   </div>
                 </div>
 
-                <!-- 4. REPEAT DAY SELECTORS (MON-SUN) -->
-                <div class="form-group">
-                  <div class="label-with-meta">
-                    <label class="form-label">Repeat Schedule</label>
-                    <span class="meta-hint" id="repeat-summary">Weekdays</span>
-                  </div>
-                  <div class="days-selector-bar" id="modal-days-bar">
-                    <button class="day-select-btn active" data-day="0">M</button>
-                    <button class="day-select-btn active" data-day="1">T</button>
-                    <button class="day-select-btn active" data-day="2">W</button>
-                    <button class="day-select-btn active" data-day="3">T</button>
-                    <button class="day-select-btn active" data-day="4">F</button>
-                    <button class="day-select-btn" data-day="5">S</button>
-                    <button class="day-select-btn" data-day="6">S</button>
+                <!-- 6. SNOOZE (Samsung Row) -->
+                <div class="samsung-form-card">
+                  <div class="form-card-row">
+                    <div>
+                      <span class="card-row-title">Snooze</span>
+                      <span class="card-row-sub">5 minutes, 3 times</span>
+                    </div>
+                    <label class="samsung-switch">
+                      <input type="checkbox" checked />
+                      <span class="samsung-switch-track"></span>
+                    </label>
                   </div>
                 </div>
 
-                <!-- 5. ALARM TONE / ACOUSTIC SELECTOR DROPDOWN -->
-                <div class="form-group">
-                  <label class="form-label">Acoustic Wake Frequency</label>
-                  <div class="custom-select-wrapper">
-                    <select id="select-alarm-tone" class="custom-select">
-                      <option value="Binaural Theta Wave (432Hz)">Binaural Theta Wave (432Hz)</option>
-                      <option value="Subtle Dawn Harmonics">Subtle Dawn Harmonics</option>
-                      <option value="Nordic Chimes">Nordic Chimes</option>
-                      <option value="Solar Flare Pulse">Solar Flare Pulse</option>
-                      <option value="Deep Forest Ambience">Deep Forest Ambience</option>
-                    </select>
-                    <span class="select-arrow">▼</span>
-                  </div>
-                </div>
-
-                <!-- 6. HAPTIC VIBRATION TOGGLE -->
-                <div class="form-group-toggle">
-                  <div class="toggle-info">
-                    <span class="toggle-title">Haptic Vibration</span>
-                    <span class="toggle-subtitle">Gradual tactile escalation</span>
-                  </div>
-                  <label class="switch-control">
-                    <input type="checkbox" id="modal-vibration-toggle" checked />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-
-                <!-- 7. PRIMARY CTA: SAVE ALARM BUTTON -->
-                <div class="sheet-cta-row">
-                  <button id="btn-save-alarm" class="btn-primary-cta">
-                    <span>Save Alarm</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
+                <!-- Bottom Save CTA Pill Button -->
+                <div class="samsung-bottom-save-row">
+                  <button id="btn-save-alarm" class="samsung-primary-btn">
+                    Save
                   </button>
                 </div>
 
@@ -283,20 +341,20 @@
       <section class="rn-code-drawer" id="code-viewer">
         <div class="drawer-header">
           <div class="code-title-group">
-            <span class="tag-rn">React Native + NativeWind</span>
-            <h3>Production-Ready Component Files</h3>
+            <span class="tag-samsung">Samsung One UI 6 / 7</span>
+            <h3>React Native & Flutter Component Code</h3>
           </div>
-          <span class="files-count">Located in <code>react-native/src/</code></span>
+          <span class="files-count">Located in <code>react-native/</code> and <code>flutter/</code></span>
         </div>
         <div class="code-files-tabs">
           <button class="tab-btn active" data-tab="screen">AlarmScreen.tsx</button>
           <button class="tab-btn" data-tab="card">AlarmCard.tsx</button>
           <button class="tab-btn" data-tab="modal">CreateAlarmModal.tsx</button>
-          <button class="tab-btn" data-tab="pills">DayPills.tsx</button>
-          <button class="tab-btn" data-tab="types">alarm.ts</button>
+          <button class="tab-btn" data-tab="nav">BottomNav.tsx</button>
+          <button class="tab-btn" data-tab="flutter">alarm_screen.dart (Flutter)</button>
         </div>
         <div class="code-box">
-          <pre><code id="code-display">/* Loading React Native Component... */</code></pre>
+          <pre><code id="code-display">/* Loading Samsung One UI Component... */</code></pre>
         </div>
       </section>
 

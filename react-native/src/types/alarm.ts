@@ -1,39 +1,52 @@
-export type AlarmCategory = 
+// Samsung One UI Clock & Alarm Types
+
+export type SamsungAlarmCategory = 
   | 'Morning Routine' 
   | 'Deep Work' 
   | 'Recovery' 
-  | 'Circadian Sync' 
-  | 'Mindfulness';
+  | 'Work' 
+  | 'Personal';
 
 export interface AlarmItem {
   id: string;
-  time: string; // e.g. "07:30 AM"
+  time: string; // e.g. "7:30"
+  period: 'AM' | 'PM';
   hour: number;
   minute: number;
-  period: 'AM' | 'PM';
   label: string;
-  category: AlarmCategory;
-  days: number[]; // 0 = Mon, 1 = Tue, 2 = Wed, 3 = Thu, 4 = Fri, 5 = Sat, 6 = Sun
+  category: SamsungAlarmCategory;
+  days: number[]; // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat (Samsung standard starts Sunday)
   isEnabled: boolean;
   sound: string;
-  vibration: boolean;
-  snoozeEnabled?: boolean;
+  volume: number; // 0 - 100
+  vibration: string;
+  snooze: string;
+  isExpanded?: boolean;
 }
 
-export const DAYS_OF_WEEK = [
-  { id: 0, label: 'M', full: 'Mon' },
-  { id: 1, label: 'T', full: 'Tue' },
-  { id: 2, label: 'W', full: 'Wed' },
-  { id: 3, label: 'T', full: 'Thu' },
-  { id: 4, label: 'F', full: 'Fri' },
-  { id: 5, label: 'S', full: 'Sat' },
-  { id: 6, label: 'S', full: 'Sun' },
+// Samsung standard day sequence (Sunday through Saturday)
+export const SAMSUNG_DAYS = [
+  { id: 0, label: 'S', full: 'Sun' },
+  { id: 1, label: 'M', full: 'Mon' },
+  { id: 2, label: 'T', full: 'Tue' },
+  { id: 3, label: 'W', full: 'Wed' },
+  { id: 4, label: 'T', full: 'Thu' },
+  { id: 5, label: 'F', full: 'Fri' },
+  { id: 6, label: 'S', full: 'Sat' },
 ];
 
-export const ALARM_SOUNDS = [
-  'Binaural Theta Wave (432Hz)',
-  'Subtle Dawn Harmonics',
-  'Nordic Chimes',
-  'Solar Flare Pulse',
-  'Deep Forest Ambience',
+export const SAMSUNG_SOUNDS = [
+  'Over the Horizon (Samsung Brand)',
+  'Morning Flower',
+  'Homecoming',
+  'Breeze',
+  'Daybreak',
+];
+
+export const SAMSUNG_VIBRATIONS = [
+  'Basic call',
+  'Heartbeat',
+  'Ticktock',
+  'Waltz',
+  'Zig-zig-zig',
 ];
