@@ -75,7 +75,6 @@ class _SamsungAlarmScreenState extends State<SamsungAlarmScreen> {
   static const Color samsungCardBg = Color(0xFF1C1F2B);
   static const Color samsungCardInactive = Color(0xFF14161F);
 
-  int _selectedBottomTab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -152,43 +151,6 @@ class _SamsungAlarmScreenState extends State<SamsungAlarmScreen> {
                   final alarm = _alarms[index];
                   return _buildSamsungAlarmCard(alarm);
                 },
-              ),
-            ),
-
-            // SAMSUNG 4-TAB BOTTOM NAVIGATION
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF0C0E14),
-                border: Border(top: BorderSide(color: Color(0xFF1C1F2B), width: 1)),
-              ),
-              child: BottomNavigationBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                type: BottomNavigationBarType.fixed,
-                currentIndex: _selectedBottomTab,
-                selectedItemColor: samsungBlue,
-                unselectedItemColor: const Color(0xFF6F7485),
-                selectedFontSize: 11,
-                unselectedFontSize: 11,
-                onTap: (idx) => setState(() => _selectedBottomTab = idx),
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.alarm),
-                    label: 'Alarm',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.public),
-                    label: 'World clock',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.timer_outlined),
-                    label: 'Stopwatch',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.hourglass_bottom),
-                    label: 'Timer',
-                  ),
-                ],
               ),
             ),
           ],

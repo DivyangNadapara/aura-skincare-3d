@@ -12,7 +12,6 @@ import { INITIAL_ALARMS } from '../data/mockAlarms';
 import { AlarmItem } from '../types/alarm';
 import { AlarmCard } from '../components/AlarmCard';
 import { CreateAlarmModal } from '../components/CreateAlarmModal';
-import { SamsungBottomNav } from '../components/BottomNav';
 
 interface AlarmScreenProps {
   onBack?: () => void;
@@ -105,7 +104,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
           showsVerticalScrollIndicator={false}
           className="flex-1 px-4"
           contentContainerStyle={{
-            paddingBottom: Platform.OS === 'ios' ? 30 : 20,
+            paddingBottom: Platform.OS === 'ios' ? 80 : 70,
           }}
         >
           {alarms.map((alarm) => (
@@ -117,9 +116,6 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
             />
           ))}
         </ScrollView>
-
-        {/* SAMSUNG BOTTOM NAVIGATION BAR (4 TABS) */}
-        <SamsungBottomNav activeTab="Alarm" />
       </View>
 
       {/* SAMSUNG CREATE ALARM MODAL */}

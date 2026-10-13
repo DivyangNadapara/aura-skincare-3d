@@ -165,3 +165,4 @@ class SamsungHomeScreen extends StatelessWidget {
     );
   }
 }
+
