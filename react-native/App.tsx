@@ -1,24 +1,30 @@
 import React, { useState } from 'react';
 import { View, SafeAreaView } from 'react-native';
+import { HomeScreen } from './src/screens/HomeScreen';
 import { AlarmScreen } from './src/screens/AlarmScreen';
 import { NotesScreen } from './src/screens/NotesScreen';
 import { SamsungBottomNav, MainBranchTab } from './src/components/BottomNav';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<MainBranchTab>('Alarm');
+  const [currentScreen, setCurrentScreen] = useState<MainBranchTab>('home');
 
   return (
     <SafeAreaView className="flex-1 bg-black">
       <View className="flex-1">
-        {activeTab === 'Alarm' ? (
-          <AlarmScreen />
-        ) : activeTab === 'Notes' ? (
-          <NotesScreen />
+        {currentScreen === 'home' ? (
+          <HomeScreen onSelectBranch={(branch) => setCurrentScreen(branch)} />
+        ) : currentScreen === 'alarm' ? (
+          <AlarmScreen onBack={() => setCurrentScreen('home')} />
         ) : (
-          <AlarmScreen />
+          <NotesScreen onBack={() => setCurrentScreen('home')} />
         )}
       </View>
-      <SamsungBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Samsung Android Bottom Navigation */}
+      <SamsungBottomNav
+        activeTab={currentScreen}
+        onTabChange={(tab) => setCurrentScreen(tab)}
+      />
     </SafeAreaView>
   );
 }

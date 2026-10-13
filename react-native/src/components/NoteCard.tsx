@@ -84,3 +84,4 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onPress }) => {
     </TouchableOpacity>
   );
 };
+

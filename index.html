@@ -3,155 +3,148 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Samsung One UI | Alarm & Notes System</title>
+    <title>Daily Rhythm | Samsung Android App</title>
     
-    <!-- Google Fonts: Inter / Plus Jakarta Sans & JetBrains Mono -->
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body class="samsung-one-ui">
-    <!-- Top Bar Controls (Simulation controls) -->
-    <aside class="desktop-banner">
-      <div class="banner-inner">
-        <div class="banner-badge">
-          <span class="samsung-dot"></span>
-          <span>Samsung Galaxy One UI 6 / 7 · Multi-Branch Ecosystem</span>
-        </div>
-        <div class="banner-actions">
-          <!-- Active Branch Indicator / Switcher -->
-          <div class="branch-pill-group">
-            <button id="branch-btn-alarm" class="branch-pill active">⏰ Alarm Branch</button>
-            <button id="branch-btn-notes" class="branch-pill">📝 Notes Branch</button>
-          </div>
-          <!-- Samsung Accent Color Switcher: Samsung One UI Blue vs Samsung Clock Orange -->
-          <button id="toggle-color-theme" class="pill-btn highlight" title="Switch between Samsung One UI Blue and Samsung Clock Orange">
-            <span id="theme-color-dot" class="color-dot blue"></span>
-            <span id="theme-color-label">Samsung Blue</span>
-          </button>
-          <button id="toggle-frame-mode" class="pill-btn" title="Toggle between mobile device frame and full responsive view">
-            <span id="frame-mode-icon">📱</span>
-            <span id="frame-mode-text">Fit Screen View</span>
-          </button>
-          <button id="audio-feedback-toggle" class="pill-btn active" title="Toggle Samsung tactile click sounds">
-            <span>🔊</span>
-            <span id="audio-status-text">Galaxy Sound ON</span>
-          </button>
-          <a href="#code-viewer" id="view-code-btn" class="pill-btn">
-            <span>📦</span>
-            <span>View Code</span>
-          </a>
-        </div>
-      </div>
-    </aside>
+  <body class="pure-android-app">
 
-    <!-- Main Viewport Shell -->
-    <main class="device-viewport-wrapper" id="viewport-wrapper">
+    <!-- Center Phone Canvas (Zero Website Elements) -->
+    <div class="android-app-container">
       
-      <!-- Realistic Samsung Galaxy Flagship Phone Frame -->
-      <div class="mobile-frame samsung-galaxy-frame" id="mobile-frame">
+      <!-- Samsung Galaxy Device Shell -->
+      <div class="samsung-phone-shell">
         
-        <!-- Phone Screen Surface -->
-        <div class="screen-surface">
+        <!-- Screen Display Surface -->
+        <div class="android-screen-surface">
           
-          <!-- Samsung One UI Status Bar (with Galaxy Punch-Hole Camera) -->
-          <header class="status-bar samsung-status-bar">
-            <span class="status-time" id="status-clock">9:41</span>
+          <!-- 1. ANDROID / SAMSUNG STATUS BAR -->
+          <header class="android-status-bar">
+            <span class="status-clock" id="status-clock">9:41</span>
             
-            <!-- Samsung Galaxy Centered Punch-Hole Camera -->
+            <!-- Centered Galaxy Punch Hole Camera -->
             <div class="punch-hole-camera">
-              <span class="lens-dot"></span>
+              <span class="lens-core"></span>
             </div>
 
-            <div class="status-indicators">
-              <!-- Sound icon -->
-              <span class="samsung-indicator-icon">
+            <div class="status-icons-cluster">
+              <span class="status-icon">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
               </span>
-              <!-- Wifi -->
-              <span class="samsung-indicator-icon">
+              <span class="status-icon">
                 <svg width="14" height="11" viewBox="0 0 15 11" fill="currentColor">
                   <path d="M7.5 10.5C8.05 10.5 8.5 10.05 8.5 9.5C8.5 8.95 8.05 8.5 7.5 8.5C6.95 8.5 6.5 8.95 6.5 9.5C6.5 10.05 6.95 10.5 7.5 10.5ZM11.75 6.25C10.55 5.05 8.95 4.3 7.5 4.3C6.05 4.3 4.45 5.05 3.25 6.25L4.3 7.3C5.2 6.4 6.3 5.8 7.5 5.8C8.7 5.8 9.8 6.4 10.7 7.3L11.75 6.25ZM13.85 4.15C12.15 2.45 9.9 1.5 7.5 1.5C5.1 1.5 2.85 2.45 1.15 4.15L2.2 5.2C3.65 3.75 5.5 2.9 7.5 2.9C9.5 2.9 11.35 3.75 12.8 5.2L13.85 4.15Z" />
                 </svg>
               </span>
-              <!-- Signal -->
               <span class="network-bars">
                 <i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i>
               </span>
-              <!-- Battery -->
-              <span class="samsung-battery">
-                <span class="battery-fill"></span>
-                <span class="battery-pct">85%</span>
+              <span class="android-battery">
+                <span class="battery-body"></span>
+                <span class="battery-text">85%</span>
               </span>
             </div>
           </header>
 
-          <!-- ========================================== -->
-          <!-- BRANCH 1: SAMSUNG ALARM SCREEN VIEW        -->
-          <!-- ========================================== -->
-          <div class="branch-view-container active" id="view-alarm-branch">
-            
-            <!-- Samsung Top Action Bar -->
-            <div class="samsung-top-actions">
-              <div class="actions-empty-left"></div>
-              <div class="actions-right-cluster">
-                <button class="samsung-action-btn" aria-label="Search alarms">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
-                </button>
-                <button class="samsung-action-btn plus-btn" id="btn-open-create-modal" aria-label="Add new alarm">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </button>
-                <button class="samsung-action-btn" aria-label="More options">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="1.5"></circle>
-                    <circle cx="12" cy="5" r="1.5"></circle>
-                    <circle cx="12" cy="19" r="1.5"></circle>
-                  </svg>
-                </button>
+          <!-- ======================================================== -->
+          <!-- SCREEN 1: HOME PAGE (BRANCH SELECTION HUB)               -->
+          <!-- ======================================================== -->
+          <div class="app-screen-view active" id="screen-home">
+            <div class="screen-scrollable-content">
+              
+              <!-- Samsung One UI Home Header -->
+              <div class="one-ui-home-header">
+                <span class="system-tag">Personal System</span>
+                <h1 class="home-main-title">Daily Rhythm</h1>
+                <p class="home-subtitle">Select a branch to manage your daily routines</p>
               </div>
-            </div>
 
-            <!-- Samsung Alarm Scrollable Content -->
-            <div class="mobile-scroll-container samsung-scroll" id="alarm-scroll-container">
-              <section class="samsung-large-header">
-                <h1 class="samsung-main-title">Alarm</h1>
-                <p class="samsung-sub-title" id="samsung-alarm-subtitle">Next alarm in 4 hours 15 minutes</p>
-              </section>
+              <!-- BRANCH SELECTION CARDS CONTAINER -->
+              <div class="branch-cards-section">
+                <span class="section-micro-heading">System Branches</span>
 
-              <section class="samsung-card-list" id="alarm-cards-list">
-                <!-- Alarm cards rendered dynamically -->
-              </section>
+                <!-- BRANCH CARD 1: ⏰ ALARM BRANCH -->
+                <div class="samsung-branch-card" id="card-launch-alarm" role="button" tabindex="0">
+                  <div class="card-top-row">
+                    <div class="branch-icon-badge">
+                      <span>⏰</span>
+                    </div>
+                    <span class="branch-status-pill" id="home-alarm-badge">2 Active</span>
+                  </div>
+
+                  <h2 class="branch-card-title">Alarms & Rhythm</h2>
+                  <p class="branch-card-desc">
+                    Circadian wake anchors, deep work surges, and recovery alarms with Samsung 3-wheel precision.
+                  </p>
+
+                  <div class="branch-card-footer">
+                    <span class="footer-meta-text" id="home-alarm-next-time">Next: 7:30 AM (in 4h 15m)</span>
+                    <span class="footer-arrow-icon">→</span>
+                  </div>
+                </div>
+
+                <!-- BRANCH CARD 2: 📝 NOTES BRANCH -->
+                <div class="samsung-branch-card" id="card-launch-notes" role="button" tabindex="0">
+                  <div class="card-top-row">
+                    <div class="branch-icon-badge">
+                      <span>📝</span>
+                    </div>
+                    <span class="branch-status-pill neutral" id="home-notes-badge">3 Notes</span>
+                  </div>
+
+                  <h2 class="branch-card-title">Notes & Protocols</h2>
+                  <p class="branch-card-desc">
+                    Create, edit, and organize biohacking logs with photo attachments and pinned routines.
+                  </p>
+
+                  <div class="branch-card-footer">
+                    <span class="footer-meta-text">Image attachments enabled</span>
+                    <span class="footer-arrow-icon">→</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Today's Routine Health Banner -->
+              <div class="samsung-sync-summary-card">
+                <div class="summary-icon">⚡</div>
+                <div class="summary-content">
+                  <span class="summary-title">Circadian Synchronization</span>
+                  <p>Your branches work together: alarms anchor your biological clock, and notes log recovery and energy spikes.</p>
+                </div>
+              </div>
 
               <div class="bottom-scroll-spacer"></div>
             </div>
           </div>
 
-          <!-- ========================================== -->
-          <!-- BRANCH 2: SAMSUNG NOTES SCREEN VIEW        -->
-          <!-- ========================================== -->
-          <div class="branch-view-container" id="view-notes-branch">
+          <!-- ======================================================== -->
+          <!-- SCREEN 2: ALARM BRANCH SCREEN                            -->
+          <!-- ======================================================== -->
+          <div class="app-screen-view" id="screen-alarm">
             
-            <!-- Samsung Notes Top Action Bar -->
+            <!-- Samsung Top Action Bar with Back to Home -->
             <div class="samsung-top-actions">
-              <div class="actions-empty-left"></div>
+              <button class="nav-back-btn" id="btn-alarm-back-home" aria-label="Back to Home">
+                <span class="back-arrow">←</span>
+                <span class="back-text">Home</span>
+              </button>
+
               <div class="actions-right-cluster">
-                <button class="samsung-action-btn plus-btn" id="btn-open-new-note" aria-label="Add new note">
+                <button class="action-icon-btn plus-btn" id="btn-open-create-modal" aria-label="Add new alarm">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
                 </button>
-                <button class="samsung-action-btn" aria-label="More options">
+                <button class="action-icon-btn" aria-label="More options">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="1.5"></circle>
                     <circle cx="12" cy="5" r="1.5"></circle>
@@ -161,319 +154,305 @@
               </div>
             </div>
 
-            <!-- Samsung Notes Scrollable Content -->
-            <div class="mobile-scroll-container samsung-scroll" id="notes-scroll-container">
-              <section class="samsung-large-header">
-                <h1 class="samsung-main-title">Notes</h1>
-                <p class="samsung-sub-title" id="samsung-notes-count-subtitle">3 notes</p>
-              </section>
+            <!-- Scrollable Alarms Content -->
+            <div class="screen-scrollable-content">
+              <div class="one-ui-screen-header">
+                <h1 class="main-title">Alarm</h1>
+                <p class="subtitle" id="samsung-alarm-subtitle">Next alarm in 4 hours 15 minutes</p>
+              </div>
 
-              <!-- Samsung Notes Search Bar -->
-              <div class="samsung-search-box">
-                <span class="search-icon">🔍</span>
+              <div class="alarm-cards-container" id="alarm-cards-list">
+                <!-- Alarm cards rendered dynamically -->
+              </div>
+
+              <div class="bottom-scroll-spacer"></div>
+            </div>
+          </div>
+
+          <!-- ======================================================== -->
+          <!-- SCREEN 3: NOTES BRANCH SCREEN                            -->
+          <!-- ======================================================== -->
+          <div class="app-screen-view" id="screen-notes">
+            
+            <!-- Samsung Top Action Bar with Back to Home -->
+            <div class="samsung-top-actions">
+              <button class="nav-back-btn" id="btn-notes-back-home" aria-label="Back to Home">
+                <span class="back-arrow">←</span>
+                <span class="back-text">Home</span>
+              </button>
+
+              <div class="actions-right-cluster">
+                <button class="action-icon-btn plus-btn" id="btn-open-new-note" aria-label="Add new note">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+                <button class="action-icon-btn" aria-label="More options">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1.5"></circle>
+                    <circle cx="12" cy="5" r="1.5"></circle>
+                    <circle cx="12" cy="19" r="1.5"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Scrollable Notes Content -->
+            <div class="screen-scrollable-content">
+              <div class="one-ui-screen-header">
+                <h1 class="main-title">Notes</h1>
+                <p class="subtitle" id="samsung-notes-count-subtitle">3 notes</p>
+              </div>
+
+              <!-- Notes Search Bar -->
+              <div class="samsung-search-bar">
+                <span class="search-ico">🔍</span>
                 <input 
                   type="text" 
                   id="input-notes-search" 
-                  class="samsung-search-input" 
+                  class="search-text-field" 
                   placeholder="Search notes, protocols & images" 
                 />
-                <button id="btn-clear-notes-search" class="search-clear-btn" style="display: none;">✕</button>
+                <button id="btn-clear-notes-search" class="clear-search-btn" style="display: none;">✕</button>
               </div>
 
-              <!-- Samsung Category Filter Chips -->
-              <div class="notes-category-chips-row" id="notes-filter-chips">
-                <button class="notes-chip active" data-cat="All">All</button>
-                <button class="notes-chip" data-cat="Circadian Protocol">Circadian</button>
-                <button class="notes-chip" data-cat="Deep Work">Deep Work</button>
-                <button class="notes-chip" data-cat="Recovery & Sleep">Recovery</button>
-                <button class="notes-chip" data-cat="Quick Ideas">Ideas</button>
+              <!-- Category Filter Chips -->
+              <div class="category-chips-scroll" id="notes-filter-chips">
+                <button class="category-chip active" data-cat="All">All</button>
+                <button class="category-chip" data-cat="Circadian Protocol">Circadian</button>
+                <button class="category-chip" data-cat="Deep Work">Deep Work</button>
+                <button class="category-chip" data-cat="Recovery & Sleep">Recovery</button>
+                <button class="category-chip" data-cat="Quick Ideas">Ideas</button>
               </div>
 
               <!-- Notes Cards Container -->
-              <section class="samsung-notes-list" id="samsung-notes-cards-list">
+              <div class="notes-cards-container" id="samsung-notes-cards-list">
                 <!-- Rendered dynamically -->
-              </section>
+              </div>
 
               <div class="bottom-scroll-spacer"></div>
             </div>
 
-            <!-- Samsung Notes Floating Action Button (FAB ✍️) -->
-            <button class="samsung-fab-btn" id="fab-create-note" aria-label="Write note">
-              <span class="fab-icon">✍️</span>
+            <!-- Samsung Notes FAB (✍️) -->
+            <button class="samsung-fab-action" id="fab-create-note" aria-label="Write note">
+              <span class="fab-pen">✍️</span>
             </button>
           </div>
 
-          <!-- SAMSUNG 4-TAB BOTTOM NAVIGATION BAR -->
-          <nav class="samsung-bottom-navbar">
-            <button class="samsung-tab-item active" data-branch="Alarm">
-              <div class="tab-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="13" r="8"></circle>
-                  <polyline points="12 9 12 13 15 15"></polyline>
-                  <path d="M5 3L2 6"></path>
-                  <path d="M22 6L19 3"></path>
-                </svg>
-              </div>
-              <span class="tab-label">Alarm</span>
+          <!-- ======================================================== -->
+          <!-- ANDROID / SAMSUNG BOTTOM NAVIGATION BAR                  -->
+          <!-- ======================================================== -->
+          <nav class="android-bottom-bar">
+            <button class="android-tab-item active" data-nav="home">
+              <span class="tab-glyph">🏠</span>
+              <span class="tab-title">Home</span>
             </button>
 
-            <button class="samsung-tab-item" data-branch="Notes">
-              <div class="tab-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </div>
-              <span class="tab-label">Notes</span>
+            <button class="android-tab-item" data-nav="alarm">
+              <span class="tab-glyph">⏰</span>
+              <span class="tab-title">Alarms</span>
             </button>
 
-            <button class="samsung-tab-item" data-branch="WorldClock">
-              <div class="tab-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="2" y1="12" x2="22" y2="12"></line>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                </svg>
-              </div>
-              <span class="tab-label">World clock</span>
-            </button>
-
-            <button class="samsung-tab-item" data-branch="Timer">
-              <div class="tab-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10 2h4"></path>
-                  <path d="M12 14v4"></path>
-                  <path d="M4 2v20"></path>
-                  <path d="M20 2v20"></path>
-                  <path d="M4 6h16"></path>
-                  <path d="M4 18h16"></path>
-                </svg>
-              </div>
-              <span class="tab-label">Timer</span>
+            <button class="android-tab-item" data-nav="notes">
+              <span class="tab-glyph">📝</span>
+              <span class="tab-title">Notes</span>
             </button>
           </nav>
 
-          <!-- Samsung Home Pill Indicator -->
-          <div class="samsung-home-pill"></div>
+          <!-- Centered Android Home Pill Indicator -->
+          <div class="android-navigation-pill"></div>
 
-          <!-- ========================================== -->
-          <!-- MODAL 1: SAMSUNG "ADD ALARM" BOTTOM SHEET  -->
-          <!-- ========================================== -->
-          <div class="modal-backdrop" id="modal-backdrop">
-            <div class="bottom-sheet samsung-sheet" id="bottom-sheet">
-              <div class="sheet-handle-bar">
+          <!-- ======================================================== -->
+          <!-- MODAL 1: SAMSUNG "ADD ALARM" BOTTOM SHEET                -->
+          <!-- ======================================================== -->
+          <div class="modal-scrim" id="modal-backdrop">
+            <div class="samsung-bottom-modal" id="bottom-sheet">
+              <div class="modal-handle-bar">
                 <div class="handle"></div>
               </div>
 
-              <div class="samsung-modal-header">
-                <button id="btn-close-modal" class="samsung-header-text-btn cancel">Cancel</button>
-                <h2 class="samsung-modal-title">Add alarm</h2>
-                <button id="btn-save-alarm-header" class="samsung-header-text-btn save">Save</button>
+              <div class="modal-header-row">
+                <button id="btn-close-modal" class="modal-action-text cancel">Cancel</button>
+                <span class="modal-heading">Add alarm</span>
+                <button id="btn-save-alarm-header" class="modal-action-text save">Save</button>
               </div>
 
-              <div class="sheet-content samsung-sheet-content">
-                <div class="samsung-wheel-picker-card">
-                  <div class="picker-selection-highlight"></div>
-                  <div class="wheel-columns-wrapper">
-                    <div class="wheel-col hour-col">
-                      <div class="wheel-items" id="wheel-hours">
-                        <span class="wheel-item dim" id="h-prev">06</span>
-                        <span class="wheel-item active" id="val-hour">07</span>
-                        <span class="wheel-item dim" id="h-next">08</span>
+              <div class="modal-scroll-body">
+                <!-- 3-Wheel Time Picker -->
+                <div class="samsung-time-dial-card">
+                  <div class="dial-selection-band"></div>
+                  <div class="dial-columns">
+                    <div class="dial-column">
+                      <div class="dial-digits">
+                        <span class="digit-sub" id="h-prev">06</span>
+                        <span class="digit-main" id="val-hour">07</span>
+                        <span class="digit-sub" id="h-next">08</span>
                       </div>
-                      <div class="stepper-micro-btns">
-                        <button class="step-micro" id="btn-hour-up" aria-label="Hour up">▲</button>
-                        <button class="step-micro" id="btn-hour-down" aria-label="Hour down">▼</button>
-                      </div>
-                    </div>
-                    <span class="wheel-colon">:</span>
-                    <div class="wheel-col minute-col">
-                      <div class="wheel-items" id="wheel-minutes">
-                        <span class="wheel-item dim" id="m-prev">25</span>
-                        <span class="wheel-item active" id="val-min">30</span>
-                        <span class="wheel-item dim" id="m-next">35</span>
-                      </div>
-                      <div class="stepper-micro-btns">
-                        <button class="step-micro" id="btn-min-up" aria-label="Minute up">▲</button>
-                        <button class="step-micro" id="btn-min-down" aria-label="Minute down">▼</button>
+                      <div class="dial-steppers">
+                        <button class="stepper-micro" id="btn-hour-up" aria-label="Hour up">▲</button>
+                        <button class="stepper-micro" id="btn-hour-down" aria-label="Hour down">▼</button>
                       </div>
                     </div>
-                    <div class="wheel-col period-col">
-                      <div class="wheel-items">
-                        <button class="period-pill-btn active" id="btn-period-am">AM</button>
-                        <button class="period-pill-btn" id="btn-period-pm">PM</button>
+                    <span class="dial-colon">:</span>
+                    <div class="dial-column">
+                      <div class="dial-digits">
+                        <span class="digit-sub" id="m-prev">25</span>
+                        <span class="digit-main" id="val-min">30</span>
+                        <span class="digit-sub" id="m-next">35</span>
                       </div>
+                      <div class="dial-steppers">
+                        <button class="stepper-micro" id="btn-min-up" aria-label="Minute up">▲</button>
+                        <button class="stepper-micro" id="btn-min-down" aria-label="Minute down">▼</button>
+                      </div>
+                    </div>
+                    <div class="dial-column period-column">
+                      <button class="period-toggle-btn active" id="btn-period-am">AM</button>
+                      <button class="period-toggle-btn" id="btn-period-pm">PM</button>
                     </div>
                   </div>
                 </div>
 
-                <div class="samsung-form-card">
-                  <div class="form-card-title">Repeat</div>
-                  <div class="samsung-days-selector" id="modal-days-bar">
-                    <button class="samsung-day-btn" data-day="0">S</button>
-                    <button class="samsung-day-btn active" data-day="1">M</button>
-                    <button class="samsung-day-btn active" data-day="2">T</button>
-                    <button class="samsung-day-btn active" data-day="3">W</button>
-                    <button class="samsung-day-btn active" data-day="4">T</button>
-                    <button class="samsung-day-btn active" data-day="5">F</button>
-                    <button class="samsung-day-btn" data-day="6">S</button>
+                <!-- Repeat Days S M T W T F S -->
+                <div class="samsung-setting-group">
+                  <span class="setting-group-label">Repeat</span>
+                  <div class="days-circle-selector" id="modal-days-bar">
+                    <button class="day-circle" data-day="0">S</button>
+                    <button class="day-circle active" data-day="1">M</button>
+                    <button class="day-circle active" data-day="2">T</button>
+                    <button class="day-circle active" data-day="3">W</button>
+                    <button class="day-circle active" data-day="4">T</button>
+                    <button class="day-circle active" data-day="5">F</button>
+                    <button class="day-circle" data-day="6">S</button>
                   </div>
-                  <div class="samsung-repeat-summary" id="repeat-summary">Every weekday</div>
+                  <span class="setting-summary-text" id="repeat-summary">Every weekday</span>
                 </div>
 
-                <div class="samsung-form-card">
-                  <div class="form-card-title">Alarm name</div>
-                  <input type="text" id="input-alarm-name" class="samsung-text-input" placeholder="Morning Sunlight & Hydration" maxlength="40" />
+                <!-- Alarm Name -->
+                <div class="samsung-setting-group">
+                  <span class="setting-group-label">Alarm name</span>
+                  <input type="text" id="input-alarm-name" class="samsung-input-line" placeholder="Morning Sunlight & Hydration" maxlength="40" />
                 </div>
 
-                <div class="samsung-form-card">
-                  <div class="form-card-row">
+                <!-- Sound Tone -->
+                <div class="samsung-setting-group">
+                  <div class="setting-row-flex">
                     <div>
-                      <span class="card-row-title">Alarm sound</span>
-                      <span class="card-row-sub" id="selected-sound-name">Over the Horizon</span>
+                      <span class="setting-row-title">Alarm sound</span>
+                      <span class="setting-row-meta" id="selected-sound-name">Over the Horizon</span>
                     </div>
-                    <div class="custom-select-wrapper">
-                      <select id="select-alarm-tone" class="samsung-tone-select">
-                        <option value="Over the Horizon (Samsung Brand)">Over the Horizon (Samsung Brand)</option>
-                        <option value="Morning Flower">Morning Flower</option>
-                        <option value="Homecoming">Homecoming</option>
-                        <option value="Breeze">Breeze</option>
-                        <option value="Daybreak">Daybreak</option>
-                      </select>
-                    </div>
+                    <select id="select-alarm-tone" class="samsung-select-dropdown">
+                      <option value="Over the Horizon (Samsung Brand)">Over the Horizon (Samsung Brand)</option>
+                      <option value="Morning Flower">Morning Flower</option>
+                      <option value="Homecoming">Homecoming</option>
+                      <option value="Breeze">Breeze</option>
+                    </select>
                   </div>
                 </div>
 
-                <div class="samsung-form-card">
-                  <div class="form-card-row">
+                <!-- Vibration Toggle -->
+                <div class="samsung-setting-group">
+                  <div class="setting-row-flex">
                     <div>
-                      <span class="card-row-title">Vibration</span>
-                      <span class="card-row-sub">Basic call</span>
+                      <span class="setting-row-title">Vibration</span>
+                      <span class="setting-row-meta">Basic call</span>
                     </div>
-                    <label class="samsung-switch">
+                    <label class="samsung-toggle">
                       <input type="checkbox" id="modal-vibration-toggle" checked />
-                      <span class="samsung-switch-track"></span>
+                      <span class="toggle-track"></span>
                     </label>
                   </div>
                 </div>
 
-                <div class="samsung-bottom-save-row">
-                  <button id="btn-save-alarm" class="samsung-primary-btn">Save</button>
+                <div class="modal-primary-save-container">
+                  <button id="btn-save-alarm" class="samsung-primary-cta">Save</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- ========================================== -->
-          <!-- MODAL 2: SAMSUNG NOTE EDITOR FULL MODAL    -->
-          <!-- (Create, Edit, Save, Add Images in Notes)  -->
-          <!-- ========================================== -->
-          <div class="modal-backdrop" id="note-editor-backdrop">
-            <div class="samsung-note-editor-sheet" id="note-editor-sheet">
+          <!-- ======================================================== -->
+          <!-- MODAL 2: SAMSUNG NOTE EDITOR FULL MODAL                  -->
+          <!-- (Create, Edit, Save, Add Images in Notes)                -->
+          <!-- ======================================================== -->
+          <div class="modal-scrim" id="note-editor-backdrop">
+            <div class="samsung-editor-fullscreen" id="note-editor-sheet">
               
-              <!-- Editor Header -->
-              <div class="samsung-editor-header">
-                <button id="btn-cancel-note-editor" class="samsung-header-text-btn cancel">Cancel</button>
-                <h2 class="samsung-modal-title" id="editor-title-text">Edit note</h2>
-                <button id="btn-save-note" class="samsung-header-text-btn save">Save</button>
+              <div class="editor-action-bar">
+                <button id="btn-cancel-note-editor" class="modal-action-text cancel">Cancel</button>
+                <span class="modal-heading" id="editor-title-text">Edit note</span>
+                <button id="btn-save-note" class="modal-action-text save">Save</button>
               </div>
 
-              <!-- Editor Scroll Area -->
-              <div class="samsung-editor-body">
-                
-                <!-- Note Title Input -->
+              <div class="editor-scroll-area">
+                <!-- Title -->
                 <input 
                   type="text" 
                   id="editor-note-title" 
-                  class="editor-title-input" 
+                  class="note-title-entry" 
                   placeholder="Title" 
                   maxlength="60"
                 />
 
-                <!-- Category Chips Horizontal Row -->
-                <div class="editor-category-chips" id="editor-cat-chips">
-                  <button class="editor-cat-pill active" data-cat="Circadian Protocol">Circadian</button>
-                  <button class="editor-cat-pill" data-cat="Deep Work">Deep Work</button>
-                  <button class="editor-cat-pill" data-cat="Recovery & Sleep">Recovery</button>
-                  <button class="editor-cat-pill" data-cat="Nutrition & Biohacking">Nutrition</button>
-                  <button class="editor-cat-pill" data-cat="Quick Ideas">Ideas</button>
+                <!-- Category Chips -->
+                <div class="editor-chips-bar" id="editor-cat-chips">
+                  <button class="editor-cat-chip active" data-cat="Circadian Protocol">Circadian</button>
+                  <button class="editor-cat-chip" data-cat="Deep Work">Deep Work</button>
+                  <button class="editor-cat-chip" data-cat="Recovery & Sleep">Recovery</button>
+                  <button class="editor-cat-chip" data-cat="Nutrition & Biohacking">Nutrition</button>
+                  <button class="editor-cat-chip" data-cat="Quick Ideas">Ideas</button>
                 </div>
 
-                <!-- Media & Attachment Toolbar -->
-                <div class="editor-attachment-toolbar">
-                  <div class="toolbar-tools">
-                    <!-- Add Image File Input (Triggers Native File / Photo Picker) -->
-                    <label class="tool-btn" title="Add Image from Device or Gallery">
+                <!-- Media & Attachment Bar -->
+                <div class="editor-tool-row">
+                  <div class="tool-actions-cluster">
+                    <!-- Native file picker for actual device photos -->
+                    <label class="tool-action-btn" title="Add Image from Device">
                       <input type="file" id="note-image-file-input" accept="image/*" style="display: none;" />
                       <span class="tool-icon">📷</span>
                       <span>Add Image</span>
                     </label>
-                    
-                    <!-- Preset Sample Image Quick Add -->
-                    <button id="btn-add-sample-img" class="tool-btn" title="Attach Curated Protocol Photo">
+
+                    <!-- Quick sample protocol photo -->
+                    <button id="btn-add-sample-img" class="tool-action-btn" title="Add Protocol Photo">
                       <span class="tool-icon">🖼️</span>
                       <span>Sample Photo</span>
                     </button>
 
                     <!-- Pin Note Toggle -->
-                    <button id="btn-toggle-pin-note" class="tool-btn" title="Pin Note to Top">
+                    <button id="btn-toggle-pin-note" class="tool-action-btn" title="Pin Note">
                       <span class="tool-icon" id="editor-pin-icon">📍</span>
                       <span id="editor-pin-label">Pin note</span>
                     </button>
                   </div>
 
-                  <button id="btn-delete-active-note" class="tool-btn-danger" style="display: none;">
+                  <button id="btn-delete-active-note" class="tool-danger-btn" style="display: none;">
                     Delete
                   </button>
                 </div>
 
-                <!-- Attached Images Gallery Row -->
-                <div class="editor-images-container" id="editor-images-tray" style="display: none;">
-                  <span class="tray-label">Attached Images (<span id="editor-images-count">0</span>)</span>
-                  <div class="images-thumbnails-row" id="editor-thumbnails-row">
-                    <!-- Thumbnails with remove button rendered here -->
+                <!-- Attached Images Gallery Tray -->
+                <div class="attached-images-tray" id="editor-images-tray" style="display: none;">
+                  <span class="tray-title">Attached Images (<span id="editor-images-count">0</span>)</span>
+                  <div class="thumbnails-horizontal-row" id="editor-thumbnails-row">
+                    <!-- Thumbnails rendered here with delete buttons -->
                   </div>
                 </div>
 
-                <!-- Note Body Content Multi-line Textarea -->
+                <!-- Multiline Body -->
                 <textarea 
                   id="editor-note-content" 
-                  class="editor-content-textarea" 
+                  class="note-body-entry" 
                   placeholder="Write your circadian insights, protocols, supplements, or focus routines here..."
                 ></textarea>
-
               </div>
+
             </div>
           </div>
 
-        </div> <!-- /.screen-surface -->
-      </div> <!-- /.mobile-frame -->
-
-      <!-- CODE SPECIFICATION VIEWER ACCORDION -->
-      <section class="rn-code-drawer" id="code-viewer">
-        <div class="drawer-header">
-          <div class="code-title-group">
-            <span class="tag-samsung">Samsung One UI 6 / 7 Multi-Branch</span>
-            <h3>React Native & Flutter Component Code</h3>
-          </div>
-          <span class="files-count">Located in <code>react-native/</code> and <code>flutter/</code></span>
-        </div>
-        <div class="code-files-tabs">
-          <button class="tab-btn active" data-tab="note-screen">NotesScreen.tsx</button>
-          <button class="tab-btn" data-tab="note-editor">NoteEditorModal.tsx</button>
-          <button class="tab-btn" data-tab="note-card">NoteCard.tsx</button>
-          <button class="tab-btn" data-tab="alarm-screen">AlarmScreen.tsx</button>
-          <button class="tab-btn" data-tab="flutter-notes">notes_screen.dart (Flutter)</button>
-        </div>
-        <div class="code-box">
-          <pre><code id="code-display">/* Loading Samsung One UI Component... */</code></pre>
-        </div>
-      </section>
-
-    </main>
+        </div> <!-- /.android-screen-surface -->
+      </div> <!-- /.samsung-phone-shell -->
+    </div> <!-- /.android-app-container -->
 
     <script type="module" src="/src/main.js"></script>
   </body>

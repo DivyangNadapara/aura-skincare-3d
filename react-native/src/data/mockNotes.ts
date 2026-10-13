@@ -38,3 +38,4 @@ export const INITIAL_NOTES: NoteItem[] = [
     updatedAt: 'Oct 12, 10:45 PM',
   },
 ];
+

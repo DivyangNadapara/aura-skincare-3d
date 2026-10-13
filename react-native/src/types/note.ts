@@ -26,3 +26,4 @@ export const NOTE_CATEGORIES: NoteCategory[] = [
   'Nutrition & Biohacking',
   'Quick Ideas',
 ];
+

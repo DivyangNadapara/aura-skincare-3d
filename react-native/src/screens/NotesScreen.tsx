@@ -14,7 +14,11 @@ import { NoteItem, NoteCategory, NOTE_CATEGORIES } from '../types/note';
 import { NoteCard } from '../components/NoteCard';
 import { NoteEditorModal } from '../components/NoteEditorModal';
 
-export const NotesScreen: React.FC = () => {
+interface NotesScreenProps {
+  onBack?: () => void;
+}
+
+export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
   const [notes, setNotes] = useState<NoteItem[]>(INITIAL_NOTES);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -70,7 +74,14 @@ export const NotesScreen: React.FC = () => {
         
         {/* SAMSUNG TOP ACTION BAR */}
         <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
-          <View />
+          {onBack ? (
+            <TouchableOpacity onPress={onBack} activeOpacity={0.7} className="py-1 pr-3 flex-row items-center gap-1">
+              <Text className="text-xl text-white">←</Text>
+              <Text className="text-sm font-semibold text-[#8D92A4]">Home</Text>
+            </TouchableOpacity>
+          ) : (
+            <View />
+          )}
           <View className="flex-row items-center space-x-5 gap-5">
             <TouchableOpacity onPress={handleCreateNew} className="p-1">
               <Text className="text-2xl font-light text-white leading-none">+</Text>
@@ -188,3 +199,4 @@ export const NotesScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+

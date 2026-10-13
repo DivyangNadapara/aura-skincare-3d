@@ -1,7 +1,7 @@
 import './style.css';
 
 // ============================================================================
-// SAMSUNG AUDIO FEEDBACK (Tactile Galaxy Click Synthesizer)
+// SAMSUNG AUDIO FEEDBACK (Tactile Galaxy Synthesizer)
 // ============================================================================
 class SamsungAudioFeedback {
   constructor() {
@@ -11,9 +11,9 @@ class SamsungAudioFeedback {
 
   init() {
     if (!this.ctx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        this.ctx = new AudioContext();
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
       }
     }
   }
@@ -59,7 +59,7 @@ class SamsungAudioFeedback {
         osc.start(now);
         osc.stop(now + 0.18);
       }
-    } catch (e) {
+    } catch {
       // Audio autoplay policy fallback
     }
   }
@@ -83,42 +83,60 @@ function showToast(message) {
 }
 
 // ============================================================================
-// BRANCH STATE & MULTI-BRANCH NAVIGATION
+// APP NAVIGATION: HOME BRANCH SELECTION & ROUTING
 // ============================================================================
-let currentBranch = 'Alarm'; // 'Alarm' | 'Notes'
+let currentScreen = 'home'; // 'home' | 'alarm' | 'notes'
 
-function switchBranch(branchName) {
+function navigateToScreen(screenName) {
   audio.playClick('tap');
-  currentBranch = branchName;
+  currentScreen = screenName;
 
-  // Update top banner buttons
-  document.getElementById('branch-btn-alarm')?.classList.toggle('active', branchName === 'Alarm');
-  document.getElementById('branch-btn-notes')?.classList.toggle('active', branchName === 'Notes');
+  const screens = {
+    home: document.getElementById('screen-home'),
+    alarm: document.getElementById('screen-alarm'),
+    notes: document.getElementById('screen-notes'),
+  };
 
-  // Update views
-  const alarmView = document.getElementById('view-alarm-branch');
-  const notesView = document.getElementById('view-notes-branch');
-  if (alarmView && notesView) {
-    alarmView.classList.toggle('active', branchName === 'Alarm');
-    notesView.classList.toggle('active', branchName === 'Notes');
-  }
+  Object.entries(screens).forEach(([key, el]) => {
+    if (el) el.classList.toggle('active', key === screenName);
+  });
 
   // Update bottom navigation tabs
-  const tabs = document.querySelectorAll('.samsung-tab-item');
-  tabs.forEach(tab => {
-    tab.classList.toggle('active', tab.dataset.branch === branchName);
+  const bottomTabs = document.querySelectorAll('.android-tab-item');
+  bottomTabs.forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.nav === screenName);
   });
+
+  // Keep home badges synchronized
+  updateHomeBadges();
+}
+
+function updateHomeBadges() {
+  const activeAlarms = alarms.filter(a => a.isEnabled).length;
+  const alarmBadge = document.getElementById('home-alarm-badge');
+  const alarmNextTime = document.getElementById('home-alarm-next-time');
+  if (alarmBadge) {
+    alarmBadge.textContent = `${activeAlarms} Active`;
+  }
+  if (alarmNextTime) {
+    alarmNextTime.textContent = activeAlarms > 0 ? 'Next: 7:30 AM (in 4h 15m)' : 'All alarms paused';
+  }
+
+  const notesBadge = document.getElementById('home-notes-badge');
+  if (notesBadge) {
+    notesBadge.textContent = `${notes.length} ${notes.length === 1 ? 'Note' : 'Notes'}`;
+  }
 }
 
 // ============================================================================
-// BRANCH 1: ALARM LOGIC & DATA
+// BRANCH 1: ALARMS & RHYTHM LOGIC
 // ============================================================================
 const SAMSUNG_DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 let alarms = [
   {
     id: 'alarm-1',
-    time: '7:30',
+    time: '07:30',
     period: 'AM',
     hour: 7,
     minute: 30,
@@ -133,7 +151,7 @@ let alarms = [
   },
   {
     id: 'alarm-2',
-    time: '1:30',
+    time: '01:30',
     period: 'PM',
     hour: 1,
     minute: 30,
@@ -174,6 +192,7 @@ function updateHeaderSubtitle() {
   if (subtitleEl) {
     subtitleEl.textContent = activeCount === 0 ? 'All alarms off' : 'Next alarm in 4 hours 15 minutes';
   }
+  updateHomeBadges();
 }
 
 function renderSamsungAlarmCards() {
@@ -199,49 +218,65 @@ function renderSamsungAlarmCards() {
             <span class="samsung-time-period">${alarm.period}</span>
           </div>
           <div class="samsung-card-label">${alarm.label}</div>
-          <div class="samsung-days-row">${daysHtml}</div>
+          <div class="samsung-days-row">
+            ${daysHtml}
+          </div>
         </div>
 
-        <label class="samsung-switch" onclick="event.stopPropagation();">
-          <input type="checkbox" ${alarm.isEnabled ? 'checked' : ''} class="alarm-toggle-input" data-id="${alarm.id}">
+        <label class="samsung-switch" aria-label="Toggle alarm">
+          <input type="checkbox" class="alarm-toggle-input" ${alarm.isEnabled ? 'checked' : ''} />
           <span class="samsung-switch-track"></span>
         </label>
       </div>
 
+      <!-- Expandable Samsung Drawer -->
       <div class="samsung-card-drawer">
         <div class="samsung-drawer-inner">
           <div class="drawer-row">
-            <span class="drawer-row-label">Alarm sound</span>
+            <span class="drawer-row-label">Category</span>
+            <span class="drawer-row-val accent">${alarm.category}</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-row-label">Ringtone</span>
             <span class="drawer-row-val">${alarm.sound}</span>
           </div>
           <div class="drawer-row">
             <span class="drawer-row-label">Vibration</span>
-            <span class="drawer-row-val accent">${alarm.vibration}</span>
+            <span class="drawer-row-val">${alarm.vibration}</span>
           </div>
           <div class="drawer-row">
             <span class="drawer-row-label">Snooze</span>
             <span class="drawer-row-val">${alarm.snooze}</span>
           </div>
-          <button class="samsung-delete-btn" data-delete-id="${alarm.id}">Delete</button>
+          <button class="samsung-delete-btn" data-delete-id="${alarm.id}">Delete Alarm</button>
         </div>
       </div>
     `;
 
-    card.querySelector('.samsung-card-inner')?.addEventListener('click', () => {
+    // Toggle switch interaction
+    const toggleInput = card.querySelector('.alarm-toggle-input');
+    toggleInput?.addEventListener('change', (e) => {
+      e.stopPropagation();
+      audio.playClick('toggle');
+      alarm.isEnabled = toggleInput.checked;
+      card.classList.toggle('is-active', alarm.isEnabled);
+      card.classList.toggle('is-inactive', !alarm.isEnabled);
+      updateHeaderSubtitle();
+      showToast(alarm.isEnabled ? `Alarm set for ${alarm.time} ${alarm.period}` : 'Alarm paused');
+    });
+
+    // Expand / collapse drawer
+    const cardInner = card.querySelector('.samsung-card-inner');
+    cardInner?.addEventListener('click', (e) => {
+      if (e.target.closest('.samsung-switch')) return;
       audio.playClick('tap');
       alarm.isExpanded = !alarm.isExpanded;
-      renderSamsungAlarmCards();
+      card.classList.toggle('is-expanded', alarm.isExpanded);
     });
 
-    card.querySelector('.alarm-toggle-input')?.addEventListener('change', (e) => {
-      audio.playClick('toggle');
-      alarm.isEnabled = e.target.checked;
-      renderSamsungAlarmCards();
-      updateHeaderSubtitle();
-      showToast(`${alarm.label} is now ${alarm.isEnabled ? 'On' : 'Off'}`);
-    });
-
-    card.querySelector('.samsung-delete-btn')?.addEventListener('click', (e) => {
+    // Delete alarm button
+    const deleteBtn = card.querySelector('.samsung-delete-btn');
+    deleteBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
       audio.playClick('tap');
       alarms = alarms.filter(a => a.id !== alarm.id);
@@ -293,6 +328,16 @@ function updateModalWheelDisplay() {
   }
 }
 
+function updateModalRepeatSummary() {
+  const summary = document.getElementById('repeat-summary');
+  if (!summary) return;
+  if (newAlarmDays.length === 7) summary.textContent = 'Every day';
+  else if (newAlarmDays.length === 5 && !newAlarmDays.includes(0) && !newAlarmDays.includes(6)) summary.textContent = 'Every weekday';
+  else if (newAlarmDays.length === 2 && newAlarmDays.includes(0) && newAlarmDays.includes(6)) summary.textContent = 'Weekends';
+  else if (newAlarmDays.length === 0) summary.textContent = 'Never';
+  else summary.textContent = `${newAlarmDays.length} days selected`;
+}
+
 function saveAlarmAction() {
   const nameInput = document.getElementById('input-alarm-name');
   const toneSelect = document.getElementById('select-alarm-tone');
@@ -304,7 +349,7 @@ function saveAlarmAction() {
 
   const newAlarm = {
     id: `alarm-${Date.now()}`,
-    time: `${newAlarmHour}:${newAlarmMin.toString().padStart(2, '0')}`,
+    time: `${newAlarmHour.toString().padStart(2, '0')}:${newAlarmMin.toString().padStart(2, '0')}`,
     period: newAlarmPeriod,
     hour: newAlarmHour,
     minute: newAlarmMin,
@@ -323,13 +368,13 @@ function saveAlarmAction() {
   renderSamsungAlarmCards();
   updateHeaderSubtitle();
   closeAlarmModal();
-  showToast(`Alarm saved: ${newAlarm.time} ${newAlarm.period}`);
+  showToast(`Alarm saved: ${newAlarm.time} ${newAlarmPeriod}`);
 
   if (nameInput) nameInput.value = '';
 }
 
 // ============================================================================
-// BRANCH 2: SAMSUNG NOTES LOGIC & DATA (Create, Edit, Save, Add Images)
+// BRANCH 2: NOTES & PROTOCOLS LOGIC (Create, Edit, Save, Add Images)
 // ============================================================================
 let notes = [
   {
@@ -414,7 +459,7 @@ function renderSamsungNotesCards() {
     let imagesHtml = '';
     if (note.images && note.images.length > 0) {
       const thumbs = note.images.slice(0, 2).map(imgUrl => `
-        <img src="${imgUrl}" alt="Attachment" class="note-thumb-preview" />
+        <img src="${imgUrl}" alt="Attachment preview" class="note-thumb-preview" />
       `).join('');
       imagesHtml = `<div class="note-images-gallery">${thumbs}</div>`;
     }
@@ -448,6 +493,8 @@ function renderSamsungNotesCards() {
 
     container.appendChild(card);
   });
+
+  updateHomeBadges();
 }
 
 // Open Note Editor (Create or Edit)
@@ -484,10 +531,10 @@ function openNoteEditor(noteToEdit = null) {
   // Update pin button state
   updateEditorPinState();
 
-  // Update category pills state
-  const catPills = document.querySelectorAll('.editor-cat-pill');
-  catPills.forEach(p => {
-    p.classList.toggle('active', p.dataset.cat === activeEditingCategory);
+  // Update category chips state
+  const catChips = document.querySelectorAll('#editor-cat-chips .editor-cat-chip');
+  catChips.forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.cat === activeEditingCategory);
   });
 
   // Render attached thumbnails
@@ -528,13 +575,13 @@ function renderEditorThumbnails() {
 
   activeEditingImages.forEach((imgUrl, idx) => {
     const thumbBox = document.createElement('div');
-    thumbBox.className = 'editor-thumb-box';
+    thumbBox.className = 'thumb-card-item';
     thumbBox.innerHTML = `
       <img src="${imgUrl}" alt="Attachment preview" />
-      <button class="btn-remove-thumb" data-idx="${idx}" title="Remove image">✕</button>
+      <button class="remove-thumb-x" data-idx="${idx}" title="Remove image">✕</button>
     `;
 
-    thumbBox.querySelector('.btn-remove-thumb')?.addEventListener('click', (e) => {
+    thumbBox.querySelector('.remove-thumb-x')?.addEventListener('click', (e) => {
       e.stopPropagation();
       audio.playClick('tap');
       activeEditingImages.splice(idx, 1);
@@ -588,34 +635,43 @@ function saveNoteAction() {
 // EVENT LISTENERS SETUP
 // ============================================================================
 function setupEventListeners() {
-  // Branch Switching Buttons in Top Banner
-  document.getElementById('branch-btn-alarm')?.addEventListener('click', () => switchBranch('Alarm'));
-  document.getElementById('branch-btn-notes')?.addEventListener('click', () => switchBranch('Notes'));
+  // 1. HOME SCREEN BRANCH LAUNCH CARDS
+  document.getElementById('card-launch-alarm')?.addEventListener('click', () => {
+    navigateToScreen('alarm');
+  });
 
-  // Samsung Bottom Tabs
-  const bottomTabs = document.querySelectorAll('.samsung-tab-item');
+  document.getElementById('card-launch-notes')?.addEventListener('click', () => {
+    navigateToScreen('notes');
+  });
+
+  // 2. BACK TO HOME BUTTONS
+  document.getElementById('btn-alarm-back-home')?.addEventListener('click', () => {
+    navigateToScreen('home');
+  });
+
+  document.getElementById('btn-notes-back-home')?.addEventListener('click', () => {
+    navigateToScreen('home');
+  });
+
+  // 3. ANDROID BOTTOM NAVIGATION TABS
+  const bottomTabs = document.querySelectorAll('.android-tab-item');
   bottomTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      const targetBranch = tab.dataset.branch;
-      if (targetBranch === 'Alarm' || targetBranch === 'Notes') {
-        switchBranch(targetBranch);
-      } else {
-        audio.playClick('tap');
-        bottomTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        showToast(`${tab.querySelector('.tab-label')?.textContent} selected`);
+      const navTarget = tab.dataset.nav;
+      if (navTarget) {
+        navigateToScreen(navTarget);
       }
     });
   });
 
-  // ALARM MODAL EVENTS
+  // 4. ALARM MODAL ACTIONS
   document.getElementById('btn-open-create-modal')?.addEventListener('click', openAlarmModal);
   document.getElementById('btn-close-modal')?.addEventListener('click', closeAlarmModal);
   document.getElementById('modal-backdrop')?.addEventListener('click', (e) => {
     if (e.target === document.getElementById('modal-backdrop')) closeAlarmModal();
   });
 
-  // Alarm steppers
+  // 3-Wheel Time Picker Controls
   document.getElementById('btn-hour-up')?.addEventListener('click', () => {
     audio.playClick('tap');
     newAlarmHour = newAlarmHour >= 12 ? 1 : newAlarmHour + 1;
@@ -649,8 +705,8 @@ function setupEventListeners() {
     updateModalWheelDisplay();
   });
 
-  // Alarm repeat days
-  document.querySelectorAll('.samsung-day-btn').forEach(btn => {
+  // Alarm repeat day circles (S M T W T F S)
+  document.querySelectorAll('#modal-days-bar .day-circle').forEach(btn => {
     btn.addEventListener('click', () => {
       audio.playClick('tap');
       const dayId = parseInt(btn.dataset.day, 10);
@@ -662,34 +718,26 @@ function setupEventListeners() {
         newAlarmDays.sort((a, b) => a - b);
         btn.classList.add('active');
       }
-
-      const summary = document.getElementById('repeat-summary');
-      if (summary) {
-        if (newAlarmDays.length === 7) summary.textContent = 'Every day';
-        else if (newAlarmDays.length === 5 && !newAlarmDays.includes(0) && !newAlarmDays.includes(6)) summary.textContent = 'Every weekday';
-        else if (newAlarmDays.length === 2 && newAlarmDays.includes(0) && newAlarmDays.includes(6)) summary.textContent = 'Weekends';
-        else if (newAlarmDays.length === 0) summary.textContent = 'Never';
-        else summary.textContent = `${newAlarmDays.length} days selected`;
-      }
+      updateModalRepeatSummary();
     });
   });
 
   document.getElementById('btn-save-alarm')?.addEventListener('click', saveAlarmAction);
   document.getElementById('btn-save-alarm-header')?.addEventListener('click', saveAlarmAction);
 
-  // NOTES BRANCH EVENTS
+  // 5. NOTES BRANCH ACTIONS
   document.getElementById('btn-open-new-note')?.addEventListener('click', () => openNoteEditor(null));
   document.getElementById('fab-create-note')?.addEventListener('click', () => openNoteEditor(null));
   document.getElementById('btn-cancel-note-editor')?.addEventListener('click', closeNoteEditor);
   document.getElementById('btn-save-note')?.addEventListener('click', saveNoteAction);
 
   // Note editor category chips
-  document.querySelectorAll('.editor-cat-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
+  document.querySelectorAll('#editor-cat-chips .editor-cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
       audio.playClick('tap');
-      document.querySelectorAll('.editor-cat-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      activeEditingCategory = pill.dataset.cat;
+      document.querySelectorAll('#editor-cat-chips .editor-cat-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeEditingCategory = chip.dataset.cat;
     });
   });
 
@@ -715,7 +763,7 @@ function setupEventListeners() {
     showToast('Photo attached to note');
   });
 
-  // Real File Upload to Note (Native File Picker)
+  // Native File Picker for device photos
   const fileInput = document.getElementById('note-image-file-input');
   if (fileInput) {
     fileInput.addEventListener('change', (e) => {
@@ -767,197 +815,19 @@ function setupEventListeners() {
     });
   }
 
-  // Notes Filter Chips
-  document.querySelectorAll('.notes-chip').forEach(chip => {
+  // Notes Category Filter Chips
+  document.querySelectorAll('#notes-filter-chips .category-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       audio.playClick('tap');
-      document.querySelectorAll('.notes-chip').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('#notes-filter-chips .category-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       notesFilterCategory = chip.dataset.cat;
       renderSamsungNotesCards();
     });
   });
-
-  // Color theme switcher
-  document.getElementById('toggle-color-theme')?.addEventListener('click', () => {
-    audio.playClick('tap');
-    document.body.classList.toggle('theme-samsung-orange');
-    const isOrange = document.body.classList.contains('theme-samsung-orange');
-    document.getElementById('theme-color-label').textContent = isOrange ? 'Samsung Orange' : 'Samsung Blue';
-  });
-
-  // Frame mode switcher
-  document.getElementById('toggle-frame-mode')?.addEventListener('click', () => {
-    document.body.classList.toggle('fullscreen-mode');
-    const isFullscreen = document.body.classList.contains('fullscreen-mode');
-    document.getElementById('frame-mode-text').textContent = isFullscreen ? 'Samsung Frame View' : 'Fit Screen View';
-    document.getElementById('frame-mode-icon').textContent = isFullscreen ? '💻' : '📱';
-    audio.playClick('tap');
-  });
-
-  // Audio switcher
-  document.getElementById('audio-feedback-toggle')?.addEventListener('click', () => {
-    audio.enabled = !audio.enabled;
-    document.getElementById('audio-feedback-toggle')?.classList.toggle('active', audio.enabled);
-    document.getElementById('audio-status-text').textContent = audio.enabled ? 'Galaxy Sound ON' : 'Galaxy Sound OFF';
-    audio.playClick('tap');
-  });
 }
 
-// Code Tabs Viewer
-const CODE_SNIPPETS = {
-  'note-screen': `// react-native/src/screens/NotesScreen.tsx (Samsung One UI Notes)
-import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, TextInput } from 'react-native';
-import { INITIAL_NOTES } from '../data/mockNotes';
-import { NoteItem } from '../types/note';
-import { NoteCard } from '../components/NoteCard';
-import { NoteEditorModal } from '../components/NoteEditorModal';
-
-export const NotesScreen: React.FC = () => {
-  const [notes, setNotes] = useState<NoteItem[]>(INITIAL_NOTES);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedNote, setSelectedNote] = useState<NoteItem | null>(null);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-
-  const handleSaveNote = (savedNote: NoteItem) => {
-    setNotes(prev => {
-      const exists = prev.some(n => n.id === savedNote.id);
-      return exists ? prev.map(n => n.id === savedNote.id ? savedNote : n) : [savedNote, ...prev];
-    });
-  };
-
-  return (
-    <SafeAreaView className="flex-1 bg-[#000000]">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
-      <View className="flex-1">
-        {/* Header */}
-        <View className="px-6 pt-3 pb-3">
-          <Text className="text-3xl font-bold text-white font-sans">Notes</Text>
-          <Text className="text-sm text-[#8D92A4] mt-1">{notes.length} notes</Text>
-        </View>
-
-        {/* Notes List */}
-        <ScrollView className="flex-1 px-4">
-          {notes.map(note => (
-            <NoteCard key={note.id} note={note} onPress={() => { setSelectedNote(note); setIsEditorOpen(true); }} />
-          ))}
-        </ScrollView>
-
-        {/* FAB ✍️ */}
-        <TouchableOpacity onPress={() => { setSelectedNote(null); setIsEditorOpen(true); }} className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-[#2C7BFE] items-center justify-center shadow-xl">
-          <Text className="text-2xl text-white">✍️</Text>
-        </TouchableOpacity>
-      </View>
-      <NoteEditorModal visible={isEditorOpen} initialNote={selectedNote} onClose={() => setIsEditorOpen(false)} onSave={handleSaveNote} />
-    </SafeAreaView>
-  );
-};`,
-
-  'note-editor': `// react-native/src/components/NoteEditorModal.tsx (Create, Edit, Save, Add Images)
-import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
-import { NoteItem } from '../types/note';
-
-export const NoteEditorModal: React.FC<{ visible: boolean; initialNote: NoteItem | null; onClose: () => void; onSave: (n: NoteItem) => void }> = ({ visible, initialNote, onClose, onSave }) => {
-  const [title, setTitle] = useState(initialNote?.title || '');
-  const [content, setContent] = useState(initialNote?.content || '');
-  const [images, setImages] = useState<string[]>(initialNote?.images || []);
-
-  const handleAddImage = (uri: string) => {
-    setImages([...images, uri]);
-  };
-
-  const handleSave = () => {
-    onSave({
-      id: initialNote?.id || \`note-\${Date.now()}\`,
-      title: title || 'Untitled Note',
-      content,
-      category: 'Circadian Protocol',
-      isPinned: false,
-      images,
-      createdAt: 'Today',
-      updatedAt: 'Just now',
-    });
-    onClose();
-  };
-
-  return (
-    <Modal visible={visible} animationType="slide">
-      <View className="flex-1 bg-[#090B10]">
-        <View className="flex-row justify-between px-5 pt-12 pb-4 bg-[#0E1118]">
-          <TouchableOpacity onPress={onClose}><Text className="text-base text-[#8D92A4]">Cancel</Text></TouchableOpacity>
-          <Text className="text-base font-bold text-white">{initialNote ? 'Edit note' : 'New note'}</Text>
-          <TouchableOpacity onPress={handleSave}><Text className="text-base text-[#2C7BFE] font-bold">Save</Text></TouchableOpacity>
-        </View>
-        <ScrollView className="flex-1 px-5 pt-4">
-          <TextInput value={title} onChangeText={setTitle} placeholder="Title" placeholderTextColor="#5C6274" className="text-2xl font-bold text-white mb-3" />
-          <TouchableOpacity onPress={() => handleAddImage('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600')} className="flex-row items-center gap-1.5 py-2 mb-3">
-            <Text className="text-base">📷</Text><Text className="text-xs font-semibold text-[#2C7BFE]">Add Image</Text>
-          </TouchableOpacity>
-          <TextInput value={content} onChangeText={setContent} placeholder="Write note..." placeholderTextColor="#535868" multiline className="text-sm text-[#D5DAE8] min-h-[300px]" />
-        </ScrollView>
-      </View>
-    </Modal>
-  );
-};`,
-
-  'note-card': `// react-native/src/components/NoteCard.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { NoteItem } from '../types/note';
-
-export const NoteCard: React.FC<{ note: NoteItem; onPress: (note: NoteItem) => void }> = ({ note, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(note)} className="bg-[#1C1F2B] border border-[#272B3B] rounded-[24px] p-5 mb-3.5">
-    <View className="flex-row justify-between mb-2">
-      <Text className="text-xs text-[#8E94A7] font-semibold">{note.category}</Text>
-      {note.isPinned && <Text className="text-xs text-[#2C7BFE]">📌 Pinned</Text>}
-    </View>
-    <Text className="text-lg font-bold text-white mb-2">{note.title}</Text>
-    {note.images?.length > 0 && (
-      <View className="flex-row gap-2 mb-3">
-        {note.images.map((img, i) => (
-          <Image key={i} source={{ uri: img }} className="h-28 flex-1 rounded-2xl" />
-        ))}
-      </View>
-    )}
-    <Text numberOfLines={3} className="text-xs text-[#9DA3B5] leading-relaxed mb-2">{note.content}</Text>
-    <Text className="text-[11px] text-[#646A7E]">{note.updatedAt}</Text>
-  </TouchableOpacity>
-);`,
-
-  'alarm-screen': `// react-native/src/screens/AlarmScreen.tsx (Samsung One UI Alarm)
-// Alarm branch screen with One UI Header, cards, and 3-wheel time picker...`,
-
-  'flutter-notes': `// flutter/lib/notes_screen.dart (Flutter Samsung Notes Screen)
-import 'package:flutter/material.dart';
-
-class SamsungNotesScreen extends StatefulWidget { ... }`,
-};
-
-function setupCodeTabs() {
-  const codeDisplay = document.getElementById('code-display');
-  const tabs = document.querySelectorAll('.tab-btn');
-
-  function renderTab(tabKey) {
-    if (codeDisplay && CODE_SNIPPETS[tabKey]) {
-      codeDisplay.textContent = CODE_SNIPPETS[tabKey];
-    }
-  }
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      audio.playClick('tap');
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      renderTab(tab.dataset.tab);
-    });
-  });
-
-  renderTab('note-screen');
-}
-
-// Clock
+// Clock Display in Samsung Status Bar
 function updateClock() {
   const clock = document.getElementById('status-clock');
   if (clock) {
@@ -968,23 +838,28 @@ function updateClock() {
   }
 }
 
-// Init
+// Init Application
 document.addEventListener('DOMContentLoaded', () => {
   renderSamsungAlarmCards();
   renderSamsungNotesCards();
   updateHeaderSubtitle();
   setupEventListeners();
-  setupCodeTabs();
   updateClock();
   setInterval(updateClock, 30000);
 
-  // URL Params for test states
+  // Check URL parameters for direct branch navigation (e.g. testing)
   const params = new URLSearchParams(window.location.search);
-  if (params.get('branch') === 'notes') {
-    switchBranch('Notes');
+  const requestedScreen = params.get('screen') || params.get('branch');
+  if (requestedScreen === 'alarm') {
+    navigateToScreen('alarm');
+  } else if (requestedScreen === 'notes') {
+    navigateToScreen('notes');
+  } else {
+    navigateToScreen('home');
   }
+
   if (params.get('openNoteEditor') === 'true') {
-    switchBranch('Notes');
-    openNoteEditor(notes[0]); // open first note in edit mode
+    navigateToScreen('notes');
+    openNoteEditor(notes[0]);
   }
 });

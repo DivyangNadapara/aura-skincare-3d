@@ -193,3 +193,4 @@ class _SamsungNotesScreenState extends State<SamsungNotesScreen> {
     // Note editor modal for creating / editing / attaching images
   }
 }
+

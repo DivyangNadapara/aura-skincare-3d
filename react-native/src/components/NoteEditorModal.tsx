@@ -283,3 +283,4 @@ export const NoteEditorModal: React.FC<NoteEditorModalProps> = ({
     </Modal>
   );
 };
+

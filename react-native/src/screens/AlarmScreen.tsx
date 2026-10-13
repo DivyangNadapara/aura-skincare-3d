@@ -14,7 +14,11 @@ import { AlarmCard } from '../components/AlarmCard';
 import { CreateAlarmModal } from '../components/CreateAlarmModal';
 import { SamsungBottomNav } from '../components/BottomNav';
 
-export const AlarmScreen: React.FC = () => {
+interface AlarmScreenProps {
+  onBack?: () => void;
+}
+
+export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
   const [alarms, setAlarms] = useState<AlarmItem[]>(INITIAL_ALARMS);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -55,7 +59,14 @@ export const AlarmScreen: React.FC = () => {
         
         {/* SAMSUNG TOP ACTION BAR */}
         <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
-          <View />
+          {onBack ? (
+            <TouchableOpacity onPress={onBack} activeOpacity={0.7} className="py-1 pr-3 flex-row items-center gap-1">
+              <Text className="text-xl text-white">←</Text>
+              <Text className="text-sm font-semibold text-[#8D92A4]">Home</Text>
+            </TouchableOpacity>
+          ) : (
+            <View />
+          )}
           
           <View className="flex-row items-center space-x-5 gap-5">
             {/* Search Icon */}
