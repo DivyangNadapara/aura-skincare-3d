@@ -9,15 +9,17 @@ import {
 } from 'react-native';
 
 interface HomeScreenProps {
-  onSelectBranch: (branch: 'alarm' | 'notes') => void;
+  onSelectBranch: (branch: 'alarm' | 'notes' | 'expenses') => void;
   activeAlarmsCount?: number;
   notesCount?: number;
+  balanceAmount?: number;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectBranch,
   activeAlarmsCount = 2,
   notesCount = 3,
+  balanceAmount = 1180.71,
 }) => {
   return (
     <SafeAreaView className="flex-1 bg-[#000000]">
@@ -114,6 +116,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </View>
           </TouchableOpacity>
 
+          {/* BRANCH 3: EXPENSES & INCOME (NEW) */}
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => onSelectBranch('expenses')}
+            className="bg-[#1C1F2B] border border-[#272B3B] active:border-[#2C7BFE] rounded-[28px] p-6 mb-4 shadow-lg shadow-black/60"
+          >
+            <View className="flex-row items-center justify-between mb-4">
+              <View className="w-12 h-12 rounded-2xl bg-[#30D158]/15 border border-[#30D158]/30 items-center justify-center">
+                <Text className="text-2xl">💳</Text>
+              </View>
+
+              <View className="px-3 py-1 rounded-full bg-[#30D158]/20 border border-[#30D158]/40">
+                <Text className="text-[11px] font-bold text-[#30D158]">
+                  +${balanceAmount.toFixed(2)} Balance
+                </Text>
+              </View>
+            </View>
+
+            <Text className="text-xl font-bold text-white mb-1.5 font-sans">
+              Expenses & Cashflow
+            </Text>
+            <Text className="text-xs text-[#9DA3B5] leading-relaxed mb-4">
+              Log daily income & spending with instant math, savings rate calculations, and smart category breakdown analytics.
+            </Text>
+
+            <View className="flex-row items-center justify-between pt-3 border-t border-[#252938]">
+              <Text className="text-xs text-[#30D158] font-bold">
+                Financial analytics ready
+              </Text>
+              <Text className="text-base text-white font-bold">
+                →
+              </Text>
+            </View>
+          </TouchableOpacity>
+
         </View>
 
         {/* QUICK STATUS CARD */}
@@ -125,7 +162,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </Text>
           </View>
           <Text className="text-xs text-[#8D92A4] leading-relaxed">
-            Your daily branches work symbiotically: use alarms to trigger photobiology protocols, and notes to log real-time recovery metrics.
+            Your daily branches work symbiotically: use alarms to anchor your schedule, notes to log bio-data, and expenses to track your financial health.
           </Text>
         </View>
 
@@ -133,4 +170,3 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     </SafeAreaView>
   );
 };
-

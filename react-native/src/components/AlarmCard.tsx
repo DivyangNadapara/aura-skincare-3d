@@ -3,9 +3,6 @@ import { View, Text, TouchableOpacity, Switch, LayoutAnimation, Platform, UIMana
 import { AlarmItem } from '../types/alarm';
 import { DayPills } from './DayPills';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface AlarmCardProps {
   alarm: AlarmItem;

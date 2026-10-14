@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 
-export type MainBranchTab = 'home' | 'alarm' | 'notes';
+export type MainBranchTab = 'home' | 'alarm' | 'notes' | 'expenses';
 
 interface BottomNavProps {
   activeTab: MainBranchTab;
@@ -16,6 +16,7 @@ export const SamsungBottomNav: React.FC<BottomNavProps> = ({
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'alarm', label: 'Alarms', icon: '⏰' },
     { id: 'notes', label: 'Notes', icon: '📝' },
+    { id: 'expenses', label: 'Expenses', icon: '💳' },
   ];
 
   return (
