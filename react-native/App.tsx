@@ -5,6 +5,7 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { AlarmScreen } from './src/screens/AlarmScreen';
 import { NotesScreen } from './src/screens/NotesScreen';
 import { ExpensesScreen } from './src/screens/ExpensesScreen';
+import { VaultScreen } from './src/screens/VaultScreen';
 import { SamsungBottomNav, MainBranchTab } from './src/components/BottomNav';
 
 export default function App() {
@@ -25,8 +26,10 @@ export default function App() {
           <AlarmScreen onBack={() => setCurrentScreen('home')} />
         ) : currentScreen === 'notes' ? (
           <NotesScreen onBack={() => setCurrentScreen('home')} />
-        ) : (
+        ) : currentScreen === 'expenses' ? (
           <ExpensesScreen onBack={() => setCurrentScreen('home')} />
+        ) : (
+          <VaultScreen onBack={() => setCurrentScreen('home')} />
         )}
       </View>
 

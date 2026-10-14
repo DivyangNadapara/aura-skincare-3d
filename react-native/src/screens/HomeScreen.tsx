@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 
 interface HomeScreenProps {
-  onSelectBranch: (branch: 'alarm' | 'notes' | 'expenses') => void;
+  onSelectBranch: (branch: 'alarm' | 'notes' | 'expenses' | 'vault') => void;
   activeAlarmsCount?: number;
   notesCount?: number;
   balanceAmount?: number;
+  vaultCount?: number;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -20,6 +21,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   activeAlarmsCount = 2,
   notesCount = 3,
   balanceAmount = 1180.71,
+  vaultCount = 4,
 }) => {
   return (
     <SafeAreaView className="flex-1 bg-[#000000]">
@@ -144,6 +146,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <View className="flex-row items-center justify-between pt-3 border-t border-[#252938]">
               <Text className="text-xs text-[#30D158] font-bold">
                 Financial analytics ready
+              </Text>
+              <Text className="text-base text-white font-bold">
+                →
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* BRANCH 4: SECRET MEDIA & FILE VAULT (NEW) */}
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => onSelectBranch('vault')}
+            className="bg-[#1C1F2B] border border-[#272B3B] active:border-[#2C7BFE] rounded-[28px] p-6 mb-4 shadow-lg shadow-black/60"
+          >
+            <View className="flex-row items-center justify-between mb-4">
+              <View className="w-12 h-12 rounded-2xl bg-[#FF9F0A]/15 border border-[#FF9F0A]/30 items-center justify-center">
+                <Text className="text-2xl">🔐</Text>
+              </View>
+
+              <View className="px-3 py-1 rounded-full bg-[#FF9F0A]/20 border border-[#FF9F0A]/40">
+                <Text className="text-[11px] font-bold text-[#FF9F0A]">
+                  🔒 PIN Protected
+                </Text>
+              </View>
+            </View>
+
+            <Text className="text-xl font-bold text-white mb-1.5 font-sans">
+              Secret Media & File Vault
+            </Text>
+            <Text className="text-xs text-[#9DA3B5] leading-relaxed mb-4">
+              Hide private photos, videos, and confidential documents inside an encrypted sandbox. Easily restore files back to your device's photo gallery anytime.
+            </Text>
+
+            <View className="flex-row items-center justify-between pt-3 border-t border-[#252938]">
+              <Text className="text-xs text-[#FF9F0A] font-bold">
+                Export & Gallery Restore ready
               </Text>
               <Text className="text-base text-white font-bold">
                 →

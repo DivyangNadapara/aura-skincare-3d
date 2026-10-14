@@ -173,3 +173,4 @@ export const ExpenseCalendar: React.FC<ExpenseCalendarProps> = ({
     </View>
   );
 };
+

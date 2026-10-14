@@ -16,6 +16,23 @@
     },
     "web": {
       "bundler": "metro"
-    }
+    },
+    "plugins": [
+      "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to save private vault photos and videos back to your gallery.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to restore photos back to your gallery."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access media to hide files into your private vault.",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to take secret photos directly into your private vault."
+        }
+      ]
+    ]
   }
 }
