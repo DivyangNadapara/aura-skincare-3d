@@ -44,9 +44,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
   }, [alarms]);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050510]">
-      <StatusBar barStyle="light-content" backgroundColor="#050510" />
-
+    <View className="flex-1 bg-[#050510]">
       {/* ── AMBIENT GRADIENT MESH SIMULATION ── */}
       <View className="absolute top-0 left-0 right-0 h-96 bg-[#08081A] opacity-60" />
       <View className="absolute top-16 right-[-50px] w-64 h-64 rounded-full bg-[#6C5CE7] opacity-[0.05]" />
@@ -54,7 +52,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
 
       <View className="flex-1">
         {/* ── TOP ACTION BAR ── */}
-        <View className="flex-row items-center justify-between px-6 pt-3 pb-2 z-10">
+        <View className="flex-row items-center justify-between px-5 pt-2 pb-2 z-10">
           {onBack ? (
             <TouchableOpacity
               onPress={onBack}
@@ -131,7 +129,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={() => setIsModalOpen(true)}
-          className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-[#6C5CE7] items-center justify-center shadow-2xl shadow-[#6C5CE7]/50"
+          className="absolute bottom-4 right-4 w-14 h-14 rounded-full bg-[#6C5CE7] items-center justify-center shadow-2xl shadow-[#6C5CE7]/50"
         >
           <Text className="text-2xl text-white font-light">+</Text>
         </TouchableOpacity>
@@ -143,6 +141,6 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveNewAlarm}
       />
-    </SafeAreaView>
+    </View>
   );
 };

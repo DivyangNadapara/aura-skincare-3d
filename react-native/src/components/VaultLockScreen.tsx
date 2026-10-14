@@ -58,9 +58,7 @@ export const VaultLockScreen: React.FC<VaultLockScreenProps> = ({
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050510]">
-      <StatusBar barStyle="light-content" backgroundColor="#050510" />
-
+    <View className="flex-1 bg-[#050510]">
       {/* ── LAYERED GRADIENT BACKGROUND ── */}
       <View className="absolute inset-0 bg-[#050510]">
         {/* Radial gradient simulation — concentric layers */}
@@ -243,6 +241,6 @@ export const VaultLockScreen: React.FC<VaultLockScreenProps> = ({
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };

@@ -74,9 +74,7 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050510]">
-      <StatusBar barStyle="light-content" backgroundColor="#050510" />
-
+    <View className="flex-1 bg-[#050510]">
       {/* ── AMBIENT GRADIENT MESH SIMULATION ── */}
       <View className="absolute top-0 left-0 right-0 h-96 bg-[#08081A] opacity-60" />
       <View className="absolute top-16 right-[-50px] w-64 h-64 rounded-full bg-[#FD79A8] opacity-[0.03]" />
@@ -84,7 +82,7 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
 
       <View className="flex-1">
         {/* ── TOP ACTION BAR ── */}
-        <View className="flex-row items-center justify-between px-6 pt-3 pb-2 z-10">
+        <View className="flex-row items-center justify-between px-5 pt-2 pb-2 z-10">
           {onBack ? (
             <TouchableOpacity
               onPress={onBack}
@@ -212,7 +210,7 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={handleCreateNew}
-          className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-[#FD79A8] items-center justify-center shadow-2xl shadow-[#FD79A8]/40"
+          className="absolute bottom-4 right-4 w-14 h-14 rounded-full bg-[#FD79A8] items-center justify-center shadow-2xl shadow-[#FD79A8]/40"
         >
           <Text className="text-2xl text-[#050510] font-light">+</Text>
         </TouchableOpacity>
@@ -226,6 +224,6 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
         onSave={handleSaveNote}
         onDelete={handleDeleteNote}
       />
-    </SafeAreaView>
+    </View>
   );
 };

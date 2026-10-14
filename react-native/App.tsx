@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StatusBar, Platform, Keyboard } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { AlarmScreen } from './src/screens/AlarmScreen';
@@ -12,9 +13,42 @@ import { AppProvider, useApp } from './src/context/AppContext';
 
 function MainAppContent() {
   const { currentScreen, setCurrentScreen } = useApp();
+  const insets = useSafeAreaInsets();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  // Exact hardware safe bounds for Samsung S22 (punch-hole cutout & system navigation bar)
+  const topInset = Math.max(
+    insets.top,
+    Platform.OS === 'android' ? (StatusBar.currentHeight || 28) : 0
+  );
+  const bottomInset = Math.max(
+    insets.bottom,
+    Platform.OS === 'android' ? 12 : 8
+  );
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setIsKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setIsKeyboardVisible(false)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050510]">
+    <View className="flex-1 bg-[#050510]" style={{ paddingTop: topInset }}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#050510"
+        translucent={Platform.OS === 'android'}
+      />
+
       <View className="flex-1">
         {currentScreen === 'home' ? (
           <HomeScreen onSelectBranch={(branch) => setCurrentScreen(branch)} />
@@ -31,26 +65,30 @@ function MainAppContent() {
         )}
       </View>
 
-      {/* Floating Bottom Navigation */}
-      <SamsungBottomNav
-        activeTab={currentScreen}
-        onTabChange={(tab) => setCurrentScreen(tab)}
-      />
-    </SafeAreaView>
+      {/* Docked Bottom Navigation with dynamic keyboard hiding */}
+      {!isKeyboardVisible && (
+        <SamsungBottomNav
+          activeTab={currentScreen}
+          onTabChange={(tab) => setCurrentScreen(tab)}
+          bottomInset={bottomInset}
+        />
+      )}
+    </View>
   );
 }
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
 
-  // Show splash screen first, then transition to app
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
   return (
-    <AppProvider>
-      <MainAppContent />
-    </AppProvider>
+    <SafeAreaProvider>
+      <AppProvider>
+        <MainAppContent />
+      </AppProvider>
+    </SafeAreaProvider>
   );
 }

@@ -141,12 +141,10 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050510]">
-      <StatusBar barStyle="light-content" backgroundColor="#050510" />
-
+    <View className="flex-1 bg-[#050510]">
       <View className="flex-1">
         {/* ── TOP ACTION BAR ── */}
-        <View className="flex-row items-center justify-between px-6 pt-3 pb-1">
+        <View className="flex-row items-center justify-between px-5 pt-2 pb-1">
           {onBack ? (
             <TouchableOpacity
               onPress={onBack}
@@ -470,7 +468,7 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => setIsModalOpen(true)}
-          className="absolute bottom-7 right-6 w-14 h-14 rounded-full bg-[#6C5CE7] items-center justify-center"
+          className="absolute bottom-4 right-4 w-14 h-14 rounded-full bg-[#6C5CE7] items-center justify-center"
           style={{
             shadowColor: '#6C5CE7',
             shadowOffset: { width: 0, height: 4 },
@@ -490,6 +488,6 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
         onSave={handleAddTransaction}
         initialDate={selectedDate || undefined}
       />
-    </SafeAreaView>
+    </View>
   );
 };

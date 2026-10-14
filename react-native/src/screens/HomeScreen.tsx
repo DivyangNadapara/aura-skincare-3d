@@ -50,15 +50,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const balanceAmount = propBalanceAmount !== undefined ? propBalanceAmount : computedBalance;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#050510]">
-      <StatusBar barStyle="light-content" backgroundColor="#050510" />
-
+    <View className="flex-1 bg-[#050510]">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* DRAMATIC HEADER — Gradient mesh background simulation */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <View className="pt-14 pb-10 px-7">
+        <View className="pt-4 pb-6 px-6">
           {/* Subtle gradient overlay layers */}
           <View className="absolute top-0 left-0 right-0 bottom-0 bg-[#0A0A18] opacity-60 rounded-b-[60px]" />
           <View className="absolute top-10 right-0 w-48 h-48 bg-[#6C5CE7] opacity-[0.04] rounded-full" />
@@ -357,9 +355,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
 
         {/* Bottom padding for nav clearance */}
-        <View className="h-24" />
+        <View className="h-6" />
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
