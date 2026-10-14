@@ -4,8 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   Platform,
 } from 'react-native';
 import {

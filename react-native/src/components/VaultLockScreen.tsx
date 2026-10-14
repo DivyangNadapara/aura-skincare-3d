@@ -3,8 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   Vibration,
 } from 'react-native';
 

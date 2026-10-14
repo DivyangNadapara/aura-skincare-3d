@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { AppContextType } from '../context/AppContext';
 import { AiActionResult } from './aiCore';
 
@@ -394,3 +394,4 @@ export const GeminiService = {
     return null;
   },
 };
+
