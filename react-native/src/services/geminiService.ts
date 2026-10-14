@@ -3,10 +3,19 @@ import { AppContextType } from '../context/AppContext';
 import { AiActionResult } from './aiCore';
 
 const API_KEY_FILE = `${FileSystem.documentDirectory}gemini_api_key.txt`;
+const MODEL_NAME_FILE = `${FileSystem.documentDirectory}gemini_model_name.txt`;
 
-// Pre-configured default key fallback if user doesn't have their own key yet
-// (User can override with their own key anytime in the UI)
 let cachedApiKey: string | null = null;
+let cachedModelName: string | null = null;
+
+// Fallback cascade in order of performance
+const CANDIDATE_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-flash',
+  'gemini-pro',
+];
 
 export const GeminiService = {
   /**
@@ -46,70 +55,159 @@ export const GeminiService = {
   async clearApiKey(): Promise<void> {
     try {
       cachedApiKey = null;
+      cachedModelName = null;
       await FileSystem.deleteAsync(API_KEY_FILE, { idempotent: true });
+      await FileSystem.deleteAsync(MODEL_NAME_FILE, { idempotent: true });
     } catch (e) {
       console.warn('Failed to delete Gemini key', e);
     }
   },
 
   /**
-   * Test and validate whether a Gemini API key is active and responding
+   * Get preferred or cached model name
    */
-  async testApiKey(key: string): Promise<{ valid: boolean; message: string }> {
+  async getActiveModel(): Promise<string> {
+    if (cachedModelName) return cachedModelName;
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(MODEL_NAME_FILE);
+      if (fileInfo.exists) {
+        const model = await FileSystem.readAsStringAsync(MODEL_NAME_FILE);
+        cachedModelName = model.trim();
+        return cachedModelName;
+      }
+    } catch (e) {}
+    return 'gemini-2.5-flash';
+  },
+
+  /**
+   * Save active model name
+   */
+  async setActiveModel(model: string): Promise<void> {
+    try {
+      cachedModelName = model.trim();
+      await FileSystem.writeAsStringAsync(MODEL_NAME_FILE, cachedModelName);
+    } catch (e) {}
+  },
+
+  /**
+   * Fetch all valid models supporting content generation for this API key
+   */
+  async fetchAvailableModels(apiKey: string): Promise<string[]> {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data.models && Array.isArray(data.models)) {
+          const suitable = data.models
+            .filter(
+              (m: any) =>
+                m.supportedGenerationMethods?.includes('generateContent') &&
+                !m.name.includes('embedding') &&
+                !m.name.includes('aqa') &&
+                !m.name.includes('imagen')
+            )
+            .map((m: any) => m.name.replace(/^models\//, ''));
+
+          if (suitable.length > 0) {
+            // Sort flash models to the top, newest first
+            suitable.sort((a: string, b: string) => {
+              const aFlash = a.includes('flash');
+              const bFlash = b.includes('flash');
+              if (aFlash && !bFlash) return -1;
+              if (!aFlash && bFlash) return 1;
+              return b.localeCompare(a);
+            });
+            return suitable;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not query dynamic models list', e);
+    }
+    return CANDIDATE_MODELS;
+  },
+
+  /**
+   * Test and validate whether a Gemini API key is active and responding
+   * Dynamically auto-discovers which Gemini model version (2.5-flash, 2.0-flash, etc.)
+   * is supported by this key.
+   */
+  async testApiKey(key: string): Promise<{ valid: boolean; message: string; model?: string }> {
     const trimmed = key.trim();
     if (!trimmed) {
       return { valid: false, message: 'API key is empty.' };
     }
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${trimmed}`;
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
-        }),
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.candidates && data.candidates.length > 0) {
-          return {
-            valid: true,
-            message: '✓ Key Verified! Gemini 1.5 Flash is active and responding.',
-          };
-        }
-      }
+    // 1. Discover models supported by this specific key
+    const available = await this.fetchAvailableModels(trimmed);
+    const candidateList = Array.from(new Set([...available, ...CANDIDATE_MODELS]));
 
-      const errText = await response.text();
-      let detail = `HTTP ${response.status}`;
+    let lastErrorDetail = '';
+
+    // 2. Test candidate models in order until one responds with 200 OK
+    for (const model of candidateList) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${trimmed}`;
       try {
-        const errJson = JSON.parse(errText);
-        detail = errJson.error?.message || detail;
-      } catch (e) {}
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
+          }),
+        });
 
-      return { valid: false, message: `✗ Invalid Key: ${detail}` };
-    } catch (e: any) {
-      return {
-        valid: false,
-        message: `✗ Network test failed: ${e.message || 'Check your internet connection'}`,
-      };
+        if (response.ok) {
+          const data = await response.json();
+          if (data.candidates && data.candidates.length > 0) {
+            await this.setActiveModel(model);
+            return {
+              valid: true,
+              message: `✓ Connected! Model '${model}' verified & active.`,
+              model,
+            };
+          }
+        } else {
+          const errText = await response.text();
+          try {
+            const errJson = JSON.parse(errText);
+            const msg = errJson.error?.message || '';
+            // If it's an API_KEY_INVALID error, fail immediately without cycling
+            if (response.status === 400 && (msg.includes('API key not valid') || msg.includes('API_KEY_INVALID'))) {
+              return { valid: false, message: '✗ Invalid API Key. Please verify the key from ai.google.dev' };
+            }
+            lastErrorDetail = msg || `HTTP ${response.status}`;
+          } catch (e) {
+            lastErrorDetail = `HTTP ${response.status}`;
+          }
+        }
+      } catch (e: any) {
+        lastErrorDetail = e.message || 'Network error';
+      }
     }
+
+    return {
+      valid: false,
+      message: `✗ Key connection failed: ${lastErrorDetail || 'No active Gemini model found'}`,
+    };
   },
 
   /**
-   * Execute chat query through Google Gemini 1.5 Flash API with tool calling
+   * Execute chat query through Google Gemini API with dynamic model selection and tool calling
    */
   async chatWithGemini(
     prompt: string,
     history: { sender: 'user' | 'cortex'; text: string }[],
     appContext: AppContextType
-  ): Promise<{ message: string; action?: AiActionResult } | null> {
+  ): Promise<{ message: string; action?: AiActionResult; model?: string } | null> {
     const apiKey = await this.getApiKey();
     if (!apiKey) {
       return null; // Fallback to local intelligence
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const preferredModel = await this.getActiveModel();
+    const candidateModels = Array.from(new Set([preferredModel, ...CANDIDATE_MODELS]));
 
     // App live context summary for Gemini
     const alarmsSummary = appContext.alarms
@@ -128,7 +226,7 @@ export const GeminiService = {
           text:
             `You are Cortex, an intelligent, charming, and highly autonomous AI companion created for Divyang.\n` +
             `You run inside Divyang's personal application called 'DIVYANG'.\n` +
-            `You have deep conversational intelligence like Google Gemini: you can chat about anything (science, philosophy, day-to-day advice, coding, humor, motivation, fitness, relationships).\n\n` +
+            `You have deep conversational intelligence: you can chat about anything (science, philosophy, day-to-day advice, coding, humor, motivation, fitness, relationships).\n\n` +
             `CURRENT SYSTEM STATE:\n` +
             `- Alarms: [${alarmsSummary || 'None currently'}]\n` +
             `- Net Cashflow: $${netBalance.toFixed(2)} across ${appContext.transactions.length} records\n` +
@@ -257,7 +355,6 @@ export const GeminiService = {
 
     // Format chat contents
     const contents: any[] = [];
-    // Add up to 6 previous messages for context
     const recentHistory = history.slice(-6);
     for (const h of recentHistory) {
       contents.push({
@@ -265,177 +362,198 @@ export const GeminiService = {
         parts: [{ text: h.text }],
       });
     }
-    // Add current user prompt
     contents.push({
       role: 'user',
       parts: [{ text: prompt }],
     });
 
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents,
-          system_instruction: systemInstruction,
-          tools,
-        }),
-      });
+    // Try candidate models in cascade
+    for (const model of candidateModels) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.warn('Gemini API Error:', response.status, errorText);
-        return null;
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents,
+            system_instruction: systemInstruction,
+            tools,
+          }),
+        });
+
+        if (!response.ok) {
+          // If model not found (404), continue to next model in candidateList
+          if (response.status === 404) {
+            continue;
+          }
+          const errorText = await response.text();
+          console.warn(`Gemini API Error with ${model}:`, response.status, errorText);
+          continue;
+        }
+
+        const data = await response.json();
+        const candidate = data.candidates?.[0];
+        if (!candidate) continue;
+
+        // Remember working model
+        await this.setActiveModel(model);
+
+        const modelPart = candidate.content?.parts?.[0];
+
+        // Check if Gemini invoked a tool (functionCall)
+        if (modelPart?.functionCall) {
+          const fn = modelPart.functionCall;
+          const args = fn.args || {};
+
+          if (fn.name === 'create_alarm') {
+            const time = args.time || '07:00';
+            const period: 'AM' | 'PM' = args.period === 'PM' ? 'PM' : 'AM';
+            const label = args.label || 'Wake Anchor';
+            const [hStr, mStr] = time.split(':');
+            const rawHour = parseInt(hStr, 10) || 7;
+            const minute = parseInt(mStr, 10) || 0;
+            const hour =
+              period === 'PM' && rawHour !== 12
+                ? rawHour + 12
+                : period === 'AM' && rawHour === 12
+                ? 0
+                : rawHour;
+
+            appContext.addAlarm({
+              time: `${rawHour}:${minute.toString().padStart(2, '0')}`,
+              period,
+              hour,
+              minute,
+              label,
+              category: period === 'AM' ? 'Morning Routine' : 'Deep Work',
+              days: [1, 2, 3, 4, 5],
+              isEnabled: true,
+              sound: 'Over the Horizon',
+              volume: 85,
+              vibration: 'Basic Call',
+              snooze: '5 minutes, 3 times',
+            });
+
+            return {
+              message: `✦ I have set your alarm for **${rawHour}:${minute.toString().padStart(2, '0')} ${period}** labeled **"${label}"**.\n\nIt is now active and synchronized in your Alarms branch. Sleep well!`,
+              action: {
+                actionType: 'ALARM_CREATED',
+                badgeTitle: `Alarm: ${rawHour}:${minute.toString().padStart(2, '0')} ${period}`,
+                badgeDetails: label,
+                badgeColor: '#6C5CE7',
+                targetBranch: 'alarm',
+              },
+              model,
+            };
+          }
+
+          if (fn.name === 'add_expense') {
+            const amount = Number(args.amount) || 0;
+            const category = args.category || 'Food & Dining';
+            const title = args.title || 'Expense';
+
+            appContext.addTransaction({
+              title,
+              amount,
+              type: 'expense',
+              category: category as any,
+              dateStr: new Date().toISOString().split('T')[0],
+              timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            });
+
+            return {
+              message: `✦ Logged **$${amount.toFixed(2)}** for **"${title}"** under *${category}*.\n\nYour net balance and cashflow analytics have been updated.`,
+              action: {
+                actionType: 'EXPENSE_LOGGED',
+                badgeTitle: `-$${amount.toFixed(2)} ${title}`,
+                badgeDetails: category,
+                badgeColor: '#FD79A8',
+                targetBranch: 'expenses',
+              },
+              model,
+            };
+          }
+
+          if (fn.name === 'add_income') {
+            const amount = Number(args.amount) || 0;
+            const title = args.title || 'Income';
+
+            appContext.addTransaction({
+              title,
+              amount,
+              type: 'income',
+              category: 'Salary & Work',
+              dateStr: new Date().toISOString().split('T')[0],
+              timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            });
+
+            return {
+              message: `✦ Credited **+$${amount.toFixed(2)}** from **"${title}"** into your balance.\n\nGreat job on increasing your cashflow!`,
+              action: {
+                actionType: 'INCOME_LOGGED',
+                badgeTitle: `+$${amount.toFixed(2)} ${title}`,
+                badgeDetails: 'Cashflow Credited',
+                badgeColor: '#00B894',
+                targetBranch: 'expenses',
+              },
+              model,
+            };
+          }
+
+          if (fn.name === 'create_note') {
+            const title = args.title || 'New Protocol';
+            const content = args.content || '';
+            const category = args.category || 'Ideas';
+
+            appContext.addNote({
+              title,
+              content,
+              category: category as any,
+              isPinned: false,
+            });
+
+            return {
+              message: `✦ Saved note **"${title}"** to your protocols.\n\nYou can review or edit it anytime in the Notes branch.`,
+              action: {
+                actionType: 'NOTE_CREATED',
+                badgeTitle: title,
+                badgeDetails: `Category: ${category}`,
+                badgeColor: '#FD79A8',
+                targetBranch: 'notes',
+              },
+              model,
+            };
+          }
+
+          if (fn.name === 'lock_vault') {
+            appContext.lockVault();
+            return {
+              message: `✦ Encrypted Enclave locked down immediately. Biometric or PIN authentication is now required to access private files.`,
+              action: {
+                actionType: 'VAULT_LOCKED',
+                badgeTitle: 'Enclave Secured',
+                badgeDetails: 'Zero-Knowledge Lock Active',
+                badgeColor: '#FDCB6E',
+                targetBranch: 'vault',
+              },
+              model,
+            };
+          }
+        }
+
+        // If text response from Gemini
+        if (modelPart?.text) {
+          return {
+            message: modelPart.text,
+            model,
+          };
+        }
+      } catch (err) {
+        console.warn(`Gemini request failed for model ${model}`, err);
       }
-
-      const data = await response.json();
-      const candidate = data.candidates?.[0];
-      if (!candidate) return null;
-
-      const modelPart = candidate.content?.parts?.[0];
-
-      // Check if Gemini invoked a tool (functionCall)
-      if (modelPart?.functionCall) {
-        const fn = modelPart.functionCall;
-        const args = fn.args || {};
-
-        if (fn.name === 'create_alarm') {
-          const time = args.time || '07:00';
-          const period: 'AM' | 'PM' = args.period === 'PM' ? 'PM' : 'AM';
-          const label = args.label || 'Wake Anchor';
-          const [hStr, mStr] = time.split(':');
-          const rawHour = parseInt(hStr, 10) || 7;
-          const minute = parseInt(mStr, 10) || 0;
-          const hour = period === 'PM' && rawHour !== 12 ? rawHour + 12 : period === 'AM' && rawHour === 12 ? 0 : rawHour;
-
-          appContext.addAlarm({
-            time: `${rawHour}:${minute.toString().padStart(2, '0')}`,
-            period,
-            hour,
-            minute,
-            label,
-            category: period === 'AM' ? 'Morning Routine' : 'Deep Work',
-            days: [1, 2, 3, 4, 5],
-            isEnabled: true,
-            sound: 'Over the Horizon',
-            volume: 85,
-            vibration: 'Basic Call',
-            snooze: '5 minutes, 3 times',
-          });
-
-          return {
-            message: `✦ I have set your alarm for **${rawHour}:${minute.toString().padStart(2, '0')} ${period}** labeled **"${label}"**.\n\nIt is now active and synchronized in your Alarms branch. Sleep well!`,
-            action: {
-              actionType: 'ALARM_CREATED',
-              badgeTitle: `Alarm: ${rawHour}:${minute.toString().padStart(2, '0')} ${period}`,
-              badgeDetails: label,
-              badgeColor: '#6C5CE7',
-              targetBranch: 'alarm',
-            },
-          };
-        }
-
-        if (fn.name === 'add_expense') {
-          const amount = Number(args.amount) || 0;
-          const category = args.category || 'Food & Dining';
-          const title = args.title || 'Expense';
-
-          appContext.addTransaction({
-            title,
-            amount,
-            type: 'expense',
-            category: category as any,
-            dateStr: new Date().toISOString().split('T')[0],
-            timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          });
-
-          return {
-            message: `✦ Logged **$${amount.toFixed(2)}** for **"${title}"** under *${category}*.\n\nYour net balance and cashflow analytics have been updated.`,
-            action: {
-              actionType: 'EXPENSE_LOGGED',
-              badgeTitle: `-$${amount.toFixed(2)} ${title}`,
-              badgeDetails: category,
-              badgeColor: '#FD79A8',
-              targetBranch: 'expenses',
-            },
-          };
-        }
-
-        if (fn.name === 'add_income') {
-          const amount = Number(args.amount) || 0;
-          const title = args.title || 'Income';
-
-          appContext.addTransaction({
-            title,
-            amount,
-            type: 'income',
-            category: 'Salary & Work',
-            dateStr: new Date().toISOString().split('T')[0],
-            timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          });
-
-          return {
-            message: `✦ Credited **+$${amount.toFixed(2)}** from **"${title}"** into your balance.\n\nGreat job on increasing your cashflow!`,
-            action: {
-              actionType: 'INCOME_LOGGED',
-              badgeTitle: `+$${amount.toFixed(2)} ${title}`,
-              badgeDetails: 'Cashflow Credited',
-              badgeColor: '#00B894',
-              targetBranch: 'expenses',
-            },
-          };
-        }
-
-        if (fn.name === 'create_note') {
-          const title = args.title || 'New Protocol';
-          const content = args.content || '';
-          const category = args.category || 'Ideas';
-
-          appContext.addNote({
-            title,
-            content,
-            category: category as any,
-            isPinned: false,
-          });
-
-          return {
-            message: `✦ Saved note **"${title}"** to your protocols.\n\nYou can review or edit it anytime in the Notes branch.`,
-            action: {
-              actionType: 'NOTE_CREATED',
-              badgeTitle: title,
-              badgeDetails: `Category: ${category}`,
-              badgeColor: '#FD79A8',
-              targetBranch: 'notes',
-            },
-          };
-        }
-
-        if (fn.name === 'lock_vault') {
-          appContext.lockVault();
-          return {
-            message: `✦ Encrypted Enclave locked down immediately. Biometric or PIN authentication is now required to access private files.`,
-            action: {
-              actionType: 'VAULT_LOCKED',
-              badgeTitle: 'Enclave Secured',
-              badgeDetails: 'Zero-Knowledge Lock Active',
-              badgeColor: '#FDCB6E',
-              targetBranch: 'vault',
-            },
-          };
-        }
-      }
-
-      // If text response from Gemini
-      if (modelPart?.text) {
-        return {
-          message: modelPart.text,
-        };
-      }
-    } catch (err) {
-      console.warn('Gemini chat request failed', err);
     }
 
     return null;
   },
 };
-

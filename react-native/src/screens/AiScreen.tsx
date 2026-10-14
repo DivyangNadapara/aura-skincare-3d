@@ -40,11 +40,12 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [inputText, setInputText] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [activeModel, setActiveModel] = useState('Gemini');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [keySaveMessage, setKeySaveMessage] = useState('');
   const [isTestingKey, setIsTestingKey] = useState(false);
-  const [testResult, setTestResult] = useState<{ valid: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ valid: boolean; message: string; model?: string } | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -75,6 +76,8 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   useEffect(() => {
     (async () => {
       const key = await GeminiService.getApiKey();
+      const model = await GeminiService.getActiveModel();
+      if (model) setActiveModel(model);
       if (key) {
         setHasApiKey(true);
         setApiKeyInput(key);
@@ -171,6 +174,7 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         // Auto-save on successful test
         await GeminiService.setApiKey(cleaned);
         setHasApiKey(true);
+        if (res.model) setActiveModel(res.model);
       }
     } catch (err: any) {
       setTestResult({ valid: false, message: err.message || 'Connection test failed.' });
@@ -241,7 +245,7 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                 hasApiKey ? 'text-[#00B894]' : 'text-[#6C5CE7]'
               }`}
             >
-              {hasApiKey ? '✦ Gemini 1.5 Flash' : '⚡ Local + Gemini API'}
+              {hasApiKey ? `✦ ${activeModel}` : '⚡ Local + Gemini API'}
             </Text>
           </TouchableOpacity>
 
@@ -324,7 +328,7 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                   {msg.sender === 'user'
                     ? 'Divyang'
                     : msg.isGemini
-                    ? '✦ Gemini 1.5'
+                    ? `✦ ${activeModel}`
                     : '✦ Cortex Core'}
                 </Text>
                 <Text className="text-[9px] text-[#3D3D5C] font-mono">
