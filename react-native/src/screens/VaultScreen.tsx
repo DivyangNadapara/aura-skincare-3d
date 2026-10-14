@@ -10,7 +10,6 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import {
@@ -66,57 +65,32 @@ export const VaultScreen: React.FC<VaultScreenProps> = ({ onBack }) => {
   // Restore file to default phone gallery / storage
   const handleRestoreToGallery = async (item: VaultItem) => {
     try {
-      if (item.type === 'image' || item.type === 'video') {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status === 'granted') {
-          let targetUri = item.uri;
+      let targetUri = item.uri;
 
-          // If it's a remote URL, download it first to temporary file
-          if (item.uri.startsWith('http://') || item.uri.startsWith('https://')) {
-            const ext = item.type === 'video' ? 'mp4' : 'jpg';
-            const fileUri = `${FileSystem.cacheDirectory}restored_${Date.now()}.${ext}`;
-            const downloadRes = await FileSystem.downloadAsync(item.uri, fileUri);
-            targetUri = downloadRes.uri;
-          }
-
-          // Save to device photo gallery
-          await MediaLibrary.saveToLibraryAsync(targetUri);
-          Alert.alert(
-            'Restored to Gallery! 🎉',
-            `"${item.name}" has been exported back to your device's photo gallery.`
-          );
-          return;
-        }
+      // If it's a remote URL, download it first to local cache
+      if (item.uri.startsWith('http://') || item.uri.startsWith('https://')) {
+        const ext = item.type === 'video' ? 'mp4' : item.type === 'image' ? 'jpg' : 'pdf';
+        const fileUri = `${FileSystem.cacheDirectory}restore_${Date.now()}.${ext}`;
+        const downloadRes = await FileSystem.downloadAsync(item.uri, fileUri);
+        targetUri = downloadRes.uri;
       }
 
-      // Fallback for documents or if gallery permissions were skipped: use system export/share
       const isShareAvailable = await Sharing.isAvailableAsync();
       if (isShareAvailable) {
-        let targetUri = item.uri;
-        if (item.uri.startsWith('http://') || item.uri.startsWith('https://')) {
-          const ext = item.mimeType?.includes('pdf') ? 'pdf' : 'dat';
-          const fileUri = `${FileSystem.cacheDirectory}restored_${Date.now()}.${ext}`;
-          const downloadRes = await FileSystem.downloadAsync(item.uri, fileUri);
-          targetUri = downloadRes.uri;
-        }
-
         await Sharing.shareAsync(targetUri, {
-          dialogTitle: `Restore "${item.name}" to Device`,
+          dialogTitle: `Restore "${item.name}" to Photos / Gallery`,
+          mimeType: item.mimeType || (item.type === 'video' ? 'video/mp4' : item.type === 'image' ? 'image/jpeg' : 'application/octet-stream'),
+          UTI: item.type === 'image' ? 'public.image' : item.type === 'video' ? 'public.movie' : 'public.item',
         });
       } else {
         Alert.alert(
-          'Restoration Note',
-          `"${item.name}" is securely stored at: ${item.uri}`
+          'Restored to Device',
+          `"${item.name}" is stored at: ${targetUri}`
         );
       }
     } catch (err: any) {
       console.warn('Restore failed:', err);
-      // Fallback to sharing
-      try {
-        await Sharing.shareAsync(item.uri);
-      } catch (shareErr: any) {
-        throw new Error(err?.message || 'Could not restore file.');
-      }
+      Alert.alert('Restore Note', err?.message || 'Could not export file.');
     }
   };
 
