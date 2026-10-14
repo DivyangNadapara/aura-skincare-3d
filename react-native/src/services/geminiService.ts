@@ -53,6 +53,50 @@ export const GeminiService = {
   },
 
   /**
+   * Test and validate whether a Gemini API key is active and responding
+   */
+  async testApiKey(key: string): Promise<{ valid: boolean; message: string }> {
+    const trimmed = key.trim();
+    if (!trimmed) {
+      return { valid: false, message: 'API key is empty.' };
+    }
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${trimmed}`;
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.candidates && data.candidates.length > 0) {
+          return {
+            valid: true,
+            message: '✓ Key Verified! Gemini 1.5 Flash is active and responding.',
+          };
+        }
+      }
+
+      const errText = await response.text();
+      let detail = `HTTP ${response.status}`;
+      try {
+        const errJson = JSON.parse(errText);
+        detail = errJson.error?.message || detail;
+      } catch (e) {}
+
+      return { valid: false, message: `✗ Invalid Key: ${detail}` };
+    } catch (e: any) {
+      return {
+        valid: false,
+        message: `✗ Network test failed: ${e.message || 'Check your internet connection'}`,
+      };
+    }
+  },
+
+  /**
    * Execute chat query through Google Gemini 1.5 Flash API with tool calling
    */
   async chatWithGemini(

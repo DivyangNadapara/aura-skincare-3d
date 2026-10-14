@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { AiCommandEngine, AiActionResult } from '../services/aiCore';
@@ -42,6 +43,8 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [keySaveMessage, setKeySaveMessage] = useState('');
+  const [isTestingKey, setIsTestingKey] = useState(false);
+  const [testResult, setTestResult] = useState<{ valid: boolean; message: string } | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -150,6 +153,29 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       }, 1500);
     } catch (e) {
       setKeySaveMessage('Failed to save key. Please try again.');
+    }
+  };
+
+  const handleTestKey = async () => {
+    const cleaned = apiKeyInput.trim();
+    if (!cleaned) {
+      setTestResult({ valid: false, message: 'Please paste your Gemini API key first.' });
+      return;
+    }
+    setIsTestingKey(true);
+    setTestResult(null);
+    try {
+      const res = await GeminiService.testApiKey(cleaned);
+      setTestResult(res);
+      if (res.valid) {
+        // Auto-save on successful test
+        await GeminiService.setApiKey(cleaned);
+        setHasApiKey(true);
+      }
+    } catch (err: any) {
+      setTestResult({ valid: false, message: err.message || 'Connection test failed.' });
+    } finally {
+      setIsTestingKey(false);
     }
   };
 
@@ -457,17 +483,39 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               </TouchableOpacity>
             </View>
 
-            <Text className="text-xs text-[#6B6B8D] leading-relaxed mb-4">
-              Connect your free Google Gemini API key to unlock full conversational depth, natural language chatting, and autonomous multi-branch tool calling.
+            <Text className="text-xs text-[#6B6B8D] leading-relaxed mb-3">
+              Google provides free Gemini API keys directly to developers. No credit card is required.
             </Text>
 
-            <View className="bg-[#14142A] border border-[#1E1E3A] rounded-2xl px-4 py-3 mb-4">
+            {/* 1-TAP GOOGLE AI STUDIO SHORTCUT */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => Linking.openURL('https://aistudio.google.com/app/apikey')}
+              className="bg-[#14142A] border border-[#6C5CE7]/40 rounded-2xl p-3 mb-4 flex-row items-center justify-between shadow-md"
+            >
+              <View className="flex-1 mr-2">
+                <Text className="text-xs font-bold text-[#E8E8F0]">
+                  ✦ 1-Tap: Get Free Key from Google AI Studio
+                </Text>
+                <Text className="text-[10px] text-[#6B6B8D] mt-0.5">
+                  Opens aistudio.google.com • Tap "Create API Key" & copy
+                </Text>
+              </View>
+              <View className="bg-[#6C5CE7]/20 px-2.5 py-1 rounded-lg">
+                <Text className="text-[10px] font-bold text-[#6C5CE7]">OPEN ↗</Text>
+              </View>
+            </TouchableOpacity>
+
+            <View className="bg-[#14142A] border border-[#1E1E3A] rounded-2xl px-4 py-3 mb-3">
               <Text className="text-[10px] font-bold uppercase tracking-[2px] text-[#6C5CE7] mb-1">
-                Gemini API Key
+                Paste Gemini API Key Here
               </Text>
               <TextInput
                 value={apiKeyInput}
-                onChangeText={setApiKeyInput}
+                onChangeText={(t) => {
+                  setApiKeyInput(t);
+                  setTestResult(null);
+                }}
                 placeholder="AIzaSy..."
                 placeholderTextColor="#3D3D5C"
                 secureTextEntry
@@ -477,21 +525,58 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               />
             </View>
 
+            {/* TEST RESULT BADGE */}
+            {testResult && (
+              <View
+                className={`p-3 rounded-2xl mb-3 border ${
+                  testResult.valid
+                    ? 'bg-[#00B894]/10 border-[#00B894]/30'
+                    : 'bg-[#FD79A8]/10 border-[#FD79A8]/30'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-semibold ${
+                    testResult.valid ? 'text-[#00B894]' : 'text-[#FD79A8]'
+                  }`}
+                >
+                  {testResult.message}
+                </Text>
+              </View>
+            )}
+
             {keySaveMessage ? (
               <Text className="text-xs text-[#00B894] font-medium mb-3 text-center">
                 {keySaveMessage}
               </Text>
             ) : null}
 
-            {/* Action buttons */}
-            <View className="flex-row items-center gap-3">
+            {/* ACTION BUTTONS: TEST KEY & SAVE */}
+            <View className="flex-row items-center gap-2 mb-2">
+              <TouchableOpacity
+                onPress={handleTestKey}
+                disabled={!apiKeyInput.trim() || isTestingKey}
+                activeOpacity={0.8}
+                className="bg-[#14142A] border border-[#6C5CE7]/50 px-4 py-3.5 rounded-2xl items-center justify-center flex-row gap-1.5"
+              >
+                {isTestingKey ? (
+                  <ActivityIndicator size="small" color="#6C5CE7" />
+                ) : (
+                  <>
+                    <Text className="text-xs text-[#6C5CE7] font-bold">⚡</Text>
+                    <Text className="text-xs font-bold text-[#6C5CE7] uppercase tracking-[1px]">
+                      Test Key
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={handleSaveApiKey}
                 activeOpacity={0.8}
                 className="flex-1 bg-[#6C5CE7] py-3.5 rounded-2xl items-center justify-center shadow-lg shadow-[#6C5CE7]/30"
               >
                 <Text className="text-xs font-bold text-white uppercase tracking-[1px]">
-                  {apiKeyInput.trim() ? 'Save Gemini Key' : 'Use Local Cortex'}
+                  {apiKeyInput.trim() ? 'Save & Activate' : 'Use Local Cortex'}
                 </Text>
               </TouchableOpacity>
 
@@ -501,19 +586,20 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                     await GeminiService.clearApiKey();
                     setHasApiKey(false);
                     setApiKeyInput('');
+                    setTestResult(null);
                     setKeySaveMessage('API Key removed.');
                     setTimeout(() => setKeySaveMessage(''), 2000);
                   }}
                   activeOpacity={0.7}
-                  className="px-4 py-3.5 rounded-2xl bg-[#1E1E3A] items-center justify-center"
+                  className="px-3.5 py-3.5 rounded-2xl bg-[#1E1E3A] items-center justify-center"
                 >
-                  <Text className="text-xs font-semibold text-[#FD79A8]">Remove</Text>
+                  <Text className="text-xs font-semibold text-[#FD79A8]">Clear</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            <Text className="text-[10px] text-[#3D3D5C] text-center mt-4">
-              Get a free key from ai.google.dev (Free tier available, no credit card required)
+            <Text className="text-[10px] text-[#3D3D5C] text-center mt-2">
+              Gemini 1.5 Flash free tier: 15 RPM • 1,500 RPD • 1M tokens/min free
             </Text>
           </View>
         </View>
