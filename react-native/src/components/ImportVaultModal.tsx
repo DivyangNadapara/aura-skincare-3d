@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -53,7 +52,7 @@ export const ImportVaultModal: React.FC<ImportVaultModalProps> = ({
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const timeStr = `${hours % 12 || 12}:${minutes} ${ampm}`;
 
-        const fileName = asset.fileName || (isVideo ? `video_${Date.now()}.mp4` : `photo_${Date.now()}.jpg`);
+        const fileName = asset.fileName || (isVideo ? `VID_${Date.now()}.mp4` : `IMG_${Date.now()}.jpg`);
 
         const newItem: VaultItem = {
           id: `vault-${Date.now()}`,
@@ -66,7 +65,7 @@ export const ImportVaultModal: React.FC<ImportVaultModalProps> = ({
           timeAdded: timeStr,
           originalFileName: fileName,
           mimeType: asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg'),
-          note: note.trim() || 'Imported from device gallery',
+          note: note.trim() || 'Imported from gallery storage',
           isFavorite: false,
         };
 
@@ -74,7 +73,7 @@ export const ImportVaultModal: React.FC<ImportVaultModalProps> = ({
         setCustomName('');
         setNote('');
         onClose();
-        Alert.alert('Vault Secured', `"${newItem.name}" is now hidden in your private vault.`);
+        Alert.alert('Artifact Encrypted', `"${newItem.name}" is now secured in your private vault.`);
       }
     } catch (err: any) {
       Alert.alert('Import Error', err?.message || 'Could not import media.');
@@ -104,7 +103,7 @@ export const ImportVaultModal: React.FC<ImportVaultModalProps> = ({
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const timeStr = `${hours % 12 || 12}:${minutes} ${ampm}`;
-        const fileName = `secret_capture_${Date.now()}.jpg`;
+        const fileName = `CAPTURE_${Date.now()}.jpg`;
 
         const newItem: VaultItem = {
           id: `vault-${Date.now()}`,
@@ -170,7 +169,7 @@ export const ImportVaultModal: React.FC<ImportVaultModalProps> = ({
         setCustomName('');
         setNote('');
         onClose();
-        Alert.alert('File Hidden', `"${newItem.name}" is now safely encrypted in your vault.`);
+        Alert.alert('File Encrypted', `"${newItem.name}" is now safely encrypted in your vault.`);
       }
     } catch (err: any) {
       Alert.alert('Document Error', err?.message || 'Could not pick file.');
@@ -184,52 +183,58 @@ export const ImportVaultModal: React.FC<ImportVaultModalProps> = ({
       transparent
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/80 justify-end">
-        <View className="bg-[#181B26] border-t border-[#272B3B] rounded-t-[36px] p-6 pb-10">
+      <View className="flex-1 bg-black/85 justify-end">
+        <View className="bg-[#0D0D1A] border-t border-[#1E1E3A] rounded-t-[40px] p-6 pb-10 shadow-2xl">
+          {/* TOP DRAG HANDLE */}
+          <View className="items-center mb-5">
+            <View className="w-10 h-1 rounded-full bg-[#1E1E3A]" />
+          </View>
+
           {/* HEADER */}
           <View className="flex-row items-center justify-between mb-5">
             <View>
-              <Text className="text-xl font-bold text-white tracking-tight">
-                Hide Files in Vault
+              <Text className="text-[10px] font-bold tracking-[3px] uppercase text-[#6C5CE7] mb-1">
+                Zero-Knowledge Storage
               </Text>
-              <Text className="text-xs text-[#8E94A7] mt-0.5">
-                Import private photos, videos, or documents
+              <Text className="text-xl font-extrabold text-[#E8E8F0] tracking-tight">
+                Encrypt & Hide Artifact
               </Text>
             </View>
 
             <TouchableOpacity
               onPress={onClose}
-              className="w-8 h-8 rounded-full bg-[#11131C] items-center justify-center border border-[#272B3B]"
+              activeOpacity={0.7}
+              className="w-8 h-8 rounded-full bg-[#14142A] items-center justify-center border border-[#1E1E3A]"
             >
-              <Text className="text-white text-base">✕</Text>
+              <Text className="text-[#6B6B8D] text-sm">✕</Text>
             </TouchableOpacity>
           </View>
 
           {/* OPTIONAL CUSTOM LABEL */}
           <View className="mb-3">
-            <Text className="text-[11px] font-semibold text-[#8E94A7] mb-1 uppercase tracking-wider">
-              Secret Label / Title (Optional)
+            <Text className="text-[10px] font-bold text-[#6B6B8D] mb-1.5 uppercase tracking-[2px]">
+              Artifact Alias (Optional)
             </Text>
             <TextInput
               value={customName}
               onChangeText={setCustomName}
-              placeholder="e.g. My Private Video, Tax Return 2026..."
-              placeholderTextColor="#555B70"
-              className="bg-[#11131C] border border-[#272B3B] rounded-xl px-4 py-3 text-white text-sm"
+              placeholder="e.g. Master Seed, Tax Return 2026..."
+              placeholderTextColor="#3D3D5C"
+              className="bg-[#14142A] border border-[#1E1E3A] rounded-2xl px-4 py-3 text-[#E8E8F0] text-sm font-sans"
             />
           </View>
 
           {/* OPTIONAL NOTE */}
           <View className="mb-5">
-            <Text className="text-[11px] font-semibold text-[#8E94A7] mb-1 uppercase tracking-wider">
-              Secret Note (Optional)
+            <Text className="text-[10px] font-bold text-[#6B6B8D] mb-1.5 uppercase tracking-[2px]">
+              Encrypted Note (Optional)
             </Text>
             <TextInput
               value={note}
               onChangeText={setNote}
-              placeholder="Add encrypted notes for this file..."
-              placeholderTextColor="#555B70"
-              className="bg-[#11131C] border border-[#272B3B] rounded-xl px-4 py-2.5 text-white text-sm"
+              placeholder="Private memos attached to artifact..."
+              placeholderTextColor="#3D3D5C"
+              className="bg-[#14142A] border border-[#1E1E3A] rounded-2xl px-4 py-2.5 text-[#E8E8F0] text-sm font-sans"
             />
           </View>
 
@@ -239,66 +244,66 @@ export const ImportVaultModal: React.FC<ImportVaultModalProps> = ({
             <TouchableOpacity
               activeOpacity={0.75}
               onPress={handlePickFromGallery}
-              className="bg-[#1F2332] border border-[#2F3447] p-4 rounded-2xl flex-row items-center justify-between active:bg-[#2C7BFE]/20"
+              className="bg-[#14142A] border border-[#1E1E3A] p-4 rounded-2xl flex-row items-center justify-between active:border-[#6C5CE7]"
             >
-              <View className="flex-row items-center gap-3">
-                <View className="w-11 h-11 rounded-xl bg-[#2C7BFE]/20 items-center justify-center border border-[#2C7BFE]/40">
-                  <Text className="text-xl">🖼️</Text>
+              <View className="flex-row items-center gap-3.5">
+                <View className="w-10 h-10 rounded-xl bg-[#6C5CE7]/15 items-center justify-center border border-[#6C5CE7]/30">
+                  <Text className="text-base font-bold text-[#6C5CE7]">◆</Text>
                 </View>
                 <View>
-                  <Text className="text-sm font-bold text-white">
-                    Hide Photos & Videos from Gallery
+                  <Text className="text-sm font-bold text-[#E8E8F0]">
+                    Import Gallery Media
                   </Text>
-                  <Text className="text-xs text-[#8E94A7] mt-0.5">
-                    Select any picture or video from phone storage
+                  <Text className="text-xs text-[#6B6B8D] mt-0.5">
+                    Absorb private photos or videos from phone storage
                   </Text>
                 </View>
               </View>
-              <Text className="text-sm text-[#8E94A7]">›</Text>
+              <Text className="text-sm text-[#6B6B8D]">›</Text>
             </TouchableOpacity>
 
             {/* Direct Camera Capture */}
             <TouchableOpacity
               activeOpacity={0.75}
               onPress={handleTakePhoto}
-              className="bg-[#1F2332] border border-[#2F3447] p-4 rounded-2xl flex-row items-center justify-between active:bg-[#30D158]/20"
+              className="bg-[#14142A] border border-[#1E1E3A] p-4 rounded-2xl flex-row items-center justify-between active:border-[#FD79A8]"
             >
-              <View className="flex-row items-center gap-3">
-                <View className="w-11 h-11 rounded-xl bg-[#30D158]/20 items-center justify-center border border-[#30D158]/40">
-                  <Text className="text-xl">📸</Text>
+              <View className="flex-row items-center gap-3.5">
+                <View className="w-10 h-10 rounded-xl bg-[#FD79A8]/15 items-center justify-center border border-[#FD79A8]/30">
+                  <Text className="text-base font-bold text-[#FD79A8]">◉</Text>
                 </View>
                 <View>
-                  <Text className="text-sm font-bold text-white">
-                    Take Secret Photo Directly
+                  <Text className="text-sm font-bold text-[#E8E8F0]">
+                    Direct Lens Capture
                   </Text>
-                  <Text className="text-xs text-[#8E94A7] mt-0.5">
-                    Captures instantly into vault without saving to gallery
+                  <Text className="text-xs text-[#6B6B8D] mt-0.5">
+                    Writes straight to enclave without camera roll entry
                   </Text>
                 </View>
               </View>
-              <Text className="text-sm text-[#8E94A7]">›</Text>
+              <Text className="text-sm text-[#6B6B8D]">›</Text>
             </TouchableOpacity>
 
             {/* Document Picker */}
             <TouchableOpacity
               activeOpacity={0.75}
               onPress={handlePickDocument}
-              className="bg-[#1F2332] border border-[#2F3447] p-4 rounded-2xl flex-row items-center justify-between active:bg-[#FF9F0A]/20"
+              className="bg-[#14142A] border border-[#1E1E3A] p-4 rounded-2xl flex-row items-center justify-between active:border-[#00B894]"
             >
-              <View className="flex-row items-center gap-3">
-                <View className="w-11 h-11 rounded-xl bg-[#FF9F0A]/20 items-center justify-center border border-[#FF9F0A]/40">
-                  <Text className="text-xl">📁</Text>
+              <View className="flex-row items-center gap-3.5">
+                <View className="w-10 h-10 rounded-xl bg-[#00B894]/15 items-center justify-center border border-[#00B894]/30">
+                  <Text className="text-base font-bold text-[#00B894]">■</Text>
                 </View>
                 <View>
-                  <Text className="text-sm font-bold text-white">
-                    Hide Document or Any File
+                  <Text className="text-sm font-bold text-[#E8E8F0]">
+                    Confidential File / PDF
                   </Text>
-                  <Text className="text-xs text-[#8E94A7] mt-0.5">
-                    PDF, documents, spreadsheets, zip archives
+                  <Text className="text-xs text-[#6B6B8D] mt-0.5">
+                    Contracts, spreadsheets, keys, and documents
                   </Text>
                 </View>
               </View>
-              <Text className="text-sm text-[#8E94A7]">›</Text>
+              <Text className="text-sm text-[#6B6B8D]">›</Text>
             </TouchableOpacity>
           </View>
         </View>

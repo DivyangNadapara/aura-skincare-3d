@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Switch, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, TouchableOpacity, Switch, LayoutAnimation, Platform } from 'react-native';
 import { AlarmItem } from '../types/alarm';
 import { DayPills } from './DayPills';
-
 
 interface AlarmCardProps {
   alarm: AlarmItem;
@@ -20,35 +19,38 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete 
 
   return (
     <View
-      className={`rounded-[26px] mb-3.5 transition-all overflow-hidden ${
+      className={`rounded-[32px] mb-4 overflow-hidden border ${
         alarm.isEnabled
-          ? 'bg-[#1C1F2B] border border-[#272B3B]'
-          : 'bg-[#14161F] border border-[#1A1C25] opacity-70'
+          ? 'bg-[#0D0D1A] border-[#1E1E3A]'
+          : 'bg-[#080814] border-[#121226] opacity-60'
       }`}
     >
+      {/* Active accent top bar */}
+      {alarm.isEnabled && (
+        <View className="h-[2px] w-20 bg-[#6C5CE7]" />
+      )}
+
       {/* Main Clickable Card Surface */}
       <TouchableOpacity
         activeOpacity={0.88}
         onPress={toggleExpand}
-        className="p-5"
+        className="p-6"
       >
         <View className="flex-row items-center justify-between">
-          
           {/* Left Column: Time, Label, and Days */}
           <View className="flex-1 pr-3">
-            
             {/* Digital Time & Period */}
-            <View className="flex-row items-baseline mb-1">
+            <View className="flex-row items-baseline mb-1.5">
               <Text
-                className={`text-4xl font-bold font-sans tracking-tight ${
-                  alarm.isEnabled ? 'text-white' : 'text-[#6C7182]'
+                className={`text-5xl font-extralight tracking-tighter ${
+                  alarm.isEnabled ? 'text-[#E8E8F0]' : 'text-[#3D3D5C]'
                 }`}
               >
                 {alarm.time}
               </Text>
               <Text
-                className={`text-sm font-semibold ml-2 uppercase ${
-                  alarm.isEnabled ? 'text-[#2C7BFE]' : 'text-[#4B5061]'
+                className={`text-xs font-bold tracking-[2px] ml-2.5 uppercase ${
+                  alarm.isEnabled ? 'text-[#6C5CE7]' : 'text-[#2D2D44]'
                 }`}
               >
                 {alarm.period}
@@ -57,57 +59,65 @@ export const AlarmCard: React.FC<AlarmCardProps> = ({ alarm, onToggle, onDelete 
 
             {/* Alarm Label / Purpose */}
             <Text
-              className={`text-sm mb-3.5 font-normal ${
-                alarm.isEnabled ? 'text-[#CBD0DF]' : 'text-[#5B6070]'
+              className={`text-xs mb-4 font-medium tracking-wide ${
+                alarm.isEnabled ? 'text-[#6B6B8D]' : 'text-[#3D3D5C]'
               }`}
             >
               {alarm.label}
             </Text>
 
-            {/* Days Chips Row (Samsung S M T W T F S) */}
+            {/* Days Chips Row */}
             <DayPills
               selectedDays={alarm.days}
               isAlarmEnabled={alarm.isEnabled}
             />
           </View>
 
-          {/* Right Column: Samsung One UI Switch */}
+          {/* Right Column: Switch */}
           <View className="items-center justify-center pl-2">
             <Switch
               value={alarm.isEnabled}
               onValueChange={(val) => onToggle(alarm.id, val)}
-              trackColor={{ false: '#2E3240', true: '#2C7BFE' }}
-              thumbColor={alarm.isEnabled ? '#FFFFFF' : '#8A8F9E'}
-              ios_backgroundColor="#2E3240"
+              trackColor={{ false: '#14142A', true: '#6C5CE7' }}
+              thumbColor={alarm.isEnabled ? '#FFFFFF' : '#3D3D5C'}
+              ios_backgroundColor="#14142A"
             />
           </View>
         </View>
       </TouchableOpacity>
 
-      {/* Expanded Quick Settings Drawer (Samsung Style) */}
+      {/* Expanded Quick Settings Drawer */}
       {isExpanded && (
-        <View className="px-5 pb-5 pt-2 border-t border-[#252937] bg-[#151722]">
+        <View className="px-6 pb-6 pt-3 border-t border-[#14142A] bg-[#0A0A14]">
           <View className="flex-row justify-between items-center py-2.5">
-            <Text className="text-xs text-[#82889A]">Alarm sound</Text>
-            <Text className="text-xs text-[#E1E5F2] font-medium">{alarm.sound}</Text>
+            <Text className="text-[11px] font-bold tracking-[2px] uppercase text-[#6B6B8D]">
+              Acoustic Theme
+            </Text>
+            <Text className="text-xs text-[#E8E8F0] font-mono">{alarm.sound}</Text>
           </View>
 
-          <View className="flex-row justify-between items-center py-2.5 border-t border-[#1F2230]">
-            <Text className="text-xs text-[#82889A]">Vibration pattern</Text>
-            <Text className="text-xs text-[#2C7BFE] font-medium">{alarm.vibration}</Text>
+          <View className="flex-row justify-between items-center py-2.5 border-t border-[#121224]">
+            <Text className="text-[11px] font-bold tracking-[2px] uppercase text-[#6B6B8D]">
+              Tactile Haptic
+            </Text>
+            <Text className="text-xs text-[#6C5CE7] font-mono">{alarm.vibration}</Text>
           </View>
 
-          <View className="flex-row justify-between items-center py-2.5 border-t border-[#1F2230]">
-            <Text className="text-xs text-[#82889A]">Snooze</Text>
-            <Text className="text-xs text-[#E1E5F2] font-medium">{alarm.snooze}</Text>
+          <View className="flex-row justify-between items-center py-2.5 border-t border-[#121224]">
+            <Text className="text-[11px] font-bold tracking-[2px] uppercase text-[#6B6B8D]">
+              Snooze Rhythm
+            </Text>
+            <Text className="text-xs text-[#E8E8F0] font-mono">{alarm.snoozeInterval}</Text>
           </View>
 
           {onDelete && (
             <TouchableOpacity
               onPress={() => onDelete(alarm.id)}
-              className="mt-3 py-2.5 bg-[#FF3B30]/15 rounded-2xl items-center"
+              className="mt-3 py-2.5 rounded-xl bg-[#FD79A8]/10 border border-[#FD79A8]/20 items-center"
             >
-              <Text className="text-xs text-[#FF453A] font-semibold">Delete</Text>
+              <Text className="text-xs text-[#FD79A8] font-bold uppercase tracking-[2px]">
+                Erase Anchor
+              </Text>
             </TouchableOpacity>
           )}
         </View>

@@ -17,6 +17,23 @@ import {
 import { AddTransactionModal } from '../components/AddTransactionModal';
 import { ExpenseCalendar } from '../components/ExpenseCalendar';
 
+// ── Category color map for breakdown bars ──
+const CATEGORY_COLORS: Partial<Record<ExpenseCategory, string>> = {
+  Food: '#FD79A8',
+  Transport: '#6C5CE7',
+  Shopping: '#FDCB6E',
+  Entertainment: '#00B894',
+  Health: '#74B9FF',
+  Bills: '#E17055',
+  Education: '#A29BFE',
+  Travel: '#55EFC4',
+  Salary: '#00B894',
+  Freelance: '#6C5CE7',
+  Investment: '#FDCB6E',
+  Gift: '#FD79A8',
+  Other: '#636E72',
+};
+
 interface ExpensesScreenProps {
   onBack?: () => void;
 }
@@ -127,46 +144,46 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#000000]">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className="flex-1 bg-[#050510]">
+      <StatusBar barStyle="light-content" backgroundColor="#050510" />
 
       <View className="flex-1">
-        {/* TOP ACTION BAR */}
-        <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
+        {/* ── TOP ACTION BAR ── */}
+        <View className="flex-row items-center justify-between px-6 pt-3 pb-1">
           {onBack ? (
             <TouchableOpacity
               onPress={onBack}
-              activeOpacity={0.7}
-              className="py-1 pr-3 flex-row items-center gap-1"
+              activeOpacity={0.6}
+              className="py-1 pr-3 flex-row items-center gap-1.5"
             >
-              <Text className="text-xl text-white">←</Text>
-              <Text className="text-sm font-semibold text-[#8D92A4]">Home</Text>
+              <Text className="text-lg text-[#6B6B8D]">◂</Text>
+              <Text className="text-[11px] font-semibold text-[#6B6B8D] uppercase tracking-[2px]">Back</Text>
             </TouchableOpacity>
           ) : (
             <View />
           )}
 
-          <View className="flex-row items-center space-x-5 gap-5">
+          <View className="flex-row items-center gap-5">
             <TouchableOpacity
-              activeOpacity={0.7}
+              activeOpacity={0.6}
               onPress={() => setIsModalOpen(true)}
               className="p-1"
             >
-              <Text className="text-2xl font-light text-white leading-none">+</Text>
+              <Text className="text-2xl font-light text-[#6C5CE7] leading-none">+</Text>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.7} className="p-1">
-              <Text className="text-xl text-[#9EA3B5] font-bold">⋮</Text>
+            <TouchableOpacity activeOpacity={0.6} className="p-1">
+              <Text className="text-lg text-[#3D3D5C] font-bold">⋮</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* ONE UI HEADER */}
-        <View className="px-6 pt-2 pb-4">
-          <Text className="text-3xl font-bold tracking-tight text-white font-sans">
-            Expenses & Income
+        {/* ── SCREEN TITLE ── */}
+        <View className="px-6 pt-1 pb-5">
+          <Text className="text-[10px] font-bold text-[#6C5CE7] uppercase tracking-[4px] mb-1">
+            Finance
           </Text>
-          <Text className="text-sm text-[#8D92A4] mt-1 font-normal">
-            Financial rhythm & daily cashflow
+          <Text className="text-3xl font-extrabold tracking-tight text-[#E8E8F0]">
+            Cash Flow
           </Text>
         </View>
 
@@ -174,63 +191,76 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
           showsVerticalScrollIndicator={false}
           className="flex-1 px-4"
           contentContainerStyle={{
-            paddingBottom: Platform.OS === 'ios' ? 80 : 70,
+            paddingBottom: Platform.OS === 'ios' ? 90 : 80,
           }}
         >
-          {/* ── ADVANCED CALCULATION SUMMARY CARD ── */}
-          <View className="bg-[#181B26] border border-[#272B3B] rounded-[28px] p-5 mb-4 shadow-lg shadow-black/80">
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-xs font-semibold uppercase tracking-wider text-[#82889A]">
-                {selectedDate ? `Net Balance (${selectedDate})` : 'Monthly Net Balance'}
+          {/* ══════════════════════════════════════════════════════════════
+              HERO BALANCE CARD
+              ══════════════════════════════════════════════════════════════ */}
+          <View className="bg-[#0D0D1A] border border-[#1E1E3A] rounded-[36px] p-6 mb-5">
+            {/* Top label row */}
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-[10px] font-bold uppercase tracking-[3px] text-[#3D3D5C]">
+                {selectedDate ? 'Day Balance' : 'Net Balance'}
               </Text>
               <View
-                className={`px-2.5 py-0.5 rounded-full ${
-                  summary.savingsRate >= 0 ? 'bg-[#30D158]/20' : 'bg-[#FF453A]/20'
+                className={`px-3 py-1 rounded-full border ${
+                  summary.savingsRate >= 0
+                    ? 'bg-[#00B894]/8 border-[#00B894]/20'
+                    : 'bg-[#FD79A8]/8 border-[#FD79A8]/20'
                 }`}
               >
                 <Text
-                  className={`text-[11px] font-bold ${
-                    summary.savingsRate >= 0 ? 'text-[#30D158]' : 'text-[#FF453A]'
+                  className={`text-[10px] font-extrabold tracking-[1px] ${
+                    summary.savingsRate >= 0 ? 'text-[#00B894]' : 'text-[#FD79A8]'
                   }`}
                 >
-                  {summary.savingsRate}% Saved
+                  {summary.savingsRate >= 0 ? '▲' : '▼'} {Math.abs(summary.savingsRate)}%
                 </Text>
               </View>
             </View>
 
-            {/* Total Balance Amount */}
-            <Text className="text-4xl font-extrabold text-white mb-4">
+            {/* HERO AMOUNT — massive, dominating */}
+            <Text
+              className="text-[52px] font-extrabold text-[#E8E8F0] mb-6"
+              style={{ letterSpacing: -2, lineHeight: 58 }}
+            >
               ${summary.netBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </Text>
 
-            {/* Income & Expense Split Chips */}
-            <View className="flex-row items-center justify-between bg-[#11131C] p-3 rounded-2xl border border-[#202330]">
-              {/* Income */}
-              <View className="flex-1">
-                <Text className="text-[11px] text-[#8E94A7] font-semibold mb-0.5">
-                  ↓ Total Income
-                </Text>
-                <Text className="text-base font-bold text-[#30D158]">
-                  +${summary.income.toFixed(2)}
-                </Text>
+            {/* Income & Expense split — two elegant columns with accent bars */}
+            <View className="flex-row">
+              {/* Income column */}
+              <View className="flex-1 flex-row">
+                <View className="w-[3px] rounded-full bg-[#00B894] mr-3" />
+                <View>
+                  <Text className="text-[10px] font-bold uppercase tracking-[2px] text-[#3D3D5C] mb-1">
+                    Income
+                  </Text>
+                  <Text className="text-lg font-extrabold text-[#00B894]">
+                    +${summary.income.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Text>
+                </View>
               </View>
 
-              {/* Vertical divider */}
-              <View className="w-[1px] h-8 bg-[#2A2E3D] mx-3" />
-
-              {/* Expense */}
-              <View className="flex-1">
-                <Text className="text-[11px] text-[#8E94A7] font-semibold mb-0.5">
-                  ↑ Total Expenses
-                </Text>
-                <Text className="text-base font-bold text-[#FF453A]">
-                  -${summary.expenses.toFixed(2)}
-                </Text>
+              {/* Expense column */}
+              <View className="flex-1 flex-row">
+                <View className="w-[3px] rounded-full bg-[#FD79A8] mr-3" />
+                <View>
+                  <Text className="text-[10px] font-bold uppercase tracking-[2px] text-[#3D3D5C] mb-1">
+                    Expenses
+                  </Text>
+                  <Text className="text-lg font-extrabold text-[#FD79A8]">
+                    -${summary.expenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
 
-          {/* ── INTERACTIVE MONTHLY CALENDAR ── */}
+          {/* ══════════════════════════════════════════════════════════════
+              INTERACTIVE MONTHLY CALENDAR
+              ══════════════════════════════════════════════════════════════ */}
           <ExpenseCalendar
             currentYear={currentYear}
             currentMonth={currentMonth}
@@ -241,163 +271,218 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
             transactions={transactions}
           />
 
-          {/* ── SELECTED DATE ACTIVE FILTER BANNER ── */}
+          {/* ══════════════════════════════════════════════════════════════
+              SELECTED DATE FILTER BANNER
+              ══════════════════════════════════════════════════════════════ */}
           {selectedDate && (
-            <View className="flex-row items-center justify-between bg-[#2C7BFE]/15 border border-[#2C7BFE]/40 rounded-2xl px-4 py-2.5 mb-4">
-              <View className="flex-row items-center gap-2">
-                <Text className="text-base">📅</Text>
-                <Text className="text-xs font-semibold text-[#8EB7FF]">
-                  Filtered for: <Text className="font-bold text-white">{selectedDate}</Text>
+            <View className="flex-row items-center justify-between bg-[#6C5CE7]/8 border border-[#6C5CE7]/20 rounded-2xl px-4 py-3 mb-5">
+              <View className="flex-row items-center gap-2.5">
+                <View className="w-2 h-2 rounded-full bg-[#6C5CE7]" />
+                <Text className="text-[11px] font-semibold text-[#A29BFE]">
+                  Filtered: <Text className="font-bold text-[#E8E8F0]">{selectedDate}</Text>
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => setSelectedDate(null)}
-                className="bg-[#2C7BFE]/30 px-2.5 py-1 rounded-full"
-                activeOpacity={0.7}
+                className="bg-[#6C5CE7]/15 px-3 py-1.5 rounded-full"
+                activeOpacity={0.6}
               >
-                <Text className="text-[11px] font-bold text-[#8EB7FF]">Show Month ✕</Text>
+                <Text className="text-[10px] font-bold text-[#A29BFE] tracking-[1px]">CLEAR</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {/* ── EXPENSE CATEGORY ANALYTICS BAR ── */}
+          {/* ══════════════════════════════════════════════════════════════
+              CATEGORY BREAKDOWN — colored dots + horizontal bars
+              ══════════════════════════════════════════════════════════════ */}
           {categoryBreakdown.length > 0 && (
-            <View className="bg-[#141620] border border-[#212433] rounded-[24px] p-4 mb-5">
-              <Text className="text-xs font-bold text-[#8E94A7] uppercase tracking-wider mb-3">
-                Expense Breakdown
+            <View className="bg-[#0D0D1A] border border-[#1E1E3A] rounded-[28px] p-5 mb-6">
+              <Text className="text-[10px] font-bold text-[#3D3D5C] uppercase tracking-[3px] mb-4">
+                Breakdown
               </Text>
-              {categoryBreakdown.map((item) => (
-                <View key={item.category} className="mb-2.5">
-                  <View className="flex-row justify-between mb-1">
-                    <Text className="text-xs font-medium text-white">
-                      {CATEGORY_ICONS[item.category]} {item.category}
-                    </Text>
-                    <Text className="text-xs font-semibold text-[#8D92A4]">
-                      ${item.amount.toFixed(2)} ({item.percentage}%)
-                    </Text>
+              {categoryBreakdown.map((item) => {
+                const barColor = CATEGORY_COLORS[item.category] || '#6C5CE7';
+                return (
+                  <View key={item.category} className="mb-3.5">
+                    <View className="flex-row items-center justify-between mb-1.5">
+                      <View className="flex-row items-center gap-2.5">
+                        {/* Colored dot indicator */}
+                        <View
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: barColor }}
+                        />
+                        <Text className="text-[12px] font-semibold text-[#E8E8F0]">
+                          {item.category}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Text className="text-[12px] font-extrabold text-[#E8E8F0]">
+                          ${item.amount.toFixed(0)}
+                        </Text>
+                        <Text className="text-[10px] font-bold text-[#3D3D5C]">
+                          {item.percentage}%
+                        </Text>
+                      </View>
+                    </View>
+                    {/* Styled horizontal bar */}
+                    <View className="h-[5px] bg-[#14142A] rounded-full overflow-hidden">
+                      <View
+                        style={{
+                          width: `${Math.min(item.percentage, 100)}%`,
+                          backgroundColor: barColor,
+                          opacity: 0.85,
+                        }}
+                        className="h-full rounded-full"
+                      />
+                    </View>
                   </View>
-                  {/* Progress bar */}
-                  <View className="h-1.5 bg-[#252837] rounded-full overflow-hidden">
-                    <View
-                      style={{ width: `${Math.min(item.percentage, 100)}%` }}
-                      className="h-full bg-[#2C7BFE] rounded-full"
-                    />
-                  </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           )}
 
-          {/* ── TRANSACTION LIST HEADER & TYPE FILTER CHIPS ── */}
-          <View className="flex-row items-center justify-between mb-3 mt-1">
-            <Text className="text-xs font-bold text-[#82889A] uppercase tracking-wider">
-              {selectedDate ? `Transactions (${selectedDate})` : 'Monthly Records'}
+          {/* ══════════════════════════════════════════════════════════════
+              TRANSACTION LIST HEADER & FILTER PILLS
+              ══════════════════════════════════════════════════════════════ */}
+          <View className="flex-row items-center justify-between mb-4 mt-1">
+            <Text className="text-[10px] font-bold text-[#3D3D5C] uppercase tracking-[3px]">
+              Records
             </Text>
 
-            <View className="flex-row gap-1 bg-[#12141D] p-1 rounded-xl border border-[#212433]">
-              {(['all', 'expense', 'income'] as const).map((tab) => (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => setFilterType(tab)}
-                  className={`px-2.5 py-1 rounded-lg ${
-                    filterType === tab ? 'bg-[#2C7BFE]' : ''
-                  }`}
-                >
-                  <Text
-                    className={`text-[10px] font-bold uppercase ${
-                      filterType === tab ? 'text-white' : 'text-[#82889A]'
+            <View className="flex-row gap-2">
+              {(['all', 'expense', 'income'] as const).map((tab) => {
+                const isActive = filterType === tab;
+                return (
+                  <TouchableOpacity
+                    key={tab}
+                    onPress={() => setFilterType(tab)}
+                    activeOpacity={0.6}
+                    className={`px-3.5 py-1.5 rounded-full border ${
+                      isActive
+                        ? 'bg-[#6C5CE7]/15 border-[#6C5CE7]/40'
+                        : 'bg-transparent border-[#1E1E3A]'
                     }`}
+                    style={
+                      isActive
+                        ? {
+                            shadowColor: '#6C5CE7',
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 8,
+                            elevation: 4,
+                          }
+                        : undefined
+                    }
                   >
-                    {tab}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      className={`text-[10px] font-bold uppercase tracking-[1px] ${
+                        isActive ? 'text-[#A29BFE]' : 'text-[#3D3D5C]'
+                      }`}
+                    >
+                      {tab}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
-          {/* ── TRANSACTION CARDS ── */}
+          {/* ══════════════════════════════════════════════════════════════
+              TRANSACTION CARDS — minimal, thin accent line design
+              ══════════════════════════════════════════════════════════════ */}
           {filteredTransactions.length === 0 ? (
-            <View className="items-center justify-center py-12">
-              <Text className="text-3xl mb-2">💳</Text>
-              <Text className="text-sm text-[#8E94A7] font-medium">
-                No transactions for this selection
+            <View className="items-center justify-center py-16">
+              <Text className="text-3xl text-[#1E1E3A] mb-3">◇</Text>
+              <Text className="text-[12px] text-[#3D3D5C] font-medium">
+                No transactions found
               </Text>
               {selectedDate && (
                 <TouchableOpacity
                   onPress={() => setSelectedDate(null)}
-                  className="mt-3 bg-[#1C1F2B] px-4 py-2 rounded-xl border border-[#272B3B]"
+                  className="mt-4 bg-[#14142A] px-5 py-2.5 rounded-full border border-[#1E1E3A]"
+                  activeOpacity={0.6}
                 >
-                  <Text className="text-xs text-[#2C7BFE] font-bold">
-                    View Entire Month
+                  <Text className="text-[10px] text-[#6C5CE7] font-bold uppercase tracking-[2px]">
+                    View Month
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
           ) : (
-            filteredTransactions.map((tx) => (
-              <View
-                key={tx.id}
-                className="bg-[#1C1F2B] border border-[#272B3B] rounded-2xl p-4 mb-3 flex-row items-center justify-between shadow-sm shadow-black"
-              >
-                <View className="flex-row items-center flex-1 pr-3">
+            filteredTransactions.map((tx) => {
+              const isIncome = tx.type === 'income';
+              const accentColor = isIncome ? '#00B894' : '#FD79A8';
+
+              return (
+                <View
+                  key={tx.id}
+                  className="flex-row mb-2.5 rounded-2xl overflow-hidden bg-[#0D0D1A] border border-[#1E1E3A]"
+                >
+                  {/* Thin left accent line */}
                   <View
-                    className={`w-11 h-11 rounded-2xl items-center justify-center mr-3 border ${
-                      tx.type === 'income'
-                        ? 'bg-[#30D158]/15 border-[#30D158]/30'
-                        : 'bg-[#FF453A]/15 border-[#FF453A]/30'
-                    }`}
-                  >
-                    <Text className="text-xl">
-                      {CATEGORY_ICONS[tx.category] || '📦'}
-                    </Text>
-                  </View>
+                    className="w-[3px]"
+                    style={{ backgroundColor: accentColor }}
+                  />
 
-                  <View className="flex-1">
-                    <Text className="text-sm font-bold text-white mb-0.5">
-                      {tx.title}
-                    </Text>
-                    <Text className="text-[11px] text-[#82889A]">
-                      {tx.category} • 📅 {tx.dateStr} • ⏰ {tx.timeStr}
-                    </Text>
-                    {tx.note ? (
-                      <Text className="text-[10px] text-[#5D6273] mt-0.5" numberOfLines={1}>
-                        "{tx.note}"
+                  {/* Content area */}
+                  <View className="flex-1 flex-row items-center justify-between px-4 py-3.5">
+                    <View className="flex-1 pr-3">
+                      <Text className="text-[13px] font-bold text-[#E8E8F0] mb-0.5">
+                        {tx.title}
                       </Text>
-                    ) : null}
+                      <View className="flex-row items-center gap-1.5">
+                        <Text className="text-[10px] text-[#3D3D5C] font-medium">
+                          {tx.category}
+                        </Text>
+                        <Text className="text-[8px] text-[#1E1E3A]">●</Text>
+                        <Text className="text-[10px] text-[#3D3D5C] font-medium">
+                          {tx.dateStr}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Amount + delete */}
+                    <View className="items-end">
+                      <Text
+                        className={`text-[15px] font-extrabold ${
+                          isIncome ? 'text-[#00B894]' : 'text-[#FD79A8]'
+                        }`}
+                        style={{ letterSpacing: -0.5 }}
+                      >
+                        {isIncome ? '+' : '-'}${tx.amount.toFixed(2)}
+                      </Text>
+
+                      <TouchableOpacity
+                        onPress={() => handleDeleteTransaction(tx.id)}
+                        className="mt-1 px-1.5 py-0.5"
+                        activeOpacity={0.5}
+                      >
+                        <Text className="text-[9px] text-[#3D3D5C] font-semibold">
+                          Remove
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-
-                {/* Amount and delete button */}
-                <View className="items-end">
-                  <Text
-                    className={`text-base font-extrabold ${
-                      tx.type === 'income' ? 'text-[#30D158]' : 'text-[#FF453A]'
-                    }`}
-                  >
-                    {tx.type === 'income' ? '+' : '-'}${tx.amount.toFixed(2)}
-                  </Text>
-
-                  <TouchableOpacity
-                    onPress={() => handleDeleteTransaction(tx.id)}
-                    className="mt-1 px-1.5 py-0.5"
-                  >
-                    <Text className="text-[10px] text-[#6E7385] font-semibold">
-                      Delete
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
+              );
+            })
           )}
         </ScrollView>
 
-        {/* FLOATING ACTION BUTTON TO ADD TRANSACTION */}
+        {/* ── FLOATING ACTION BUTTON ── */}
         <TouchableOpacity
-          activeOpacity={0.85}
+          activeOpacity={0.8}
           onPress={() => setIsModalOpen(true)}
-          className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-[#2C7BFE] items-center justify-center shadow-xl shadow-[#2C7BFE]/40"
+          className="absolute bottom-7 right-6 w-14 h-14 rounded-full bg-[#6C5CE7] items-center justify-center"
+          style={{
+            shadowColor: '#6C5CE7',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.5,
+            shadowRadius: 16,
+            elevation: 12,
+          }}
         >
-          <Text className="text-2xl text-white font-light">+</Text>
+          <Text className="text-2xl text-white font-light leading-none">+</Text>
         </TouchableOpacity>
       </View>
 
@@ -411,4 +496,3 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
     </SafeAreaView>
   );
 };
-

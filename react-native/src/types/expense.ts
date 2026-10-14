@@ -23,15 +23,15 @@ export interface TransactionItem {
 }
 
 export const CATEGORY_ICONS: Record<ExpenseCategory, string> = {
-  'Food & Dining': '🍔',
-  Shopping: '🛍️',
-  Transport: '🚗',
-  'Bills & Utilities': '⚡',
-  'Health & Fitness': '💊',
-  Entertainment: '🎬',
-  'Salary & Work': '💼',
-  Investments: '📈',
-  Other: '📦',
+  'Food & Dining': '◆',
+  Shopping: '◇',
+  Transport: '▲',
+  'Bills & Utilities': '⬡',
+  'Health & Fitness': '✚',
+  Entertainment: '◈',
+  'Salary & Work': '■',
+  Investments: '▲',
+  Other: '●',
 };
 
 // Initial mock transactions anchored to October 2026

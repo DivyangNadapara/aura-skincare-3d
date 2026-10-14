@@ -67,105 +67,128 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#000000]">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className="flex-1 bg-[#050510]">
+      <StatusBar barStyle="light-content" backgroundColor="#050510" />
+
+      {/* ── AMBIENT GRADIENT MESH SIMULATION ── */}
+      <View className="absolute top-0 left-0 right-0 h-96 bg-[#08081A] opacity-60" />
+      <View className="absolute top-16 right-[-50px] w-64 h-64 rounded-full bg-[#FD79A8] opacity-[0.03]" />
+      <View className="absolute top-48 left-[-40px] w-48 h-48 rounded-full bg-[#6C5CE7] opacity-[0.04]" />
 
       <View className="flex-1">
-        
-        {/* SAMSUNG TOP ACTION BAR */}
-        <View className="flex-row items-center justify-between px-6 pt-3 pb-2">
+        {/* ── TOP ACTION BAR ── */}
+        <View className="flex-row items-center justify-between px-6 pt-3 pb-2 z-10">
           {onBack ? (
-            <TouchableOpacity onPress={onBack} activeOpacity={0.7} className="py-1 pr-3 flex-row items-center gap-1">
-              <Text className="text-xl text-white">←</Text>
-              <Text className="text-sm font-semibold text-[#8D92A4]">Home</Text>
+            <TouchableOpacity
+              onPress={onBack}
+              activeOpacity={0.7}
+              className="py-1 pr-3 flex-row items-center gap-1.5"
+            >
+              <Text className="text-lg text-[#6B6B8D]">←</Text>
+              <Text className="text-[11px] font-semibold tracking-[2px] uppercase text-[#6B6B8D]">
+                Home
+              </Text>
             </TouchableOpacity>
           ) : (
             <View />
           )}
-          <View className="flex-row items-center space-x-5 gap-5">
-            <TouchableOpacity onPress={handleCreateNew} className="p-1">
-              <Text className="text-2xl font-light text-white leading-none">+</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="p-1">
-              <Text className="text-xl text-[#9EA3B5] font-bold">⋮</Text>
-            </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleCreateNew}
+            activeOpacity={0.7}
+            className="w-8 h-8 rounded-full bg-[#FD79A8]/15 border border-[#FD79A8]/30 items-center justify-center"
+          >
+            <Text className="text-lg font-light text-[#E8E8F0] leading-none">+</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── DRAMATIC HEADER ── */}
+        <View className="px-6 pt-3 pb-4">
+          <View className="flex-row items-center gap-2 mb-1.5">
+            <View className="w-2 h-2 rounded-full bg-[#FD79A8]" />
+            <Text className="text-[10px] font-bold tracking-[3px] uppercase text-[#6B6B8D]">
+              Protocols & Logs
+            </Text>
           </View>
-        </View>
-
-        {/* SAMSUNG LARGE ONE UI HEADER */}
-        <View className="px-6 pt-2 pb-4">
-          <Text className="text-3xl font-bold tracking-tight text-white font-sans">
-            Notes
+          <Text className="text-3xl font-extrabold tracking-tight text-[#E8E8F0] font-sans">
+            Aesthetic Notes
           </Text>
-          <Text className="text-sm text-[#8D92A4] mt-1 font-normal">
-            {notes.length} {notes.length === 1 ? 'note' : 'notes'}
+          <Text className="text-xs text-[#6B6B8D] mt-1 font-normal tracking-wide">
+            {notes.length} verified research logs and photo evidence
           </Text>
         </View>
 
-        {/* SEARCH BAR (Samsung Pill Input) */}
-        <View className="px-5 mb-3">
-          <View className="flex-row items-center bg-[#171A26] rounded-2xl px-4 py-2.5 border border-[#232738]">
-            <Text className="text-sm mr-2 text-[#7D8294]">🔍</Text>
+        {/* ── SEARCH BAR ── */}
+        <View className="px-5 mb-4">
+          <View className="flex-row items-center bg-[#0D0D1A] rounded-2xl px-4 py-3 border border-[#1E1E3A]">
+            <Text className="text-xs mr-2.5 text-[#6C5CE7]">◈</Text>
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Search notes and protocols"
-              placeholderTextColor="#5C6274"
-              className="flex-1 text-white text-xs py-0 font-medium"
+              placeholder="Search protocols and evidence..."
+              placeholderTextColor="#3D3D5C"
+              className="flex-1 text-[#E8E8F0] text-xs py-0 font-medium"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Text className="text-xs text-[#8E94A7]">✕</Text>
+                <Text className="text-xs text-[#6B6B8D]">✕</Text>
               </TouchableOpacity>
             )}
           </View>
         </View>
 
-        {/* CATEGORY FILTER CHIPS */}
-        <View className="mb-3 px-5">
+        {/* ── CATEGORY FILTER CHIPS ── */}
+        <View className="mb-4 px-5">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex-row"
+            contentContainerStyle={{ gap: 8 }}
           >
-            {['All', ...NOTE_CATEGORIES].map((cat) => (
-              <TouchableOpacity
-                key={cat}
-                onPress={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-full mr-2 ${
-                  selectedCategory === cat ? 'bg-[#2C7BFE]' : 'bg-[#181A25]'
-                }`}
-              >
-                <Text
-                  className={`text-xs ${
-                    selectedCategory === cat ? 'text-white font-bold' : 'text-[#82889A]'
+            {['All', ...NOTE_CATEGORIES].map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => setSelectedCategory(cat)}
+                  activeOpacity={0.75}
+                  className={`px-3.5 py-1.5 rounded-2xl border ${
+                    isSelected
+                      ? 'bg-[#FD79A8] border-[#FD79A8]'
+                      : 'bg-[#0D0D1A] border-[#1E1E3A]'
                   }`}
                 >
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    className={`text-xs font-bold tracking-wider ${
+                      isSelected ? 'text-[#050510]' : 'text-[#6B6B8D]'
+                    }`}
+                  >
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
         </View>
 
-        {/* NOTES LIST */}
+        {/* ── NOTES LIST ── */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           className="flex-1 px-4"
           contentContainerStyle={{
-            paddingBottom: Platform.OS === 'ios' ? 80 : 70,
+            paddingBottom: Platform.OS === 'ios' ? 100 : 90,
           }}
         >
           {filteredNotes.length === 0 ? (
-            <View className="items-center justify-center py-20">
-              <Text className="text-3xl mb-2">📝</Text>
-              <Text className="text-sm text-[#8E94A7] font-medium">No notes found</Text>
-              <TouchableOpacity
-                onPress={handleCreateNew}
-                className="mt-3 px-4 py-2 bg-[#2C7BFE] rounded-xl"
-              >
-                <Text className="text-xs text-white font-bold">Create Note</Text>
-              </TouchableOpacity>
+            <View className="items-center justify-center py-20 bg-[#0D0D1A] border border-[#1E1E3A] rounded-[32px] px-6">
+              <View className="w-16 h-16 rounded-3xl bg-[#14142A] border border-[#1E1E3A] items-center justify-center mb-4">
+                <Text className="text-2xl text-[#FD79A8]">◈</Text>
+              </View>
+              <Text className="text-base font-bold text-[#E8E8F0] mb-1">
+                Zero Logs Found
+              </Text>
+              <Text className="text-xs text-[#6B6B8D] text-center max-w-xs mb-5">
+                No matching notes or protocols in this category.
+              </Text>
             </View>
           ) : (
             filteredNotes.map((note) => (
@@ -178,20 +201,20 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
           )}
         </ScrollView>
 
-        {/* SAMSUNG FLOATING ACTION BUTTON (FAB) */}
+        {/* FLOATING ACTION BUTTON */}
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={handleCreateNew}
-          className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-[#2C7BFE] items-center justify-center shadow-xl shadow-[#2C7BFE]/40"
+          className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-[#FD79A8] items-center justify-center shadow-2xl shadow-[#FD79A8]/40"
         >
-          <Text className="text-2xl text-white">✍️</Text>
+          <Text className="text-2xl text-[#050510] font-light">+</Text>
         </TouchableOpacity>
       </View>
 
-      {/* NOTE EDITOR MODAL (Create, Edit, Save, Add Images) */}
+      {/* NOTE EDITOR MODAL */}
       <NoteEditorModal
         visible={isEditorOpen}
-        initialNote={editingNote}
+        note={editingNote}
         onClose={() => setIsEditorOpen(false)}
         onSave={handleSaveNote}
         onDelete={handleDeleteNote}
@@ -199,4 +222,3 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
     </SafeAreaView>
   );
 };
-

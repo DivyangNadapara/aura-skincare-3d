@@ -5,9 +5,7 @@ import {
   Modal,
   TouchableOpacity,
   Image,
-  ScrollView,
   Alert,
-  Platform,
 } from 'react-native';
 import { VaultItem, formatBytes } from '../types/vault';
 import { VideoView, useVideoPlayer } from 'expo-video';
@@ -35,12 +33,12 @@ export const VaultViewerModal: React.FC<VaultViewerModalProps> = ({
 
   const handleDeleteConfirm = () => {
     Alert.alert(
-      'Remove from Vault',
-      `Are you sure you want to delete "${item.name}" from your private vault?`,
+      'Permanent Deletion',
+      `Erase "${item.name}" from your encrypted vault? This cannot be undone.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Delete',
+          text: 'Erase',
           style: 'destructive',
           onPress: () => {
             onDelete(item.id);
@@ -56,7 +54,7 @@ export const VaultViewerModal: React.FC<VaultViewerModalProps> = ({
       setIsRestoring(true);
       await onRestoreToGallery(item);
     } catch (e: any) {
-      Alert.alert('Restore Failed', e?.message || 'Could not export file to gallery.');
+      Alert.alert('Export Failed', e?.message || 'Could not export artifact to gallery.');
     } finally {
       setIsRestoring(false);
     }
@@ -69,70 +67,75 @@ export const VaultViewerModal: React.FC<VaultViewerModalProps> = ({
       transparent
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/95 justify-between">
-        {/* HEADER BAR */}
-        <View className="pt-12 px-6 pb-4 flex-row items-center justify-between border-b border-[#212433]">
+      <View className="flex-1 bg-[#050510]/98 justify-between">
+        {/* ── HEADER BAR ── */}
+        <View className="pt-12 px-6 pb-4 flex-row items-center justify-between border-b border-[#1E1E3A]">
           <View className="flex-1 mr-4">
-            <Text className="text-base font-bold text-white" numberOfLines={1}>
+            <Text className="text-base font-bold text-[#E8E8F0]" numberOfLines={1}>
               {item.name}
             </Text>
-            <Text className="text-xs text-[#8E94A7] mt-0.5">
-              {item.type.toUpperCase()} • {formatBytes(item.sizeBytes)} • {item.dateAdded}
+            <Text className="text-[11px] text-[#6B6B8D] font-mono mt-0.5 tracking-wider uppercase">
+              {item.type} • {formatBytes(item.sizeBytes)} • {item.dateAdded}
             </Text>
           </View>
 
           <TouchableOpacity
             onPress={onClose}
-            className="w-9 h-9 rounded-full bg-[#181B26] items-center justify-center border border-[#272B3B]"
+            activeOpacity={0.7}
+            className="w-9 h-9 rounded-full bg-[#14142A] items-center justify-center border border-[#1E1E3A]"
           >
-            <Text className="text-lg text-white font-light">✕</Text>
+            <Text className="text-base text-[#6B6B8D] font-light">✕</Text>
           </TouchableOpacity>
         </View>
 
-        {/* MEDIA PREVIEW CONTAINER */}
+        {/* ── MEDIA PREVIEW CONTAINER ── */}
         <View className="flex-1 items-center justify-center p-4">
           {item.type === 'image' ? (
             <Image
               source={{ uri: item.uri }}
-              className="w-full h-full rounded-2xl"
+              className="w-full h-full rounded-3xl"
               resizeMode="contain"
             />
           ) : item.type === 'video' ? (
             <VaultVideoPlayer uri={item.uri} />
           ) : (
-            <View className="items-center justify-center bg-[#141620] p-8 rounded-3xl border border-[#212433] max-w-sm w-full">
-              <View className="w-20 h-20 rounded-2xl bg-[#2C7BFE]/15 border border-[#2C7BFE]/30 items-center justify-center mb-4">
-                <Text className="text-4xl">📄</Text>
+            <View className="items-center justify-center bg-[#0D0D1A] p-8 rounded-[36px] border border-[#1E1E3A] max-w-sm w-full shadow-2xl">
+              <View className="w-20 h-20 rounded-3xl bg-[#6C5CE7]/15 border border-[#6C5CE7]/30 items-center justify-center mb-5">
+                <Text className="text-3xl text-[#6C5CE7]">■</Text>
               </View>
-              <Text className="text-lg font-bold text-white text-center mb-1">
+              <Text className="text-base font-bold text-[#E8E8F0] text-center mb-1">
                 {item.originalFileName || item.name}
               </Text>
-              <Text className="text-xs text-[#8E94A7] text-center mb-4">
+              <Text className="text-xs text-[#6B6B8D] font-mono text-center mb-5 uppercase tracking-wider">
                 Encrypted Document • {formatBytes(item.sizeBytes)}
               </Text>
               {item.note ? (
-                <View className="bg-[#1C1F2B] p-3 rounded-xl border border-[#272B3B] w-full">
-                  <Text className="text-xs text-[#5D6273] font-semibold mb-1 uppercase">Note:</Text>
-                  <Text className="text-xs text-white leading-relaxed">{item.note}</Text>
+                <View className="bg-[#14142A] p-4 rounded-2xl border border-[#1E1E3A] w-full">
+                  <Text className="text-[10px] text-[#6C5CE7] font-bold tracking-[2px] uppercase mb-1">
+                    Cipher Note
+                  </Text>
+                  <Text className="text-xs text-[#E8E8F0] leading-relaxed">
+                    {item.note}
+                  </Text>
                 </View>
               ) : null}
             </View>
           )}
         </View>
 
-        {/* BOTTOM ACTION TOOLBAR */}
-        <View className="px-6 pb-8 pt-4 border-t border-[#212433] bg-[#0E1017]">
+        {/* ── BOTTOM ACTION TOOLBAR ── */}
+        <View className="px-6 pb-8 pt-4 border-t border-[#1E1E3A] bg-[#0A0A14]">
           <View className="flex-row items-center justify-between gap-3">
             {/* RESTORE TO GALLERY BUTTON */}
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={handleRestore}
               disabled={isRestoring}
-              className="flex-1 bg-[#2C7BFE] py-3.5 px-4 rounded-2xl flex-row items-center justify-center gap-2 shadow-lg shadow-[#2C7BFE]/30"
+              className="flex-1 bg-[#00B894] py-3.5 px-4 rounded-2xl flex-row items-center justify-center gap-2 shadow-lg shadow-[#00B894]/30"
             >
-              <Text className="text-lg">📥</Text>
-              <Text className="text-xs font-bold text-white">
-                {isRestoring ? 'Restoring...' : 'Restore to Gallery'}
+              <Text className="text-sm font-bold text-[#050510]">↑</Text>
+              <Text className="text-xs font-bold uppercase tracking-[2px] text-[#050510]">
+                {isRestoring ? 'Decrypting...' : 'Restore to Gallery'}
               </Text>
             </TouchableOpacity>
 
@@ -140,23 +143,23 @@ export const VaultViewerModal: React.FC<VaultViewerModalProps> = ({
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => onShare(item)}
-              className="w-12 h-12 rounded-2xl bg-[#1C1F2B] border border-[#272B3B] items-center justify-center"
+              className="w-12 h-12 rounded-2xl bg-[#14142A] border border-[#1E1E3A] items-center justify-center"
             >
-              <Text className="text-lg">↗</Text>
+              <Text className="text-base text-[#6C5CE7]">↗</Text>
             </TouchableOpacity>
 
             {/* DELETE BUTTON */}
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={handleDeleteConfirm}
-              className="w-12 h-12 rounded-2xl bg-[#FF453A]/15 border border-[#FF453A]/30 items-center justify-center"
+              className="w-12 h-12 rounded-2xl bg-[#FD79A8]/10 border border-[#FD79A8]/25 items-center justify-center"
             >
-              <Text className="text-base text-[#FF453A]">🗑</Text>
+              <Text className="text-base text-[#FD79A8]">✕</Text>
             </TouchableOpacity>
           </View>
 
-          <Text className="text-[10px] text-[#555B70] text-center mt-3 font-medium">
-            "Restore to Gallery" exports the decrypted file back to your device's photo library or downloads.
+          <Text className="text-[10px] text-[#3D3D5C] text-center mt-3 font-mono tracking-wider">
+            RESTORE TO GALLERY WRITES DECRYPTED BYTES TO NATIVE PHOTO ROLL
           </Text>
         </View>
       </View>
@@ -174,7 +177,7 @@ const VaultVideoPlayer: React.FC<{ uri: string }> = ({ uri }) => {
   } catch (e) {}
 
   return (
-    <View className="w-full h-80 rounded-2xl overflow-hidden bg-black items-center justify-center border border-[#272B3B]">
+    <View className="w-full h-80 rounded-3xl overflow-hidden bg-black items-center justify-center border border-[#1E1E3A]">
       {player ? (
         <VideoView
           player={player}
@@ -184,8 +187,8 @@ const VaultVideoPlayer: React.FC<{ uri: string }> = ({ uri }) => {
         />
       ) : (
         <View className="items-center">
-          <Text className="text-3xl mb-2">🎬</Text>
-          <Text className="text-xs text-[#8E94A7]">Video ready to stream</Text>
+          <Text className="text-2xl text-[#6C5CE7] mb-2">▲</Text>
+          <Text className="text-xs text-[#6B6B8D] font-mono">Stream Ready</Text>
         </View>
       )}
     </View>

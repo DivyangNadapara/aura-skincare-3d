@@ -18,7 +18,7 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView className="flex-1 bg-[#050510]">
       <View className="flex-1">
         {currentScreen === 'home' ? (
           <HomeScreen onSelectBranch={(branch) => setCurrentScreen(branch)} />

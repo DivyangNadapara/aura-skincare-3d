@@ -58,138 +58,189 @@ export const VaultLockScreen: React.FC<VaultLockScreenProps> = ({
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#000000] justify-between pb-8">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className="flex-1 bg-[#050510]">
+      <StatusBar barStyle="light-content" backgroundColor="#050510" />
 
-      {/* TOP BAR */}
-      <View className="px-6 pt-3 flex-row items-center justify-between">
-        {onBack ? (
-          <TouchableOpacity
-            onPress={onBack}
-            activeOpacity={0.7}
-            className="flex-row items-center py-2 pr-4 gap-1"
-          >
-            <Text className="text-xl text-white">←</Text>
-            <Text className="text-sm font-semibold text-[#8D92A4]">Home</Text>
-          </TouchableOpacity>
-        ) : (
-          <View />
-        )}
-        <View className="bg-[#1C1F2B] px-3 py-1 rounded-full border border-[#272B3B]">
-          <Text className="text-[11px] text-[#2C7BFE] font-bold">🔒 Encrypted</Text>
-        </View>
+      {/* ── LAYERED GRADIENT BACKGROUND ── */}
+      <View className="absolute inset-0 bg-[#050510]">
+        {/* Radial gradient simulation — concentric layers */}
+        <View className="absolute top-1/4 left-1/2 -translate-x-[200px] -translate-y-[200px] w-[400px] h-[400px] rounded-full bg-[#0D0D1A] opacity-80" />
+        <View className="absolute top-1/4 left-1/2 -translate-x-[140px] -translate-y-[140px] w-[280px] h-[280px] rounded-full bg-[#0F0F20] opacity-60" />
+        <View className="absolute top-1/4 left-1/2 -translate-x-[80px] -translate-y-[80px] w-[160px] h-[160px] rounded-full bg-[#14142A] opacity-40" />
+        {/* Bottom ambient glow */}
+        <View className="absolute bottom-0 left-0 right-0 h-[300px] bg-[#08081A] opacity-90" />
       </View>
 
-      {/* CENTER HEADING & PIN DOTS */}
-      <View className="items-center px-6">
-        <View className="w-20 h-20 rounded-3xl bg-[#181B26] border border-[#272B3B] items-center justify-center mb-6 shadow-xl shadow-black">
-          <Text className="text-4xl">🔐</Text>
+      {/* ── CORNER ACCENT DECORATIONS ── */}
+      <View className="absolute top-12 left-6 w-8 h-[1px] bg-[#6C5CE7] opacity-30" />
+      <View className="absolute top-12 left-6 w-[1px] h-8 bg-[#6C5CE7] opacity-30" />
+      <View className="absolute top-12 right-6 w-8 h-[1px] bg-[#6C5CE7] opacity-30" />
+      <View className="absolute top-12 right-6 w-[1px] h-8 bg-[#6C5CE7] opacity-30" />
+
+      <View className="flex-1 justify-between pb-10">
+        {/* ── TOP BAR ── */}
+        <View className="px-7 pt-4 flex-row items-center justify-between z-10">
+          {onBack ? (
+            <TouchableOpacity
+              onPress={onBack}
+              activeOpacity={0.7}
+              className="flex-row items-center py-2 pr-4"
+            >
+              <Text className="text-lg text-[#6B6B8D] mr-1">←</Text>
+              <Text className="text-[11px] font-medium text-[#6B6B8D] uppercase tracking-[2px]">Back</Text>
+            </TouchableOpacity>
+          ) : (
+            <View />
+          )}
+          <View className="flex-row items-center">
+            <View className="w-[5px] h-[5px] rounded-full bg-[#00B894] mr-2" />
+            <Text className="text-[10px] text-[#3D3D5C] font-semibold uppercase tracking-[3px]">
+              Encrypted
+            </Text>
+          </View>
         </View>
 
-        <Text className="text-2xl font-bold text-white tracking-tight text-center">
-          Secure Personal Vault
-        </Text>
-        <Text className="text-xs text-[#8E94A7] text-center mt-2 px-8">
-          Enter your 4-digit security PIN to unlock hidden photos, videos, and private documents
-        </Text>
+        {/* ── CENTER — GEOMETRIC LOCK ICON + HEADING + PIN DOTS ── */}
+        <View className="items-center px-6 z-10">
+          {/* Geometric diamond lock icon — overlapping rotated squares */}
+          <View className="w-24 h-24 items-center justify-center mb-8">
+            {/* Outer diamond ring */}
+            <View className="absolute w-24 h-24 rounded-[20px] border border-[#1E1E3A] rotate-45" />
+            {/* Middle diamond */}
+            <View className="absolute w-16 h-16 rounded-[14px] border border-[#6C5CE7] opacity-30 rotate-45" />
+            {/* Inner filled diamond */}
+            <View className="absolute w-8 h-8 rounded-[6px] bg-[#6C5CE7] opacity-20 rotate-45" />
+            {/* Lock symbol centered */}
+            <Text className="text-2xl text-[#6C5CE7] font-bold">◆</Text>
+          </View>
 
-        {/* PIN DOTS */}
-        <View className="flex-row items-center justify-center gap-5 mt-8 mb-2">
-          {[0, 1, 2, 3].map((idx) => {
-            const isFilled = pin.length > idx;
-            return (
-              <View
-                key={idx}
-                className={`w-4 h-4 rounded-full transition-all duration-150 ${
-                  hasError
-                    ? 'bg-[#FF453A] scale-110'
-                    : isFilled
-                    ? 'bg-[#2C7BFE] scale-110'
-                    : 'bg-[#272B3B]'
-                }`}
-              />
-            );
-          })}
-        </View>
+          {/* Thin accent line */}
+          <View className="w-12 h-[1px] bg-[#1E1E3A] mb-6" />
 
-        {hasError ? (
-          <Text className="text-xs text-[#FF453A] font-semibold mt-2">
-            Incorrect PIN. Try again.
+          <Text className="text-[10px] text-[#3D3D5C] font-bold uppercase tracking-[5px] mb-3">
+            Personal Vault
           </Text>
-        ) : (
-          <Text className="text-[11px] text-[#555B70] font-medium mt-2">
-            Default PIN: <Text className="text-[#8E94A7] font-bold">1234</Text>
+          <Text className="text-2xl font-bold text-[#E8E8F0] tracking-tight text-center">
+            Enter Security PIN
           </Text>
-        )}
-      </View>
+          <Text className="text-[11px] text-[#3D3D5C] text-center mt-2 px-10 leading-4">
+            4-digit code required to access hidden files
+          </Text>
 
-      {/* NUMPAD */}
-      <View className="px-10">
-        <View className="flex-row justify-between mb-4">
-          {['1', '2', '3'].map((n) => (
-            <TouchableOpacity
-              key={n}
-              activeOpacity={0.6}
-              onPress={() => handleKeyPress(n)}
-              className="w-20 h-20 rounded-full bg-[#141620] border border-[#212433] items-center justify-center active:bg-[#2C7BFE]/30"
-            >
-              <Text className="text-2xl font-semibold text-white">{n}</Text>
-            </TouchableOpacity>
-          ))}
+          {/* ── PIN DOTS — dramatic with glow rings ── */}
+          <View className="flex-row items-center justify-center mt-10 mb-3" style={{ gap: 28 }}>
+            {[0, 1, 2, 3].map((idx) => {
+              const isFilled = pin.length > idx;
+              const isError = hasError;
+              return (
+                <View key={idx} className="items-center justify-center">
+                  {/* Outer glow ring */}
+                  <View
+                    className={`w-[22px] h-[22px] rounded-full items-center justify-center ${
+                      isError
+                        ? 'bg-[#FF453A]/15'
+                        : isFilled
+                        ? 'bg-[#6C5CE7]/15'
+                        : 'bg-transparent'
+                    }`}
+                  >
+                    {/* Middle ring */}
+                    <View
+                      className={`w-[16px] h-[16px] rounded-full items-center justify-center ${
+                        isError
+                          ? 'bg-[#FF453A]/25'
+                          : isFilled
+                          ? 'bg-[#6C5CE7]/25'
+                          : 'bg-transparent'
+                      }`}
+                    >
+                      {/* Inner dot */}
+                      <View
+                        className={`w-[10px] h-[10px] rounded-full ${
+                          isError
+                            ? 'bg-[#FF453A]'
+                            : isFilled
+                            ? 'bg-[#6C5CE7]'
+                            : 'bg-[#1E1E3A]'
+                        }`}
+                      />
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+
+          {hasError ? (
+            <Text className="text-[11px] text-[#FF453A] font-semibold mt-1 tracking-wide">
+              Incorrect PIN
+            </Text>
+          ) : (
+            <Text className="text-[10px] text-[#3D3D5C] font-medium mt-1">
+              Default: <Text className="text-[#6B6B8D] font-bold tracking-[2px]">1234</Text>
+            </Text>
+          )}
         </View>
 
-        <View className="flex-row justify-between mb-4">
-          {['4', '5', '6'].map((n) => (
-            <TouchableOpacity
-              key={n}
-              activeOpacity={0.6}
-              onPress={() => handleKeyPress(n)}
-              className="w-20 h-20 rounded-full bg-[#141620] border border-[#212433] items-center justify-center active:bg-[#2C7BFE]/30"
-            >
-              <Text className="text-2xl font-semibold text-white">{n}</Text>
-            </TouchableOpacity>
+        {/* ── NUMPAD — MINIMAL, NO BORDERS ── */}
+        <View className="px-12 z-10">
+          {/* Thin decorative line above numpad */}
+          <View className="h-[1px] bg-[#1E1E3A] mx-8 mb-8 opacity-40" />
+
+          {[
+            ['1', '2', '3'],
+            ['4', '5', '6'],
+            ['7', '8', '9'],
+          ].map((row, rowIdx) => (
+            <View key={rowIdx} className="flex-row justify-between mb-5">
+              {row.map((n) => (
+                <TouchableOpacity
+                  key={n}
+                  activeOpacity={0.3}
+                  onPress={() => handleKeyPress(n)}
+                  className="w-20 h-16 items-center justify-center"
+                >
+                  <Text className="text-[28px] font-light text-[#E8E8F0] tracking-tight">
+                    {n}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           ))}
-        </View>
 
-        <View className="flex-row justify-between mb-4">
-          {['7', '8', '9'].map((n) => (
+          {/* Bottom row: biometric / 0 / delete */}
+          <View className="flex-row justify-between items-center">
+            {/* Biometric trigger */}
             <TouchableOpacity
-              key={n}
-              activeOpacity={0.6}
-              onPress={() => handleKeyPress(n)}
-              className="w-20 h-20 rounded-full bg-[#141620] border border-[#212433] items-center justify-center active:bg-[#2C7BFE]/30"
+              activeOpacity={0.3}
+              onPress={handleBiometricMock}
+              className="w-20 h-16 items-center justify-center"
             >
-              <Text className="text-2xl font-semibold text-white">{n}</Text>
+              <View className="w-10 h-10 rounded-full border border-[#1E1E3A] items-center justify-center">
+                <Text className="text-[13px] text-[#6C5CE7] font-bold">✦</Text>
+              </View>
             </TouchableOpacity>
-          ))}
-        </View>
 
-        <View className="flex-row justify-between items-center">
-          {/* Biometric trigger button */}
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={handleBiometricMock}
-            className="w-20 h-20 rounded-full bg-[#141620]/60 border border-[#212433] items-center justify-center active:bg-[#2C7BFE]/30"
-          >
-            <Text className="text-2xl">⚡</Text>
-          </TouchableOpacity>
+            {/* Zero */}
+            <TouchableOpacity
+              activeOpacity={0.3}
+              onPress={() => handleKeyPress('0')}
+              className="w-20 h-16 items-center justify-center"
+            >
+              <Text className="text-[28px] font-light text-[#E8E8F0] tracking-tight">
+                0
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => handleKeyPress('0')}
-            className="w-20 h-20 rounded-full bg-[#141620] border border-[#212433] items-center justify-center active:bg-[#2C7BFE]/30"
-          >
-            <Text className="text-2xl font-semibold text-white">0</Text>
-          </TouchableOpacity>
-
-          {/* Backspace */}
-          <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={handleDelete}
-            className="w-20 h-20 rounded-full bg-[#141620]/60 border border-[#212433] items-center justify-center active:bg-[#FF453A]/20"
-          >
-            <Text className="text-xl text-[#9EA3B5]">⌫</Text>
-          </TouchableOpacity>
+            {/* Backspace */}
+            <TouchableOpacity
+              activeOpacity={0.3}
+              onPress={handleDelete}
+              className="w-20 h-16 items-center justify-center"
+            >
+              <Text className="text-[18px] text-[#6B6B8D]">←</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </SafeAreaView>

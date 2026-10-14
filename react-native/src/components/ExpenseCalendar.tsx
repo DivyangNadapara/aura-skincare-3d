@@ -65,43 +65,46 @@ export const ExpenseCalendar: React.FC<ExpenseCalendarProps> = ({
   }
 
   return (
-    <View className="bg-[#141620] border border-[#232738] rounded-[28px] p-4 mb-4">
-      {/* Month Navigator Header */}
-      <View className="flex-row items-center justify-between mb-3 px-1">
+    <View className="bg-[#0D0D1A] border border-[#1E1E3A] rounded-[32px] p-5 mb-5">
+      {/* ── MONTH NAVIGATOR ── */}
+      <View className="flex-row items-center justify-between mb-5 px-1">
         <TouchableOpacity
           onPress={onPrevMonth}
-          className="w-8 h-8 rounded-full bg-[#1C1F2B] items-center justify-center border border-[#272B3B]"
+          activeOpacity={0.6}
+          className="w-9 h-9 rounded-full bg-[#14142A] items-center justify-center border border-[#1E1E3A]"
         >
-          <Text className="text-white text-xs font-bold">‹</Text>
+          <Text className="text-[#6B6B8D] text-sm font-bold">◂</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => onSelectDate(null)}
+          activeOpacity={0.7}
           className="items-center"
         >
-          <Text className="text-base font-bold text-white">
-            {MONTH_NAMES[currentMonth]} {currentYear}
+          <Text className="text-2xl font-extrabold text-[#E8E8F0] tracking-tight">
+            {MONTH_NAMES[currentMonth]}
           </Text>
-          <Text className="text-[10px] text-[#2C7BFE] font-medium mt-0.5">
-            {selectedDate ? `Filtering: ${selectedDate} (Tap to show all)` : 'Showing Full Month'}
+          <Text className="text-[10px] text-[#3D3D5C] font-semibold tracking-[4px] uppercase mt-1">
+            {currentYear}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={onNextMonth}
-          className="w-8 h-8 rounded-full bg-[#1C1F2B] items-center justify-center border border-[#272B3B]"
+          activeOpacity={0.6}
+          className="w-9 h-9 rounded-full bg-[#14142A] items-center justify-center border border-[#1E1E3A]"
         >
-          <Text className="text-white text-xs font-bold">›</Text>
+          <Text className="text-[#6B6B8D] text-sm font-bold">▸</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Weekday Labels (S M T W T F S) */}
-      <View className="flex-row justify-between mb-2 px-1">
+      {/* ── WEEKDAY LABELS ── */}
+      <View className="flex-row justify-between mb-3 px-0.5">
         {WEEK_DAYS.map((wd, i) => (
-          <View key={i} className="w-10 items-center">
+          <View key={i} className="flex-1 items-center">
             <Text
-              className={`text-[11px] font-bold ${
-                i === 0 ? 'text-[#FF453A]' : i === 6 ? 'text-[#2C7BFE]' : 'text-[#6C7182]'
+              className={`text-[10px] font-bold tracking-[2px] ${
+                i === 0 || i === 6 ? 'text-[#3D3D5C]' : 'text-[#6B6B8D]'
               }`}
             >
               {wd}
@@ -110,11 +113,11 @@ export const ExpenseCalendar: React.FC<ExpenseCalendarProps> = ({
         ))}
       </View>
 
-      {/* Calendar Days Grid */}
-      <View className="flex-row flex-wrap justify-between">
+      {/* ── CALENDAR GRID ── */}
+      <View className="flex-row flex-wrap">
         {cells.map((dayNum, idx) => {
           if (dayNum === null) {
-            return <View key={idx} className="w-10 h-10 m-0.5" />;
+            return <View key={idx} style={{ width: '14.285%' }} className="h-11 p-0.5" />;
           }
 
           const dayStr = dayNum.toString().padStart(2, '0');
@@ -123,54 +126,95 @@ export const ExpenseCalendar: React.FC<ExpenseCalendarProps> = ({
 
           const isSelected = selectedDate === cellDateStr;
           const txStatus = dateTxMap[cellDateStr];
+          const hasTx = txStatus?.hasIncome || txStatus?.hasExpense;
 
           return (
-            <TouchableOpacity
-              key={idx}
-              activeOpacity={0.7}
-              onPress={() => {
-                if (isSelected) {
-                  onSelectDate(null); // Deselect to show whole month
-                } else {
-                  onSelectDate(cellDateStr);
-                }
-              }}
-              className={`w-10 h-10 m-0.5 rounded-2xl items-center justify-center ${
-                isSelected
-                  ? 'bg-[#2C7BFE] border border-white'
-                  : 'bg-[#181B26] border border-[#202330]'
-              }`}
-            >
-              <Text
-                className={`text-xs font-bold ${
-                  isSelected ? 'text-white font-extrabold' : 'text-[#CBD0E0]'
-                }`}
+            <View key={idx} style={{ width: '14.285%' }} className="items-center p-0.5">
+              <TouchableOpacity
+                activeOpacity={0.6}
+                onPress={() => {
+                  if (isSelected) {
+                    onSelectDate(null); // Deselect to show whole month
+                  } else {
+                    onSelectDate(cellDateStr);
+                  }
+                }}
+                className="w-full items-center justify-center"
               >
-                {dayNum}
-              </Text>
+                {/* Outer glow ring for selected state */}
+                <View
+                  className={`w-10 h-10 rounded-full items-center justify-center ${
+                    isSelected
+                      ? 'bg-[#6C5CE7]/10 border-2 border-[#6C5CE7]'
+                      : hasTx
+                        ? 'bg-[#14142A]'
+                        : ''
+                  }`}
+                  style={
+                    isSelected
+                      ? {
+                          shadowColor: '#6C5CE7',
+                          shadowOffset: { width: 0, height: 0 },
+                          shadowOpacity: 0.6,
+                          shadowRadius: 10,
+                          elevation: 8,
+                        }
+                      : undefined
+                  }
+                >
+                  <Text
+                    className={`text-[13px] font-semibold ${
+                      isSelected
+                        ? 'text-[#E8E8F0] font-extrabold'
+                        : hasTx
+                          ? 'text-[#E8E8F0]'
+                          : 'text-[#6B6B8D]'
+                    }`}
+                  >
+                    {dayNum}
+                  </Text>
 
-              {/* Transaction indicator dots */}
-              <View className="flex-row gap-0.5 mt-0.5">
-                {txStatus?.hasIncome && (
-                  <View
-                    className={`w-1 h-1 rounded-full ${
-                      isSelected ? 'bg-white' : 'bg-[#30D158]'
-                    }`}
-                  />
-                )}
-                {txStatus?.hasExpense && (
-                  <View
-                    className={`w-1 h-1 rounded-full ${
-                      isSelected ? 'bg-white' : 'bg-[#FF453A]'
-                    }`}
-                  />
-                )}
-              </View>
-            </TouchableOpacity>
+                  {/* Transaction indicator dots */}
+                  {(txStatus?.hasIncome || txStatus?.hasExpense) && (
+                    <View className="flex-row gap-[3px] mt-0.5">
+                      {txStatus?.hasIncome && (
+                        <View
+                          className={`w-[4px] h-[4px] rounded-full ${
+                            isSelected ? 'bg-[#E8E8F0]' : 'bg-[#00B894]'
+                          }`}
+                        />
+                      )}
+                      {txStatus?.hasExpense && (
+                        <View
+                          className={`w-[4px] h-[4px] rounded-full ${
+                            isSelected ? 'bg-[#E8E8F0]' : 'bg-[#FD79A8]'
+                          }`}
+                        />
+                      )}
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
           );
         })}
       </View>
+
+      {/* ── SELECTED DATE INDICATOR ── */}
+      {selectedDate && (
+        <View className="mt-4 pt-3 border-t border-[#1E1E3A] flex-row items-center justify-center">
+          <View className="w-[5px] h-[5px] rounded-full bg-[#6C5CE7] mr-2" />
+          <Text className="text-[11px] text-[#6B6B8D] font-medium">
+            {selectedDate}
+          </Text>
+          <Text className="text-[11px] text-[#3D3D5C] mx-2">·</Text>
+          <TouchableOpacity onPress={() => onSelectDate(null)} activeOpacity={0.7}>
+            <Text className="text-[11px] text-[#6C5CE7] font-semibold">
+              Show all
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
-

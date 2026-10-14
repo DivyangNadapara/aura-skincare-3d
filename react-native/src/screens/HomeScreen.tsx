@@ -16,6 +16,15 @@ interface HomeScreenProps {
   vaultCount?: number;
 }
 
+const getGreeting = (): string => {
+  const hour = new Date().getHours();
+  if (hour < 5) return 'Deep Night';
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  if (hour < 21) return 'Good Evening';
+  return 'Good Night';
+};
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectBranch,
   activeAlarmsCount = 2,
@@ -23,185 +32,272 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   balanceAmount = 1180.71,
   vaultCount = 4,
 }) => {
+  const greeting = getGreeting();
+
   return (
-    <SafeAreaView className="flex-1 bg-[#000000]">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className="flex-1 bg-[#050510]">
+      <StatusBar barStyle="light-content" backgroundColor="#050510" />
 
-      <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
-        
-        {/* SAMSUNG ONE UI HOME HEADER */}
-        <View className="pt-4 pb-6">
-          <Text className="text-sm font-semibold uppercase tracking-wider text-[#2C7BFE] mb-1 font-sans">
-            Personal System
-          </Text>
-          <Text className="text-4xl font-extrabold tracking-tight text-white font-sans">
-            Daily Rhythm
-          </Text>
-          <Text className="text-sm text-[#8D92A4] mt-1.5 font-normal">
-            Select a branch to manage your daily routines
-          </Text>
-        </View>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
-        {/* BRANCH SELECTION CARDS */}
-        <View className="mb-6">
-          <Text className="text-xs font-semibold uppercase tracking-wider text-[#676D80] mb-3 font-mono">
-            System Branches
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* DRAMATIC HEADER — Gradient mesh background simulation */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <View className="pt-14 pb-10 px-7">
+          {/* Subtle gradient overlay layers */}
+          <View className="absolute top-0 left-0 right-0 bottom-0 bg-[#0A0A18] opacity-60 rounded-b-[60px]" />
+          <View className="absolute top-10 right-0 w-48 h-48 bg-[#6C5CE7] opacity-[0.04] rounded-full" />
+          <View className="absolute top-20 left-[-40px] w-32 h-32 bg-[#FD79A8] opacity-[0.03] rounded-full" />
+
+          {/* Greeting */}
+          <Text className="text-[11px] font-medium tracking-[4px] uppercase text-[#6B6B8D] mb-3">
+            {greeting}
           </Text>
 
-          {/* BRANCH 1: ALARMS & RHYTHM */}
-          <TouchableOpacity
-            activeOpacity={0.88}
-            onPress={() => onSelectBranch('alarm')}
-            className="bg-[#1C1F2B] border border-[#272B3B] active:border-[#2C7BFE] rounded-[28px] p-6 mb-4 shadow-lg shadow-black/60"
-          >
-            <View className="flex-row items-center justify-between mb-4">
-              <View className="w-12 h-12 rounded-2xl bg-[#2C7BFE]/15 border border-[#2C7BFE]/30 items-center justify-center">
-                <Text className="text-2xl">⏰</Text>
-              </View>
-
-              <View className="px-3 py-1 rounded-full bg-[#2C7BFE]/20 border border-[#2C7BFE]/40">
-                <Text className="text-[11px] font-bold text-[#2C7BFE]">
-                  {activeAlarmsCount} Active
-                </Text>
-              </View>
-            </View>
-
-            <Text className="text-xl font-bold text-white mb-1.5 font-sans">
-              Alarms & Rhythm
+          {/* App name — creative wide-spaced typography */}
+          <View className="flex-row items-baseline mb-2">
+            <Text className="text-[38px] font-extralight tracking-[14px] text-[#E8E8F0]">
+              DIV
             </Text>
-            <Text className="text-xs text-[#9DA3B5] leading-relaxed mb-4">
-              Configure circadian wake anchors, deep work surges, and night recovery alarms with Samsung 3-wheel precision.
-            </Text>
-
-            <View className="flex-row items-center justify-between pt-3 border-t border-[#252938]">
-              <Text className="text-xs text-[#2C7BFE] font-bold">
-                Next: 7:30 AM (in 4h 15m)
-              </Text>
-              <Text className="text-base text-white font-bold">
-                →
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* BRANCH 2: NOTES & PROTOCOLS */}
-          <TouchableOpacity
-            activeOpacity={0.88}
-            onPress={() => onSelectBranch('notes')}
-            className="bg-[#1C1F2B] border border-[#272B3B] active:border-[#2C7BFE] rounded-[28px] p-6 mb-4 shadow-lg shadow-black/60"
-          >
-            <View className="flex-row items-center justify-between mb-4">
-              <View className="w-12 h-12 rounded-2xl bg-[#2C7BFE]/15 border border-[#2C7BFE]/30 items-center justify-center">
-                <Text className="text-2xl">📝</Text>
-              </View>
-
-              <View className="px-3 py-1 rounded-full bg-[#252838] border border-[#303548]">
-                <Text className="text-[11px] font-semibold text-[#8E94A7]">
-                  {notesCount} Notes
-                </Text>
-              </View>
-            </View>
-
-            <Text className="text-xl font-bold text-white mb-1.5 font-sans">
-              Notes & Protocols
-            </Text>
-            <Text className="text-xs text-[#9DA3B5] leading-relaxed mb-4">
-              Create, edit, and organize biohacking insights with attached image evidence, photobiology logs, and pinned routines.
-            </Text>
-
-            <View className="flex-row items-center justify-between pt-3 border-t border-[#252938]">
-              <Text className="text-xs text-[#8E94A7] font-medium">
-                Photo attachments enabled
-              </Text>
-              <Text className="text-base text-white font-bold">
-                →
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* BRANCH 3: EXPENSES & INCOME (NEW) */}
-          <TouchableOpacity
-            activeOpacity={0.88}
-            onPress={() => onSelectBranch('expenses')}
-            className="bg-[#1C1F2B] border border-[#272B3B] active:border-[#2C7BFE] rounded-[28px] p-6 mb-4 shadow-lg shadow-black/60"
-          >
-            <View className="flex-row items-center justify-between mb-4">
-              <View className="w-12 h-12 rounded-2xl bg-[#30D158]/15 border border-[#30D158]/30 items-center justify-center">
-                <Text className="text-2xl">💳</Text>
-              </View>
-
-              <View className="px-3 py-1 rounded-full bg-[#30D158]/20 border border-[#30D158]/40">
-                <Text className="text-[11px] font-bold text-[#30D158]">
-                  +${balanceAmount.toFixed(2)} Balance
-                </Text>
-              </View>
-            </View>
-
-            <Text className="text-xl font-bold text-white mb-1.5 font-sans">
-              Expenses & Cashflow
-            </Text>
-            <Text className="text-xs text-[#9DA3B5] leading-relaxed mb-4">
-              Log daily income & spending with instant math, savings rate calculations, and smart category breakdown analytics.
-            </Text>
-
-            <View className="flex-row items-center justify-between pt-3 border-t border-[#252938]">
-              <Text className="text-xs text-[#30D158] font-bold">
-                Financial analytics ready
-              </Text>
-              <Text className="text-base text-white font-bold">
-                →
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* BRANCH 4: SECRET MEDIA & FILE VAULT (NEW) */}
-          <TouchableOpacity
-            activeOpacity={0.88}
-            onPress={() => onSelectBranch('vault')}
-            className="bg-[#1C1F2B] border border-[#272B3B] active:border-[#2C7BFE] rounded-[28px] p-6 mb-4 shadow-lg shadow-black/60"
-          >
-            <View className="flex-row items-center justify-between mb-4">
-              <View className="w-12 h-12 rounded-2xl bg-[#FF9F0A]/15 border border-[#FF9F0A]/30 items-center justify-center">
-                <Text className="text-2xl">🔐</Text>
-              </View>
-
-              <View className="px-3 py-1 rounded-full bg-[#FF9F0A]/20 border border-[#FF9F0A]/40">
-                <Text className="text-[11px] font-bold text-[#FF9F0A]">
-                  🔒 PIN Protected
-                </Text>
-              </View>
-            </View>
-
-            <Text className="text-xl font-bold text-white mb-1.5 font-sans">
-              Secret Media & File Vault
-            </Text>
-            <Text className="text-xs text-[#9DA3B5] leading-relaxed mb-4">
-              Hide private photos, videos, and confidential documents inside an encrypted sandbox. Easily restore files back to your device's photo gallery anytime.
-            </Text>
-
-            <View className="flex-row items-center justify-between pt-3 border-t border-[#252938]">
-              <Text className="text-xs text-[#FF9F0A] font-bold">
-                Export & Gallery Restore ready
-              </Text>
-              <Text className="text-base text-white font-bold">
-                →
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-        </View>
-
-        {/* QUICK STATUS CARD */}
-        <View className="bg-[#141620] border border-[#1E212E] rounded-[24px] p-5 mb-8">
-          <View className="flex-row items-center gap-2 mb-2">
-            <Text className="text-base">⚡</Text>
-            <Text className="text-xs font-bold text-white uppercase tracking-wider">
-              Circadian Synchronization
+            <Text className="text-[38px] font-bold tracking-[14px] text-[#6C5CE7]">
+              YANG
             </Text>
           </View>
-          <Text className="text-xs text-[#8D92A4] leading-relaxed">
-            Your daily branches work symbiotically: use alarms to anchor your schedule, notes to log bio-data, and expenses to track your financial health.
+
+          {/* Thin accent line */}
+          <View className="flex-row items-center mt-3 gap-3">
+            <View className="w-8 h-[1.5px] bg-[#6C5CE7] rounded-full" />
+            <Text className="text-[10px] tracking-[3px] uppercase text-[#3D3D5C] font-medium">
+              Personal System
+            </Text>
+          </View>
+        </View>
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* BRANCH CARDS — Each wildly different                   */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <View className="px-5 pb-6">
+
+          {/* ─── CARD 1: ALARM — Wide hero card with GIANT time ─── */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => onSelectBranch('alarm')}
+            className="mb-5"
+          >
+            <View className="bg-[#0D0D1A] border border-[#1E1E3A] rounded-[32px] overflow-hidden">
+              {/* Inner glow layer */}
+              <View className="absolute top-0 left-0 right-0 h-24 bg-[#6C5CE7] opacity-[0.04] rounded-t-[32px]" />
+
+              <View className="p-7">
+                {/* Top row: label + pulsing dot */}
+                <View className="flex-row items-center justify-between mb-5">
+                  <View className="flex-row items-center gap-2.5">
+                    <View className="w-2 h-2 rounded-full bg-[#6C5CE7]" />
+                    <Text className="text-[10px] font-bold tracking-[3px] uppercase text-[#6B6B8D]">
+                      Wake Anchor
+                    </Text>
+                  </View>
+                  <View className="px-3 py-1.5 rounded-full bg-[#6C5CE7]/10 border border-[#6C5CE7]/20">
+                    <Text className="text-[10px] font-bold text-[#6C5CE7] tracking-wider">
+                      {activeAlarmsCount} ACTIVE
+                    </Text>
+                  </View>
+                </View>
+
+                {/* GIANT TIME DISPLAY */}
+                <View className="flex-row items-baseline mb-1">
+                  <Text className="text-[72px] font-extralight text-[#E8E8F0] leading-none tracking-tighter">
+                    07
+                  </Text>
+                  <Text className="text-[72px] font-extralight text-[#6C5CE7] leading-none mx-1">
+                    :
+                  </Text>
+                  <Text className="text-[72px] font-extralight text-[#E8E8F0] leading-none tracking-tighter">
+                    30
+                  </Text>
+                  <Text className="text-[18px] font-medium text-[#3D3D5C] ml-3 mb-2">
+                    AM
+                  </Text>
+                </View>
+
+                {/* Subtitle row */}
+                <View className="flex-row items-center justify-between mt-2">
+                  <Text className="text-[12px] text-[#6B6B8D] font-normal">
+                    Next alarm in 4h 15m
+                  </Text>
+                  <Text className="text-[16px] text-[#3D3D5C] font-light">
+                    ▸
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          {/* ─── ROW: Notes (compact) + Expenses (balance) ─── */}
+          <View className="flex-row gap-4 mb-5">
+
+            {/* ─── CARD 2: NOTES — Compact with stacked preview lines ─── */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => onSelectBranch('notes')}
+              className="flex-1"
+            >
+              <View className="bg-[#0D0D1A] border border-[#1E1E3A] rounded-[28px] overflow-hidden">
+                {/* Left accent bar */}
+                <View className="absolute left-0 top-5 bottom-5 w-[3px] bg-[#FD79A8] rounded-full" />
+
+                <View className="p-6 pl-7">
+                  {/* Header */}
+                  <View className="flex-row items-center gap-2 mb-4">
+                    <Text className="text-[14px] text-[#FD79A8] font-bold">◆</Text>
+                    <Text className="text-[10px] font-bold tracking-[2px] uppercase text-[#6B6B8D]">
+                      Notes
+                    </Text>
+                  </View>
+
+                  {/* Simulated note preview lines */}
+                  <View className="mb-4 gap-2.5">
+                    <View className="flex-row items-center gap-2">
+                      <View className="w-1.5 h-1.5 rounded-full bg-[#FD79A8] opacity-80" />
+                      <View className="h-[6px] w-[80%] bg-[#1A1A35] rounded-full" />
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      <View className="w-1.5 h-1.5 rounded-full bg-[#FD79A8] opacity-50" />
+                      <View className="h-[6px] w-[60%] bg-[#14142A] rounded-full" />
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      <View className="w-1.5 h-1.5 rounded-full bg-[#FD79A8] opacity-30" />
+                      <View className="h-[6px] w-[70%] bg-[#14142A] rounded-full" />
+                    </View>
+                  </View>
+
+                  {/* Count */}
+                  <View className="flex-row items-baseline gap-1.5">
+                    <Text className="text-[28px] font-bold text-[#E8E8F0] leading-none">
+                      {notesCount}
+                    </Text>
+                    <Text className="text-[10px] text-[#3D3D5C] font-medium tracking-wider uppercase">
+                      entries
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {/* ─── CARD 3: EXPENSES — Giant balance number ─── */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => onSelectBranch('expenses')}
+              className="flex-1"
+            >
+              <View className="bg-[#0D0D1A] border border-[#1E1E3A] rounded-[28px] overflow-hidden">
+                {/* Subtle top glow */}
+                <View className="absolute top-0 left-0 right-0 h-16 bg-[#00B894] opacity-[0.04] rounded-t-[28px]" />
+
+                <View className="p-6">
+                  {/* Header */}
+                  <View className="flex-row items-center gap-2 mb-4">
+                    <Text className="text-[14px] text-[#00B894] font-bold">▲</Text>
+                    <Text className="text-[10px] font-bold tracking-[2px] uppercase text-[#6B6B8D]">
+                      Cashflow
+                    </Text>
+                  </View>
+
+                  {/* Mini sparkline decoration (styled Views) */}
+                  <View className="flex-row items-end gap-[3px] mb-4 h-8">
+                    <View className="w-[4px] h-[8px] bg-[#00B894] opacity-20 rounded-full" />
+                    <View className="w-[4px] h-[14px] bg-[#00B894] opacity-30 rounded-full" />
+                    <View className="w-[4px] h-[10px] bg-[#00B894] opacity-25 rounded-full" />
+                    <View className="w-[4px] h-[18px] bg-[#00B894] opacity-40 rounded-full" />
+                    <View className="w-[4px] h-[12px] bg-[#00B894] opacity-30 rounded-full" />
+                    <View className="w-[4px] h-[22px] bg-[#00B894] opacity-50 rounded-full" />
+                    <View className="w-[4px] h-[16px] bg-[#00B894] opacity-35 rounded-full" />
+                    <View className="w-[4px] h-[28px] bg-[#00B894] opacity-70 rounded-full" />
+                  </View>
+
+                  {/* HUGE balance amount */}
+                  <View className="flex-row items-baseline">
+                    <Text className="text-[13px] font-light text-[#00B894] mr-0.5">
+                      $
+                    </Text>
+                    <Text className="text-[26px] font-bold text-[#E8E8F0] leading-none tracking-tight">
+                      {Math.floor(balanceAmount).toLocaleString()}
+                    </Text>
+                  </View>
+                  <Text className="text-[10px] text-[#3D3D5C] font-medium mt-1 tracking-wider uppercase">
+                    Balance
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* ─── CARD 4: VAULT — Mysterious dark card ─── */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => onSelectBranch('vault')}
+            className="mb-5"
+          >
+            <View className="bg-[#08081A] border border-[#12122A] rounded-[32px] overflow-hidden">
+              <View className="p-7">
+                <View className="flex-row items-center justify-between">
+                  {/* Left side: keyhole decoration + text */}
+                  <View className="flex-1">
+                    {/* Keyhole decorative element */}
+                    <View className="mb-5 items-start">
+                      <View className="w-10 h-10 rounded-full border-2 border-[#FDCB6E]/15 items-center justify-center">
+                        <View className="w-4 h-4 rounded-full border border-[#FDCB6E]/25 items-center justify-center">
+                          <View className="w-1.5 h-1.5 rounded-full bg-[#FDCB6E] opacity-40" />
+                        </View>
+                      </View>
+                      {/* Key shaft */}
+                      <View className="w-[2px] h-4 bg-[#FDCB6E]/10 self-center mt-[-2px]" />
+                    </View>
+
+                    <Text className="text-[10px] font-bold tracking-[3px] uppercase text-[#3D3D5C] mb-2">
+                      Secret Vault
+                    </Text>
+                    <Text className="text-[16px] font-semibold text-[#6B6B8D]">
+                      {vaultCount} items secured
+                    </Text>
+                  </View>
+
+                  {/* Right side: PIN indicator */}
+                  <View className="items-center gap-2">
+                    <View className="flex-row gap-1.5">
+                      <View className="w-2 h-2 rounded-full bg-[#FDCB6E] opacity-30" />
+                      <View className="w-2 h-2 rounded-full bg-[#FDCB6E] opacity-30" />
+                      <View className="w-2 h-2 rounded-full bg-[#FDCB6E] opacity-30" />
+                      <View className="w-2 h-2 rounded-full bg-[#FDCB6E] opacity-30" />
+                    </View>
+                    <Text className="text-[9px] tracking-[2px] uppercase text-[#3D3D5C] font-medium">
+                      PIN
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+        </View>
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* SYSTEM STATUS FOOTER                                   */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <View className="px-7 pb-10">
+          <View className="flex-row items-center gap-2 mb-2">
+            <View className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7] opacity-50" />
+            <Text className="text-[9px] tracking-[3px] uppercase text-[#3D3D5C] font-medium">
+              System Sync
+            </Text>
+          </View>
+          <Text className="text-[11px] text-[#3D3D5C] leading-relaxed font-light">
+            All branches synchronized and operational.
           </Text>
         </View>
+
+        {/* Bottom padding for nav clearance */}
+        <View className="h-24" />
 
       </ScrollView>
     </SafeAreaView>
