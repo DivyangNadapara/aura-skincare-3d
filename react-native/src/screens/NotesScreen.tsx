@@ -14,12 +14,15 @@ import { NoteItem, NoteCategory, NOTE_CATEGORIES } from '../types/note';
 import { NoteCard } from '../components/NoteCard';
 import { NoteEditorModal } from '../components/NoteEditorModal';
 
+import { useApp } from '../context/AppContext';
+
 interface NotesScreenProps {
   onBack?: () => void;
 }
 
 export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
-  const [notes, setNotes] = useState<NoteItem[]>(INITIAL_NOTES);
+  const app = useApp();
+  const notes = app.notes;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [editingNote, setEditingNote] = useState<NoteItem | null>(null);
@@ -51,19 +54,23 @@ export const NotesScreen: React.FC<NotesScreenProps> = ({ onBack }) => {
 
   // Save note (Create or Update)
   const handleSaveNote = (savedNote: NoteItem) => {
-    setNotes((prevNotes) => {
-      const exists = prevNotes.some((n) => n.id === savedNote.id);
-      if (exists) {
-        return prevNotes.map((n) => (n.id === savedNote.id ? savedNote : n));
-      } else {
-        return [savedNote, ...prevNotes];
-      }
-    });
+    const exists = notes.some((n) => n.id === savedNote.id);
+    if (exists) {
+      app.updateNote(savedNote);
+    } else {
+      app.addNote({
+        title: savedNote.title,
+        content: savedNote.content,
+        category: savedNote.category,
+        isPinned: savedNote.isPinned,
+        images: savedNote.images,
+      });
+    }
   };
 
   // Delete note
   const handleDeleteNote = (id: string) => {
-    setNotes((prev) => prev.filter((n) => n.id !== id));
+    app.deleteNote(id);
   };
 
   return (

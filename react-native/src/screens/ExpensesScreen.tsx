@@ -34,14 +34,15 @@ const CATEGORY_COLORS: Partial<Record<ExpenseCategory, string>> = {
   Other: '#636E72',
 };
 
+import { useApp } from '../context/AppContext';
+
 interface ExpensesScreenProps {
   onBack?: () => void;
 }
 
 export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
-  const [transactions, setTransactions] = useState<TransactionItem[]>(
-    INITIAL_TRANSACTIONS
-  );
+  const app = useApp();
+  const transactions = app.transactions;
   const [filterType, setFilterType] = useState<'all' | 'expense' | 'income'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -132,15 +133,11 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onBack }) => {
   }, [scopedTransactions, filterType]);
 
   const handleAddTransaction = (newTx: Omit<TransactionItem, 'id'>) => {
-    const tx: TransactionItem = {
-      ...newTx,
-      id: `tx-${Date.now()}`,
-    };
-    setTransactions((prev) => [tx, ...prev]);
+    app.addTransaction(newTx);
   };
 
   const handleDeleteTransaction = (id: string) => {
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
+    app.deleteTransaction(id);
   };
 
   return (

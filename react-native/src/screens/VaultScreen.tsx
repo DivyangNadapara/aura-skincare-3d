@@ -22,13 +22,20 @@ import { VaultLockScreen } from '../components/VaultLockScreen';
 import { VaultViewerModal } from '../components/VaultViewerModal';
 import { ImportVaultModal } from '../components/ImportVaultModal';
 
+import { useApp } from '../context/AppContext';
+
 interface VaultScreenProps {
   onBack?: () => void;
 }
 
 export const VaultScreen: React.FC<VaultScreenProps> = ({ onBack }) => {
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [vaultItems, setVaultItems] = useState<VaultItem[]>(INITIAL_VAULT_ITEMS);
+  const app = useApp();
+  const isUnlocked = app.isVaultUnlocked;
+  const setIsUnlocked = (unlocked: boolean) => {
+    if (unlocked) app.unlockVault();
+    else app.lockVault();
+  };
+  const vaultItems = app.vaultItems;
   const [activeTab, setActiveTab] = useState<'all' | VaultMediaType>('all');
   const [selectedItem, setSelectedItem] = useState<VaultItem | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -55,11 +62,11 @@ export const VaultScreen: React.FC<VaultScreenProps> = ({ onBack }) => {
 
   // Handlers
   const handleImportItem = (newItem: VaultItem) => {
-    setVaultItems((prev) => [newItem, ...prev]);
+    app.addVaultItem(newItem);
   };
 
   const handleDeleteItem = (id: string) => {
-    setVaultItems((prev) => prev.filter((i) => i.id !== id));
+    app.deleteVaultItem(id);
   };
 
   // Restore file to default phone gallery / storage

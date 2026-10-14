@@ -6,16 +6,12 @@ import { AlarmScreen } from './src/screens/AlarmScreen';
 import { NotesScreen } from './src/screens/NotesScreen';
 import { ExpensesScreen } from './src/screens/ExpensesScreen';
 import { VaultScreen } from './src/screens/VaultScreen';
-import { SamsungBottomNav, MainBranchTab } from './src/components/BottomNav';
+import { AiScreen } from './src/screens/AiScreen';
+import { SamsungBottomNav } from './src/components/BottomNav';
+import { AppProvider, useApp } from './src/context/AppContext';
 
-export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
-  const [currentScreen, setCurrentScreen] = useState<MainBranchTab>('home');
-
-  // Show splash screen first, then transition to app
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
-  }
+function MainAppContent() {
+  const { currentScreen, setCurrentScreen } = useApp();
 
   return (
     <SafeAreaView className="flex-1 bg-[#050510]">
@@ -28,16 +24,33 @@ export default function App() {
           <NotesScreen onBack={() => setCurrentScreen('home')} />
         ) : currentScreen === 'expenses' ? (
           <ExpensesScreen onBack={() => setCurrentScreen('home')} />
-        ) : (
+        ) : currentScreen === 'vault' ? (
           <VaultScreen onBack={() => setCurrentScreen('home')} />
+        ) : (
+          <AiScreen onBack={() => setCurrentScreen('home')} />
         )}
       </View>
 
-      {/* Samsung Android Bottom Navigation */}
+      {/* Floating Bottom Navigation */}
       <SamsungBottomNav
         activeTab={currentScreen}
         onTabChange={(tab) => setCurrentScreen(tab)}
       />
     </SafeAreaView>
+  );
+}
+
+export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  // Show splash screen first, then transition to app
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  }
+
+  return (
+    <AppProvider>
+      <MainAppContent />
+    </AppProvider>
   );
 }

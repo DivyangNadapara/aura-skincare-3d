@@ -8,8 +8,10 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { useApp } from '../context/AppContext';
+
 interface HomeScreenProps {
-  onSelectBranch: (branch: 'alarm' | 'notes' | 'expenses' | 'vault') => void;
+  onSelectBranch: (branch: 'alarm' | 'notes' | 'expenses' | 'vault' | 'ai') => void;
   activeAlarmsCount?: number;
   notesCount?: number;
   balanceAmount?: number;
@@ -27,12 +29,25 @@ const getGreeting = (): string => {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   onSelectBranch,
-  activeAlarmsCount = 2,
-  notesCount = 3,
-  balanceAmount = 1180.71,
-  vaultCount = 4,
+  activeAlarmsCount: propAlarmsCount,
+  notesCount: propNotesCount,
+  balanceAmount: propBalanceAmount,
+  vaultCount: propVaultCount,
 }) => {
+  const app = useApp();
   const greeting = getGreeting();
+
+  // Reactive counts from live shared app context
+  const activeAlarmsCount = propAlarmsCount !== undefined ? propAlarmsCount : app.alarms.filter((a) => a.isEnabled).length;
+  const notesCount = propNotesCount !== undefined ? propNotesCount : app.notes.length;
+  const vaultCount = propVaultCount !== undefined ? propVaultCount : app.vaultItems.length;
+
+  let computedBalance = 0;
+  app.transactions.forEach((t) => {
+    if (t.type === 'income') computedBalance += t.amount;
+    else computedBalance -= t.amount;
+  });
+  const balanceAmount = propBalanceAmount !== undefined ? propBalanceAmount : computedBalance;
 
   return (
     <SafeAreaView className="flex-1 bg-[#050510]">
@@ -274,6 +289,49 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       PIN
                     </Text>
                   </View>
+                </View>
+              </View>
+            </View>
+          {/* ─── CARD 5: NEURAL AI CORE — Autonomous Orchestrator (NEW) ─── */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => onSelectBranch('ai')}
+            className="mb-5"
+          >
+            <View className="bg-[#0A0D1F] border border-[#6C5CE7]/40 rounded-[32px] overflow-hidden shadow-2xl shadow-[#6C5CE7]/20">
+              {/* Violet ambient glow */}
+              <View className="absolute top-0 right-0 w-48 h-48 bg-[#6C5CE7] opacity-[0.08] rounded-full" />
+              <View className="h-[2px] w-24 bg-[#6C5CE7]" />
+
+              <View className="p-7">
+                <View className="flex-row items-center justify-between mb-4">
+                  <View className="flex-row items-center gap-2">
+                    <View className="w-2 h-2 rounded-full bg-[#00B894]" />
+                    <Text className="text-[10px] font-bold tracking-[3px] uppercase text-[#00B894]">
+                      Autonomous Core
+                    </Text>
+                  </View>
+                  <View className="px-3 py-1 rounded-full bg-[#6C5CE7]/20 border border-[#6C5CE7]/40">
+                    <Text className="text-[10px] font-bold text-[#E8E8F0] tracking-[1px] uppercase">
+                      4 Hooks Ready
+                    </Text>
+                  </View>
+                </View>
+
+                <Text className="text-2xl font-extrabold text-[#E8E8F0] mb-1.5 font-sans">
+                  Neural Cortex AI
+                </Text>
+                <Text className="text-xs text-[#6B6B8D] leading-relaxed mb-4">
+                  Natural language controller commanding all 4 branches: insert alarms, log cashflow, create protocols, and analyze telemetry.
+                </Text>
+
+                <View className="flex-row items-center justify-between pt-3 border-t border-[#1E1E3A]">
+                  <Text className="text-xs text-[#6C5CE7] font-bold uppercase tracking-[1px]">
+                    ✦ Open Command Terminal
+                  </Text>
+                  <Text className="text-base text-white font-bold">
+                    →
+                  </Text>
                 </View>
               </View>
             </View>

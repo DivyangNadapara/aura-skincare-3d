@@ -13,33 +13,27 @@ import { AlarmItem } from '../types/alarm';
 import { AlarmCard } from '../components/AlarmCard';
 import { CreateAlarmModal } from '../components/CreateAlarmModal';
 
+import { useApp } from '../context/AppContext';
+
 interface AlarmScreenProps {
   onBack?: () => void;
 }
 
 export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onBack }) => {
-  const [alarms, setAlarms] = useState<AlarmItem[]>(INITIAL_ALARMS);
+  const app = useApp();
+  const alarms = app.alarms;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Toggle alarm on/off
   const handleToggleAlarm = (id: string, isEnabled: boolean) => {
-    setAlarms((prev) =>
-      prev.map((alarm) => (alarm.id === id ? { ...alarm, isEnabled } : alarm))
-    );
+    app.toggleAlarm(id, isEnabled);
   };
 
-  // Delete an alarm
   const handleDeleteAlarm = (id: string) => {
-    setAlarms((prev) => prev.filter((alarm) => alarm.id !== id));
+    app.deleteAlarm(id);
   };
 
-  // Add new alarm
   const handleSaveNewAlarm = (newAlarmData: Omit<AlarmItem, 'id'>) => {
-    const newAlarm: AlarmItem = {
-      ...newAlarmData,
-      id: `alarm-${Date.now()}`,
-    };
-    setAlarms((prev) => [newAlarm, ...prev]);
+    app.addAlarm(newAlarmData);
   };
 
   // Dynamic next alarm computation
