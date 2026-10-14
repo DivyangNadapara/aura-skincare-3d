@@ -292,6 +292,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </View>
               </View>
             </View>
+          </TouchableOpacity>
+
           {/* ─── CARD 5: NEURAL AI CORE — Autonomous Orchestrator (NEW) ─── */}
           <TouchableOpacity
             activeOpacity={0.85}
