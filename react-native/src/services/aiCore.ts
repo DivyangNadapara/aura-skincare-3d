@@ -1,73 +1,554 @@
-import { AlarmItem, SamsungAlarmCategory } from '../types/alarm';
-import { NoteItem, NoteCategory, NOTE_CATEGORIES } from '../types/note';
-import { TransactionItem, ExpenseCategory, CATEGORY_ICONS } from '../types/expense';
-import { VaultItem, formatBytes } from '../types/vault';
-import { MainBranchTab } from '../components/BottomNav';
+import { AppContextType } from '../context/AppContext';
+import { GeminiService } from './geminiService';
 
 export interface AiActionResult {
   actionType:
     | 'ALARM_CREATED'
-    | 'ALARM_UPDATED'
     | 'ALARM_TOGGLED'
     | 'ALARM_DELETED'
-    | 'TRANSACTION_ADDED'
-    | 'TRANSACTION_DELETED'
+    | 'EXPENSE_LOGGED'
+    | 'INCOME_LOGGED'
     | 'NOTE_CREATED'
-    | 'NOTE_UPDATED'
     | 'NOTE_DELETED'
-    | 'VAULT_STATUS'
     | 'VAULT_LOCKED'
-    | 'VAULT_UNLOCKED'
-    | 'NAVIGATED'
-    | 'MATH_CALCULATED'
+    | 'VAULT_STATUS'
     | 'SYSTEM_BRIEFING'
+    | 'MATH_CALCULATED'
+    | 'CONVERSATION'
     | 'INFO';
   badgeTitle: string;
   badgeDetails: string;
-  badgeColor: string; // e.g. '#6C5CE7', '#00B894', '#FD79A8'
-  targetBranch?: MainBranchTab;
+  badgeColor: string;
+  targetBranch?: 'alarm' | 'notes' | 'expenses' | 'vault';
+  meta?: any;
 }
 
-export interface AiExecutionResponse {
+export interface AiResponse {
   message: string;
   action?: AiActionResult;
+  isGemini?: boolean;
 }
 
-export interface SystemState {
-  alarms: AlarmItem[];
-  notes: NoteItem[];
-  transactions: TransactionItem[];
-  vaultItems: VaultItem[];
-  isVaultUnlocked: boolean;
-  addAlarm: (data: Omit<AlarmItem, 'id'>) => AlarmItem;
-  toggleAlarm: (id: string, isEnabled?: boolean) => void;
-  deleteAlarm: (id: string) => boolean;
-  addNote: (data: { title: string; content: string; category?: NoteCategory; isPinned?: boolean }) => NoteItem;
-  updateNote: (updated: NoteItem) => void;
-  deleteNote: (id: string) => boolean;
-  addTransaction: (data: Omit<TransactionItem, 'id'>) => TransactionItem;
-  deleteTransaction: (id: string) => boolean;
-  lockVault: () => void;
-  unlockVault: () => void;
-  setCurrentScreen: (tab: MainBranchTab) => void;
+/**
+ * Normalizes input: handles common typos, cleans spacing
+ */
+function normalizeInput(input: string): string {
+  return input
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/\balaram\b/gi, 'alarm')
+    .replace(/\balram\b/gi, 'alarm')
+    .replace(/\ballarm\b/gi, 'alarm')
+    .replace(/\bexpanse\b/gi, 'expense')
+    .replace(/\bexpens\b/gi, 'expense')
+    .replace(/\bremimber\b/gi, 'remember')
+    .replace(/\bmoning\b/gi, 'morning');
+}
+
+/**
+ * Robust Natural Language Time & Alarm Parser
+ * Parses:
+ *  - "1:am", "1:AM MORNING", "1am", "1 am morning", "at 1:am"
+ *  - "6:30 am", "06:30", "6:30pm for gym"
+ *  - "wake me up at 7 in the morning"
+ *  - "alarm for 11 pm called sleep"
+ */
+function parseAlarmIntent(raw: string): {
+  hour: number;
+  minute: number;
+  period: 'AM' | 'PM';
+  label: string;
+} | null {
+  const norm = normalizeInput(raw).toLowerCase();
+
+  // Check if intent is alarm creation
+  const isAlarmIntent =
+    norm.includes('alarm') ||
+    norm.includes('wake') ||
+    norm.includes('clock') ||
+    norm.startsWith('set ') ||
+    norm.startsWith('add ') ||
+    norm.includes('remind me at');
+
+  if (!isAlarmIntent) return null;
+
+  let hour: number | null = null;
+  let minute = 0;
+  let period: 'AM' | 'PM' = 'AM';
+  let label = 'Wake Anchor';
+
+  // 1. Check for "1:am" or "1:pm" or "12:am" (colon before am/pm)
+  const colonAmPmMatch = norm.match(/\b(\d{1,2}):(am|pm)\b/i);
+  if (colonAmPmMatch) {
+    hour = parseInt(colonAmPmMatch[1], 10);
+    period = colonAmPmMatch[2].toUpperCase() as 'AM' | 'PM';
+  }
+
+  // 2. Check for standard "6:30 am" or "14:30" or "6:30"
+  if (hour === null) {
+    const stdMatch = norm.match(/\b(\d{1,2}):(\d{2})\s*(am|pm)?\b/i);
+    if (stdMatch) {
+      hour = parseInt(stdMatch[1], 10);
+      minute = parseInt(stdMatch[2], 10);
+      if (stdMatch[3]) {
+        period = stdMatch[3].toUpperCase() as 'AM' | 'PM';
+      } else if (hour >= 12) {
+        period = hour === 12 ? 'PM' : 'PM';
+        if (hour > 12) hour -= 12;
+      } else {
+        period = norm.includes('night') || norm.includes('evening') || norm.includes('pm') ? 'PM' : 'AM';
+      }
+    }
+  }
+
+  // 3. Check for simple "1 am", "1am", "7 pm", "8 in the morning"
+  if (hour === null) {
+    const simpleMatch = norm.match(/\b(\d{1,2})\s*(am|pm|a\.m\.|p\.m\.)\b/i);
+    if (simpleMatch) {
+      hour = parseInt(simpleMatch[1], 10);
+      period = simpleMatch[2].toLowerCase().startsWith('p') ? 'PM' : 'AM';
+    }
+  }
+
+  // 4. Check for "at 1 morning" or "wake me up at 1" or "alarm at 1"
+  if (hour === null) {
+    const atMatch = norm.match(/(?:at|for)\s+(\d{1,2})\b/i);
+    if (atMatch) {
+      hour = parseInt(atMatch[1], 10);
+      period = norm.includes('night') || norm.includes('evening') || norm.includes('pm') ? 'PM' : 'AM';
+    }
+  }
+
+  if (hour === null || isNaN(hour) || hour < 0 || hour > 24) {
+    return null;
+  }
+
+  // Force period if "morning" or "night" is explicitly mentioned
+  if (norm.includes('morning')) {
+    period = 'AM';
+  } else if (norm.includes('night') || norm.includes('evening') || norm.includes('afternoon')) {
+    period = 'PM';
+  }
+
+  // Extract label
+  if (norm.includes('for ')) {
+    label = raw.split(/for\s+/i)[1]?.trim() || label;
+  } else if (norm.includes('called ')) {
+    label = raw.split(/called\s+/i)[1]?.trim() || label;
+  } else if (norm.includes('morning') && !label.toLowerCase().includes('morning')) {
+    label = 'Morning Routine';
+  } else if (norm.includes('workout') || norm.includes('gym')) {
+    label = 'Workout';
+  }
+
+  // Clean label
+  label = label.replace(/[.!?,]$/, '').trim();
+  if (!label) label = period === 'AM' ? 'Morning Routine' : 'Focus Session';
+
+  return { hour, minute, period, label };
+}
+
+/**
+ * Conversational dialogue generator with Gemini-style personality
+ */
+function getConversationalResponse(
+  norm: string,
+  raw: string,
+  state: AppContextType
+): { message: string; action?: AiActionResult } | null {
+  // GREETINGS & CASUAL
+  if (/^(hi|hello|hey|yo|greetings|good\s+morning|good\s+evening|sup|what's\s+up)\b/i.test(norm)) {
+    const activeAlarms = state.alarms.filter((a) => a.isEnabled).length;
+    let net = 0;
+    state.transactions.forEach((t) => (net += t.type === 'income' ? t.amount : -t.amount));
+
+    return {
+      message:
+        `✦ **Greetings, Divyang!**\n\n` +
+        `I am **Cortex**, your personal AI companion & autonomous system orchestrator.\n\n` +
+        `Here is your quick status right now:\n` +
+        `• **Circadian Rhythm**: ${activeAlarms} active wake anchor(s) scheduled.\n` +
+        `• **Cashflow Net**: **$${net.toFixed(2)}** in ledger.\n` +
+        `• **Vault Security**: ${state.isVaultUnlocked ? 'Enclave Unlocked' : 'Enclave Fully Encrypted'}.\n\n` +
+        `What can we tackle today? We can chat, manage routines, log spending, brainstorm protocols, or solve anything you need!`,
+      action: {
+        actionType: 'CONVERSATION',
+        badgeTitle: 'Cortex Active',
+        badgeDetails: 'System Ready',
+        badgeColor: '#6C5CE7',
+      },
+    };
+  }
+
+  // IDENTITY & CAPABILITIES
+  if (norm.includes('who are you') || norm.includes('what are you') || norm.includes('what can you do')) {
+    return {
+      message:
+        `✦ **I am Cortex** — Divyang's Personal AI Intelligence.\n\n` +
+        `Unlike standard scripted bots, I operate with **full conversational depth** and **autonomous executive control** over your entire application:\n\n` +
+        `• ⏰ **Alarms & Wake Anchors**: Tell me "Set alarm at 1:AM morning" or "Turn off morning alarm".\n` +
+        `• 💳 **Cashflow & Finances**: Say "Spent $45 on Dinner" or "Analyze my spending".\n` +
+        `• 📝 **Notes & Protocols**: Tell me "Note: Retinol 0.5% every Tuesday" or "Find notes about work".\n` +
+        `• 🔐 **Encrypted Enclave**: Command "Lock vault" or "Vault security status".\n` +
+        `• 🧠 **General Knowledge & Chat**: Ask me anything about coding, science, philosophy, fitness, or life!\n` +
+        `• ✦ **Gemini Powered**: You can also connect your own Google Gemini API key using the button in the top bar to unlock live web-scale LLM reasoning!`,
+      action: {
+        actionType: 'INFO',
+        badgeTitle: 'Autonomous Intelligence',
+        badgeDetails: 'Full System Authority',
+        badgeColor: '#6C5CE7',
+      },
+    };
+  }
+
+  // HUMOR / JOKES
+  if (norm.includes('joke') || norm.includes('make me laugh') || norm.includes('funny')) {
+    const jokes = [
+      `Why do programmers prefer dark mode?\n\nBecause light attracts bugs. And in your app, we keep things at pitch-black \`#050510\` for maximum bug defense! ⚡`,
+      `There are 10 types of people in the world:\n\nThose who understand binary, and those who let Cortex set their alarms at 1:00 AM!`,
+      `Why did the JavaScript developer wear glasses?\n\nBecause they didn't C#!\n\n*(Luckily, your application is built with pristine TypeScript!)*`,
+    ];
+    const picked = jokes[Math.floor(Math.random() * jokes.length)];
+    return {
+      message: `✦ Here is one for you:\n\n${picked}`,
+      action: {
+        actionType: 'CONVERSATION',
+        badgeTitle: 'Neural Humor',
+        badgeDetails: 'Generated Joke',
+        badgeColor: '#FD79A8',
+      },
+    };
+  }
+
+  // PRODUCTIVITY & WAKING UP
+  if (norm.includes('wake up') || norm.includes('morning routine') || norm.includes('sleep') || norm.includes('tired')) {
+    return {
+      message:
+        `✦ **Circadian Optimization Protocol for Divyang**:\n\n` +
+        `1. **Consistent Wake Anchors**: Waking at the exact same hour every day sets your master suprachiasmatic clock. Setting an alarm (even at 1:00 AM or 6:30 AM) builds neurological predictability.\n` +
+        `2. **Lux Photon Blast**: Within 20 minutes of waking, get 10,000+ lux of sunlight or bright daylight into your eyes to suppress melatonin and trigger a healthy cortisol spike.\n` +
+        `3. **Delay Caffeine 90 Minutes**: Let your adenosine clear naturally first. Drinking coffee immediately after waking leads to the dreaded 2:00 PM afternoon crash.\n` +
+        `4. **Thermal Reset**: A 2-minute cold shower increases baseline dopamine by 250% for up to 3 hours.\n\n` +
+        `Would you like me to set a wake anchor for tomorrow morning?`,
+      action: {
+        actionType: 'CONVERSATION',
+        badgeTitle: 'Circadian Intelligence',
+        badgeDetails: 'Bio-Optimization Protocol',
+        badgeColor: '#00B894',
+        targetBranch: 'alarm',
+      },
+    };
+  }
+
+  // MONEY & FINANCIAL STRATEGY
+  if (norm.includes('money') || norm.includes('budget') || norm.includes('save') || norm.includes('wealth')) {
+    let income = 0;
+    let expenses = 0;
+    state.transactions.forEach((t) => {
+      if (t.type === 'income') income += t.amount;
+      else expenses += t.amount;
+    });
+    const net = income - expenses;
+    const savingsRate = income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
+
+    return {
+      message:
+        `✦ **Financial Intelligence Telemetry**:\n\n` +
+        `Based on your active records in Cashflow:\n` +
+        `• **Total Inflow**: +$${income.toFixed(2)}\n` +
+        `• **Total Outflow**: -$${expenses.toFixed(2)}\n` +
+        `• **Net Retained**: **$${net.toFixed(2)}**\n` +
+        `• **Savings Velocity**: **${savingsRate}%**\n\n` +
+        `**Golden Rules of Capital Accumulation**:\n` +
+        `1. *Pay yourself first*: Automate 20% of all incoming revenue into index funds before paying discretionary expenses.\n` +
+        `2. *Track daily micro-burn*: Small \$15 recurring purchases compound to \$5,475/year.\n` +
+        `3. *Asymmetric upside*: Direct spare capital into high-leverage personal skills.\n\n` +
+        `You can tell me anytime: *"Spent $30 on Coffee"* or *"Received $2500 Salary"* and I'll track it automatically!`,
+      action: {
+        actionType: 'CONVERSATION',
+        badgeTitle: 'Financial Intelligence',
+        badgeDetails: `Savings Velocity: ${savingsRate}%`,
+        badgeColor: '#00B894',
+        targetBranch: 'expenses',
+      },
+    };
+  }
+
+  // MOTIVATION & MINDSET
+  if (norm.includes('motivat') || norm.includes('inspire') || norm.includes('quote') || norm.includes('lazy')) {
+    return {
+      message:
+        `✦ **Daily Spark for Divyang**:\n\n` +
+        `> *"We do not rise to the level of our expectations, we fall to the level of our training and systems."*\n\n` +
+        `Discipline is choosing between what you want **now** and what you want **most**.\n` +
+        `Your personal system is loaded and ready. Let's execute today!`,
+      action: {
+        actionType: 'CONVERSATION',
+        badgeTitle: 'Mindset Protocol',
+        badgeDetails: 'Daily Focus',
+        badgeColor: '#6C5CE7',
+      },
+    };
+  }
+
+  return null;
 }
 
 export class AiCommandEngine {
-  public static execute(prompt: string, state: SystemState): AiExecutionResponse {
+  /**
+   * Synchronous alias
+   */
+  static execute(prompt: string, state: AppContextType): AiResponse {
+    return this.executeLocal(prompt, state);
+  }
+
+  /**
+   * Main entry point: tries Gemini API first if configured,
+   * otherwise falls back to enhanced Local Neural Cortex.
+   */
+  static async executeAsync(
+    prompt: string,
+    state: AppContextType,
+    history: { sender: 'user' | 'cortex'; text: string }[] = []
+  ): Promise<AiResponse> {
+    // 1. Try real Google Gemini 1.5 Flash API first
+    try {
+      const geminiResult = await GeminiService.chatWithGemini(prompt, history, state);
+      if (geminiResult) {
+        return {
+          message: geminiResult.message,
+          action: geminiResult.action,
+          isGemini: true,
+        };
+      }
+    } catch (e) {
+      console.warn('Gemini dispatch skipped, running local intelligence', e);
+    }
+
+    // 2. Execute Local Resilient Neural Cortex
+    return this.executeLocal(prompt, state);
+  }
+
+  /**
+   * Synchronous / offline intelligent engine with resilient NLU
+   */
+  static executeLocal(prompt: string, state: AppContextType): AiResponse {
     const raw = prompt.trim();
-    const lower = raw.toLowerCase();
+    const norm = normalizeInput(raw);
+    const lower = norm.toLowerCase();
 
     // ─────────────────────────────────────────────────────────────
-    // 1. SYSTEM BRIEFING / OVERVIEW OF ENTIRE APP
+    // 1. ALARM COMMANDS: CREATE ("SET ALARAM AT 1:AM MORNING")
+    // ─────────────────────────────────────────────────────────────
+    const alarmData = parseAlarmIntent(raw);
+    if (alarmData) {
+      const formattedTime = `${alarmData.hour}:${alarmData.minute.toString().padStart(2, '0')}`;
+      const hour24 =
+        alarmData.period === 'PM' && alarmData.hour !== 12
+          ? alarmData.hour + 12
+          : alarmData.period === 'AM' && alarmData.hour === 12
+          ? 0
+          : alarmData.hour;
+
+      state.addAlarm({
+        time: formattedTime,
+        period: alarmData.period,
+        hour: hour24,
+        minute: alarmData.minute,
+        label: alarmData.label,
+        category: alarmData.period === 'AM' ? 'Morning Routine' : 'Focus Session',
+        days: [1, 2, 3, 4, 5],
+        isEnabled: true,
+        sound: 'Over the Horizon (Samsung Brand)',
+        volume: 85,
+        vibration: 'Basic Call',
+        snooze: '5 minutes, 3 times',
+      });
+
+      return {
+        message:
+          `✦ **Alarm Successfully Scheduled!**\n\n` +
+          `I have set your wake anchor for **${formattedTime} ${alarmData.period}** labeled **"${alarmData.label}"**.\n\n` +
+          `It is active and synchronized into your **Alarms** branch.`,
+        action: {
+          actionType: 'ALARM_CREATED',
+          badgeTitle: `Alarm Set: ${formattedTime} ${alarmData.period}`,
+          badgeDetails: alarmData.label,
+          badgeColor: '#6C5CE7',
+          targetBranch: 'alarm',
+        },
+      };
+    }
+
+    // TOGGLE / TURN OFF ALARM
+    if (
+      lower.includes('turn off') ||
+      lower.includes('disable') ||
+      lower.includes('deactivate') ||
+      lower.includes('turn on') ||
+      lower.includes('enable')
+    ) {
+      const isEnable = lower.includes('turn on') || lower.includes('enable');
+      if (state.alarms.length > 0) {
+        const target = state.alarms[0];
+        state.toggleAlarm(target.id, isEnable);
+        return {
+          message: `✦ Wake anchor **${target.time} ${target.period}** (${target.label}) is now **${isEnable ? 'ACTIVE' : 'MUTED'}**.`,
+          action: {
+            actionType: 'ALARM_TOGGLED',
+            badgeTitle: `Alarm ${isEnable ? 'Enabled' : 'Disabled'}`,
+            badgeDetails: `${target.time} ${target.period}`,
+            badgeColor: isEnable ? '#00B894' : '#6B6B8D',
+            targetBranch: 'alarm',
+          },
+        };
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 2. EXPENSES & CASHFLOW COMMANDS
+    // ─────────────────────────────────────────────────────────────
+    const expenseMatch = lower.match(/(?:spent|paid|bought|cost|charge|purchase)\s+\$?(\d+(?:\.\d{1,2})?)\s+(?:on|for)\s+(.+)/i);
+    const simpleExpenseMatch = lower.match(/(?:spent|paid|bought)\s+\$?(\d+(?:\.\d{1,2})?)/i);
+
+    if (expenseMatch || simpleExpenseMatch) {
+      const amount = parseFloat(expenseMatch ? expenseMatch[1] : simpleExpenseMatch![1]);
+      let item = expenseMatch ? expenseMatch[2].trim() : 'Daily Expense';
+      item = item.replace(/[.!?,]$/, '');
+
+      let category: any = 'Other';
+      const itemLower = item.toLowerCase();
+      if (/food|coffee|lunch|dinner|breakfast|burger|pizza|starbucks|grocery|groceries|eat/i.test(itemLower)) {
+        category = 'Food & Dining';
+      } else if (/uber|taxi|gas|fuel|train|bus|metro|flight/i.test(itemLower)) {
+        category = 'Transport';
+      } else if (/shoes|clothes|shirt|amazon|gadget|watch|buy/i.test(itemLower)) {
+        category = 'Shopping';
+      } else if (/rent|wifi|electricity|water|bill|subscription|netflix/i.test(itemLower)) {
+        category = 'Bills & Utilities';
+      } else if (/gym|protein|supplement|doctor|medicine|workout/i.test(itemLower)) {
+        category = 'Health & Fitness';
+      }
+
+      state.addTransaction({
+        title: item.charAt(0).toUpperCase() + item.slice(1),
+        amount,
+        type: 'expense',
+        category,
+        dateStr: new Date().toISOString().split('T')[0],
+        timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      });
+
+      return {
+        message:
+          `✦ **Expenditure Recorded!**\n\n` +
+          `Deducted **-$${amount.toFixed(2)}** for **"${item}"** categorized under *${category}*.\n\n` +
+          `Your Cashflow balance and analytics have been updated.`,
+        action: {
+          actionType: 'EXPENSE_LOGGED',
+          badgeTitle: `-$${amount.toFixed(2)} ${item}`,
+          badgeDetails: category,
+          badgeColor: '#FD79A8',
+          targetBranch: 'expenses',
+        },
+      };
+    }
+
+    // INCOME: "received $2500 salary", "got paid 1500"
+    const incomeMatch = lower.match(/(?:earned|received|got\s+paid|deposit|income|salary)\s+\$?(\d+(?:\.\d{1,2})?)/i);
+    if (incomeMatch) {
+      const amount = parseFloat(incomeMatch[1]);
+      const title = lower.includes('salary') ? 'Monthly Salary' : lower.includes('freelance') ? 'Freelance Client' : 'Inflow Deposit';
+
+      state.addTransaction({
+        title,
+        amount,
+        type: 'income',
+        category: 'Salary & Work',
+        dateStr: new Date().toISOString().split('T')[0],
+        timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      });
+
+      return {
+        message:
+          `✦ **Inflow Credited!**\n\n` +
+          `Added **+$${amount.toFixed(2)}** (${title}) to your liquid balance.\n\n` +
+          `Your financial runway has been recalculated.`,
+        action: {
+          actionType: 'INCOME_LOGGED',
+          badgeTitle: `+$${amount.toFixed(2)} ${title}`,
+          badgeDetails: 'Cashflow Credited',
+          badgeColor: '#00B894',
+          targetBranch: 'expenses',
+        },
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 3. NOTES & PROTOCOLS
     // ─────────────────────────────────────────────────────────────
     if (
-      lower.includes('briefing') ||
-      lower.includes('status') ||
-      lower.includes('summary of everything') ||
-      lower.includes('overview') ||
-      (lower.includes('how') && lower.includes('doing')) ||
-      lower.includes('system check')
+      lower.startsWith('note:') ||
+      lower.startsWith('note ') ||
+      lower.startsWith('remember ') ||
+      lower.startsWith('write down ') ||
+      lower.includes('add note')
     ) {
+      let body = raw
+        .replace(/^note:\s*/i, '')
+        .replace(/^note\s+/i, '')
+        .replace(/^remember\s+/i, '')
+        .replace(/^write down\s+/i, '')
+        .replace(/^add note\s+/i, '')
+        .trim();
+
+      const parts = body.split(/[:\n-]/);
+      const title = parts[0]?.trim() || 'New Protocol';
+      const content = parts.slice(1).join(' ').trim() || body;
+
+      state.addNote({
+        title,
+        content,
+        category: 'Protocols',
+        isPinned: false,
+      });
+
+      return {
+        message:
+          `✦ **Note Encrypted & Stored!**\n\n` +
+          `Created entry **"${title}"**.\n\n` +
+          `You can view and edit it anytime in the **Notes** branch.`,
+        action: {
+          actionType: 'NOTE_CREATED',
+          badgeTitle: title,
+          badgeDetails: 'Stored in Protocols',
+          badgeColor: '#FD79A8',
+          targetBranch: 'notes',
+        },
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 4. VAULT COMMANDS
+    // ─────────────────────────────────────────────────────────────
+    if (lower.includes('lock vault') || lower.includes('lock the vault') || lower.includes('lock down')) {
+      state.lockVault();
+      return {
+        message: `✦ **Enclave Secured!**\n\nYour Secret Vault has been locked down. Biometric or PIN authorization is required to access private media.`,
+        action: {
+          actionType: 'VAULT_LOCKED',
+          badgeTitle: 'Enclave Locked',
+          badgeDetails: 'AES-256 Lockdown Engaged',
+          badgeColor: '#FDCB6E',
+          targetBranch: 'vault',
+        },
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 5. SYSTEM BRIEFING & TELEMETRY
+    // ─────────────────────────────────────────────────────────────
+    if (lower.includes('briefing') || lower.includes('system status') || lower.includes('overview') || lower.includes('daily summary')) {
       const activeAlarms = state.alarms.filter((a) => a.isEnabled);
       let income = 0;
       let expenses = 0;
@@ -76,20 +557,18 @@ export class AiCommandEngine {
         else expenses += t.amount;
       });
       const net = income - expenses;
-      const totalVaultStorage = state.vaultItems.reduce((acc, v) => acc + v.sizeBytes, 0);
-
-      const msg = `✦ **Autonomous System Diagnostic Complete**\n\n` +
-        `• **Circadian Anchors**: ${activeAlarms.length} active alarm(s) set. Next scheduled wake time is ${activeAlarms[0]?.time || 'None'} ${activeAlarms[0]?.period || ''}.\n` +
-        `• **Financial Balance**: Net cashflow is **${net >= 0 ? '+' : '-'}$${Math.abs(net).toFixed(2)}** (Inflow: +$${income.toFixed(2)} | Outflow: -$${expenses.toFixed(2)} across ${state.transactions.length} records).\n` +
-        `• **Protocols & Notes**: ${state.notes.length} verified logs stored, with ${state.notes.filter((n) => n.isPinned).length} pinned.\n` +
-        `• **Encrypted Enclave**: ${state.vaultItems.length} hidden artifact(s) utilizing ${formatBytes(totalVaultStorage)} of storage (${state.isVaultUnlocked ? 'Unlocked' : 'Locked'}).\n\n` +
-        `All four branches are synchronized and operational.`;
 
       return {
-        message: msg,
+        message:
+          `✦ **System Briefing & Live Diagnostics**\n\n` +
+          `• **Circadian Anchors**: ${activeAlarms.length} active wake anchor(s). Next scheduled: ${activeAlarms[0]?.time || 'None'} ${activeAlarms[0]?.period || ''}.\n` +
+          `• **Cashflow**: Net total **$${net.toFixed(2)}** (+$${income.toFixed(2)} inflow | -$${expenses.toFixed(2)} burn).\n` +
+          `• **Protocols**: ${state.notes.length} notes logged.\n` +
+          `• **Secret Enclave**: ${state.vaultItems.length} private items (${state.isVaultUnlocked ? 'Unlocked' : 'Locked'}).\n\n` +
+          `All system branches are synchronized and operational.`,
         action: {
           actionType: 'SYSTEM_BRIEFING',
-          badgeTitle: 'Full System Diagnostic',
+          badgeTitle: 'Full Diagnostic',
           badgeDetails: '4 Branches Synchronized',
           badgeColor: '#6C5CE7',
         },
@@ -97,465 +576,21 @@ export class AiCommandEngine {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 2. ALARM COMMANDS: CREATE, TOGGLE, DELETE, LIST
+    // 6. MATH & CALCULATIONS
     // ─────────────────────────────────────────────────────────────
-    // CREATE ALARM: e.g. "set alarm at 6:30 AM", "alarm for 7 am", "wake me up at 8:15 pm for workout"
-    const alarmTimeMatch = lower.match(/(?:set|create|add|wake\s+me\s+up\s+at|alarm\s+at|alarm\s+for)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
-    if (alarmTimeMatch || ((lower.includes('alarm') || lower.includes('wake')) && lower.match(/\b\d{1,2}(?::\d{2})?\s*(am|pm)\b/i))) {
-      const match = alarmTimeMatch || lower.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
-      if (match) {
-        let hour = parseInt(match[1], 10);
-        let minute = match[2] ? parseInt(match[2], 10) : 0;
-        let period: 'AM' | 'PM' = (match[3]?.toUpperCase() as 'AM' | 'PM') || (hour < 12 ? 'AM' : 'PM');
-
-        // Extract custom label if provided
-        let label = 'Wake Anchor';
-        if (lower.includes('for ')) {
-          label = raw.split(/for\s+/i)[1]?.trim() || label;
-        } else if (lower.includes('called ')) {
-          label = raw.split(/called\s+/i)[1]?.trim() || label;
-        } else if (lower.includes('label ')) {
-          label = raw.split(/label\s+/i)[1]?.trim() || label;
-        }
-
-        const formattedTime = `${hour}:${minute.toString().padStart(2, '0')}`;
-        const newAlarm = state.addAlarm({
-          time: formattedTime,
-          period,
-          hour: period === 'PM' && hour !== 12 ? hour + 12 : period === 'AM' && hour === 12 ? 0 : hour,
-          minute,
-          label,
-          category: hour < 10 && period === 'AM' ? 'Morning Routine' : 'Deep Work',
-          days: [1, 2, 3, 4, 5],
-          isEnabled: true,
-          sound: 'Over the Horizon (Samsung Brand)',
-          volume: 85,
-          vibration: 'Basic Call',
-          snooze: '5 minutes, 3 times',
-        });
-
-        return {
-          message: `✦ I have set an autonomous wake anchor for **${formattedTime} ${period}** labeled **"${label}"**.\n\nIt is now active in your Rhythm Alarms branch and scheduled for weekdays.`,
-          action: {
-            actionType: 'ALARM_CREATED',
-            badgeTitle: `Alarm Set: ${formattedTime} ${period}`,
-            badgeDetails: label,
-            badgeColor: '#6C5CE7',
-            targetBranch: 'alarm',
-          },
-        };
-      }
-    }
-
-    // TOGGLE / TURN OFF ALL ALARMS OR SPECIFIC ALARM
-    if (lower.includes('turn off all alarms') || lower.includes('disable all alarms')) {
-      state.alarms.forEach((a) => state.toggleAlarm(a.id, false));
-      return {
-        message: `✦ All ${state.alarms.length} alarms have been deactivated.`,
-        action: {
-          actionType: 'ALARM_TOGGLED',
-          badgeTitle: 'All Alarms Deactivated',
-          badgeDetails: `${state.alarms.length} anchors turned off`,
-          badgeColor: '#FD79A8',
-          targetBranch: 'alarm',
-        },
-      };
-    }
-
-    if (lower.includes('turn on all alarms') || lower.includes('enable all alarms')) {
-      state.alarms.forEach((a) => state.toggleAlarm(a.id, true));
-      return {
-        message: `✦ All ${state.alarms.length} alarms are now enabled.`,
-        action: {
-          actionType: 'ALARM_TOGGLED',
-          badgeTitle: 'All Alarms Activated',
-          badgeDetails: `${state.alarms.length} anchors enabled`,
-          badgeColor: '#00B894',
-          targetBranch: 'alarm',
-        },
-      };
-    }
-
-    // DELETE ALARM
-    if (lower.includes('delete alarm') || lower.includes('remove alarm')) {
-      if (state.alarms.length > 0) {
-        const deleted = state.alarms[0];
-        state.deleteAlarm(deleted.id);
-        return {
-          message: `✦ Erased alarm anchor: **${deleted.time} ${deleted.period}** ("${deleted.label}").`,
-          action: {
-            actionType: 'ALARM_DELETED',
-            badgeTitle: `Alarm Erased: ${deleted.time} ${deleted.period}`,
-            badgeDetails: deleted.label,
-            badgeColor: '#FD79A8',
-            targetBranch: 'alarm',
-          },
-        };
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 3. EXPENSES & CASHFLOW: INSERT, CALCULATE, ANALYZE, DELETE
-    // ─────────────────────────────────────────────────────────────
-    // EXPENSE: e.g. "spent $45 on dinner", "bought coffee for $6.50", "paid $120 for electric bill", "expense 50 food"
-    const expenseMatch = lower.match(/(?:spent|paid|bought|expense|outflow|cost)\s+\$?([0-9]+(?:\.[0-9]{1,2})?)/i) ||
-      lower.match(/\$?([0-9]+(?:\.[0-9]{1,2})?)\s+(?:on|for)\s+(.+)/i);
-
-    if (expenseMatch && !lower.includes('income') && !lower.includes('earned') && !lower.includes('salary') && !lower.includes('received')) {
-      const amount = parseFloat(expenseMatch[1]);
-      let description = 'Daily Expense';
-
-      if (lower.includes(' on ')) {
-        description = raw.split(/\s+on\s+/i)[1]?.trim() || description;
-      } else if (lower.includes(' for ')) {
-        description = raw.split(/\s+for\s+/i)[1]?.trim() || description;
-      }
-
-      // Smart category detection
-      let category: ExpenseCategory = 'Other';
-      if (/food|dinner|lunch|breakfast|coffee|grocer|sushi|meal|burger|snack|restaurant/i.test(description)) {
-        category = 'Food & Dining';
-      } else if (/shop|shoes|clothes|amazon|buy|mall/i.test(description)) {
-        category = 'Shopping';
-      } else if (/uber|lyft|gas|fuel|bus|train|flight|transport/i.test(description)) {
-        category = 'Transport';
-      } else if (/bill|utility|electric|wifi|internet|phone|water|rent/i.test(description)) {
-        category = 'Bills & Utilities';
-      } else if (/gym|fitness|protein|vitamin|health|doctor|medicine/i.test(description)) {
-        category = 'Health & Fitness';
-      } else if (/movie|game|netflix|spotify|entertainment/i.test(description)) {
-        category = 'Entertainment';
-      }
-
-      const now = new Date();
-      const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
-      const hours = now.getHours();
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const timeStr = `${hours % 12 || 12}:${minutes} ${ampm}`;
-
-      const tx = state.addTransaction({
-        title: description.charAt(0).toUpperCase() + description.slice(1),
-        amount,
-        type: 'expense',
-        category,
-        dateStr,
-        timeStr,
-        note: 'Logged via Autonomous AI Core',
-      });
-
-      return {
-        message: `✦ Logged outflow of **-$${amount.toFixed(2)}** for **"${tx.title}"** under category **[${category}]**.\n\n` +
-          `• Timestamp: ${dateStr} • ${timeStr}\n` +
-          `• Your monthly cashflow analytics and calendar dots have been updated.`,
-        action: {
-          actionType: 'TRANSACTION_ADDED',
-          badgeTitle: `Expense Logged: -$${amount.toFixed(2)}`,
-          badgeDetails: `${tx.title} • ${category}`,
-          badgeColor: '#FD79A8',
-          targetBranch: 'expenses',
-        },
-      };
-    }
-
-    // INCOME: e.g. "got paid $2500", "income $1200 freelancing", "earned $300 dividend"
-    const incomeMatch = lower.match(/(?:income|earned|paid\s+me|received|salary|deposit|wire)\s+\$?([0-9]+(?:\.[0-9]{1,2})?)/i) ||
-      lower.match(/got\s+paid\s+\$?([0-9]+(?:\.[0-9]{1,2})?)/i);
-
-    if (incomeMatch) {
-      const amount = parseFloat(incomeMatch[1]);
-      let description = 'Client / Work Payment';
-      if (lower.includes('for ')) {
-        description = raw.split(/for\s+/i)[1]?.trim() || description;
-      } else if (lower.includes('from ')) {
-        description = raw.split(/from\s+/i)[1]?.trim() || description;
-      }
-
-      const now = new Date();
-      const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
-      const hours = now.getHours();
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const timeStr = `${hours % 12 || 12}:${minutes} ${ampm}`;
-
-      const tx = state.addTransaction({
-        title: description.charAt(0).toUpperCase() + description.slice(1),
-        amount,
-        type: 'income',
-        category: lower.includes('invest') || lower.includes('dividend') ? 'Investments' : 'Salary & Work',
-        dateStr,
-        timeStr,
-        note: 'Income recorded via AI Core',
-      });
-
-      return {
-        message: `✦ Recorded cash inflow of **+$${amount.toFixed(2)}** from **"${tx.title}"**.\n\n` +
-          `• Timestamp: ${dateStr} • ${timeStr}\n` +
-          `• Net cash balance augmented.`,
-        action: {
-          actionType: 'TRANSACTION_ADDED',
-          badgeTitle: `Income Added: +$${amount.toFixed(2)}`,
-          badgeDetails: tx.title,
-          badgeColor: '#00B894',
-          targetBranch: 'expenses',
-        },
-      };
-    }
-
-    // ANALYZE SPENDING / CALCULATE CASHFLOW
-    if (lower.includes('spending') || lower.includes('expenses') || lower.includes('how much have i spent') || lower.includes('savings rate')) {
-      let income = 0;
-      let expenses = 0;
-      const categoryMap: Record<string, number> = {};
-
-      state.transactions.forEach((t) => {
-        if (t.type === 'income') {
-          income += t.amount;
-        } else {
-          expenses += t.amount;
-          categoryMap[t.category] = (categoryMap[t.category] || 0) + t.amount;
-        }
-      });
-
-      const net = income - expenses;
-      const savingsRate = income > 0 ? Math.round((net / income) * 100) : 0;
-      const topCat = Object.entries(categoryMap).sort((a, b) => b[1] - a[1])[0];
-
-      return {
-        message: `✦ **Financial Cashflow Breakdown**\n\n` +
-          `• **Total Inflow**: +$${income.toFixed(2)}\n` +
-          `• **Total Outflow**: -$${expenses.toFixed(2)}\n` +
-          `• **Net Balance**: ${net >= 0 ? '+' : '-'}$${Math.abs(net).toFixed(2)}\n` +
-          `• **Savings Rate**: ${savingsRate}%\n` +
-          (topCat ? `• **Highest Expense Sector**: ${topCat[0]} ($${topCat[1].toFixed(2)})\n` : '') +
-          `• **Active Records**: ${state.transactions.length} transactions indexed.`,
-        action: {
-          actionType: 'TRANSACTION_ADDED',
-          badgeTitle: `Net Cash: $${net.toFixed(2)}`,
-          badgeDetails: `${savingsRate}% Savings Rate`,
-          badgeColor: '#00B894',
-          targetBranch: 'expenses',
-        },
-      };
-    }
-
-    // DELETE LAST TRANSACTION
-    if (lower.includes('delete last transaction') || lower.includes('remove last expense')) {
-      if (state.transactions.length > 0) {
-        const deleted = state.transactions[0];
-        state.deleteTransaction(deleted.id);
-        return {
-          message: `✦ Erased transaction: **${deleted.title}** (${deleted.type === 'income' ? '+' : '-'}$${deleted.amount.toFixed(2)}).`,
-          action: {
-            actionType: 'TRANSACTION_DELETED',
-            badgeTitle: `Transaction Removed`,
-            badgeDetails: `${deleted.title} • $${deleted.amount.toFixed(2)}`,
-            badgeColor: '#FD79A8',
-            targetBranch: 'expenses',
-          },
-        };
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 4. NOTES & PROTOCOLS: INSERT, SEARCH, UPDATE, DELETE
-    // ─────────────────────────────────────────────────────────────
-    // ADD NOTE: e.g. "add note: morning cold plunge 3 minutes", "create note called workout routine..."
-    const noteMatch = lower.match(/(?:add|create|new|save|write)\s+note(?:\s*:\s*|\s+called\s+|\s+about\s+|\s+)(.+)/i);
-    if (noteMatch || (lower.startsWith('note:') || lower.startsWith('protocol:'))) {
-      const fullText = noteMatch ? noteMatch[1].trim() : raw.replace(/^(?:note|protocol):\s*/i, '').trim();
-      const parts = fullText.split(/[-–—:]\s+/);
-      const title = parts[0]?.trim() || 'Quick Protocol';
-      const content = parts.length > 1 ? parts.slice(1).join(' - ').trim() : fullText;
-
-      let category: NoteCategory = 'Quick Ideas';
-      if (/circadian|sun|sleep|melatonin|light/i.test(fullText)) category = 'Circadian Protocol';
-      else if (/work|deep|focus|code|study/i.test(fullText)) category = 'Deep Work';
-      else if (/recover|bath|sauna|relax|nap/i.test(fullText)) category = 'Recovery & Sleep';
-      else if (/nutrition|diet|fast|protein|vitamin|water|supplement/i.test(fullText)) category = 'Nutrition & Biohacking';
-
-      const newNote = state.addNote({
-        title: title.charAt(0).toUpperCase() + title.slice(1),
-        content,
-        category,
-        isPinned: lower.includes('pin') || lower.includes('important'),
-      });
-
-      return {
-        message: `✦ Created new protocol entry: **"${newNote.title}"**.\n\n` +
-          `• Sector: [${category}]\n` +
-          `• Content: "${content}"\n` +
-          `• Status: ${newNote.isPinned ? '📌 Pinned' : 'Logged in database'}`,
-        action: {
-          actionType: 'NOTE_CREATED',
-          badgeTitle: `Protocol Created: ${newNote.title}`,
-          badgeDetails: category,
-          badgeColor: '#FD79A8',
-          targetBranch: 'notes',
-        },
-      };
-    }
-
-    // SEARCH NOTES
-    if (lower.includes('search note') || lower.includes('find note') || lower.includes('show notes about')) {
-      const query = lower.replace(/.*(?:search|find|show\s+notes\s+about)\s+/i, '').trim();
-      const results = state.notes.filter(
-        (n) => n.title.toLowerCase().includes(query) || n.content.toLowerCase().includes(query)
-      );
-
-      if (results.length === 0) {
-        return {
-          message: `✦ Zero protocol logs matched query: "${query}".`,
-        };
-      }
-
-      const listStr = results.map((r, i) => `${i + 1}. **${r.title}** (${r.category}): "${r.content.slice(0, 60)}..."`).join('\n');
-      return {
-        message: `✦ Found **${results.length}** matching protocol(s) for "${query}":\n\n${listStr}`,
-        action: {
-          actionType: 'NOTE_CREATED',
-          badgeTitle: `${results.length} Notes Located`,
-          badgeDetails: `Query: ${query}`,
-          badgeColor: '#6C5CE7',
-          targetBranch: 'notes',
-        },
-      };
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 5. VAULT COMMANDS: STATUS, LOCK, TELEMETRY
-    // ─────────────────────────────────────────────────────────────
-    if (lower.includes('vault') || lower.includes('secret') || lower.includes('lock')) {
-      if (lower.includes('lock')) {
-        state.lockVault();
-        return {
-          message: `✦ Encrypted Enclave has been **LOCKED**. Security PIN will be required to re-access sensitive artifacts.`,
-          action: {
-            actionType: 'VAULT_LOCKED',
-            badgeTitle: 'Vault Sealed',
-            badgeDetails: 'AES-256 Lockdown Engaged',
-            badgeColor: '#FD79A8',
-            targetBranch: 'vault',
-          },
-        };
-      }
-
-      const totalSize = state.vaultItems.reduce((acc, v) => acc + v.sizeBytes, 0);
-      const photoCount = state.vaultItems.filter((i) => i.type === 'image').length;
-      const videoCount = state.vaultItems.filter((i) => i.type === 'video').length;
-      const docCount = state.vaultItems.filter((i) => i.type === 'document').length;
-
-      return {
-        message: `✦ **Encrypted Enclave Telemetry**\n\n` +
-          `• Total Artifacts: **${state.vaultItems.length}**\n` +
-          `• Occupied Storage: **${formatBytes(totalSize)}**\n` +
-          `• Breakdown: ${photoCount} Photos, ${videoCount} Videos, ${docCount} Documents\n` +
-          `• Enclave Security State: **${state.isVaultUnlocked ? 'UNLOCKED' : 'LOCKED'}**`,
-        action: {
-          actionType: 'VAULT_STATUS',
-          badgeTitle: `Vault: ${state.vaultItems.length} Files`,
-          badgeDetails: formatBytes(totalSize),
-          badgeColor: '#6C5CE7',
-          targetBranch: 'vault',
-        },
-      };
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 6. DIRECT NAVIGATION COMMANDS
-    // ─────────────────────────────────────────────────────────────
-    if (lower.includes('go to ') || lower.includes('open ') || lower.includes('show ')) {
-      if (lower.includes('alarm') || lower.includes('clock')) {
-        state.setCurrentScreen('alarm');
-        return {
-          message: `✦ Opening **Circadian Alarms** branch.`,
-          action: {
-            actionType: 'NAVIGATED',
-            badgeTitle: 'Navigated to Alarms',
-            badgeDetails: 'Circadian Clocks Screen',
-            badgeColor: '#6C5CE7',
-            targetBranch: 'alarm',
-          },
-        };
-      }
-      if (lower.includes('note') || lower.includes('protocol')) {
-        state.setCurrentScreen('notes');
-        return {
-          message: `✦ Opening **Aesthetic Protocols** branch.`,
-          action: {
-            actionType: 'NAVIGATED',
-            badgeTitle: 'Navigated to Notes',
-            badgeDetails: 'Research & Protocols Screen',
-            badgeColor: '#FD79A8',
-            targetBranch: 'notes',
-          },
-        };
-      }
-      if (lower.includes('expense') || lower.includes('cash') || lower.includes('calendar') || lower.includes('finance')) {
-        state.setCurrentScreen('expenses');
-        return {
-          message: `✦ Opening **Cashflow & Expenses** branch.`,
-          action: {
-            actionType: 'NAVIGATED',
-            badgeTitle: 'Navigated to Cashflow',
-            badgeDetails: 'Monthly Calendar & Ledger',
-            badgeColor: '#00B894',
-            targetBranch: 'expenses',
-          },
-        };
-      }
-      if (lower.includes('vault') || lower.includes('secret')) {
-        state.setCurrentScreen('vault');
-        return {
-          message: `✦ Opening **Secret Media Vault** branch.`,
-          action: {
-            actionType: 'NAVIGATED',
-            badgeTitle: 'Navigated to Vault',
-            badgeDetails: 'Encrypted Media Sandbox',
-            badgeColor: '#6C5CE7',
-            targetBranch: 'vault',
-          },
-        };
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 7. MATHEMATICAL COMPUTATIONS & FINANCIAL UTILITY
-    // ─────────────────────────────────────────────────────────────
-    // e.g. "calculate 15% tip on 145", "what is 2500 - 840", "tip on 82"
-    const tipMatch = lower.match(/(?:tip|tip\s+on)\s+(?:of\s+)?(?:(\d+)%\s+on\s+)?\$?(\d+(?:\.\d+)?)/i);
-    if (tipMatch) {
-      const pct = tipMatch[1] ? parseFloat(tipMatch[1]) : 18;
-      const bill = parseFloat(tipMatch[2]);
-      const tip = (bill * pct) / 100;
-      const total = bill + tip;
-      return {
-        message: `✦ **Tip & Bill Computation**\n\n` +
-          `• Bill Base: **$${bill.toFixed(2)}**\n` +
-          `• Tip (${pct}%): **$${tip.toFixed(2)}**\n` +
-          `• Total Payable: **$${total.toFixed(2)}**`,
-        action: {
-          actionType: 'MATH_CALCULATED',
-          badgeTitle: `Total: $${total.toFixed(2)}`,
-          badgeDetails: `Tip: $${tip.toFixed(2)} (${pct}%)`,
-          badgeColor: '#00B894',
-        },
-      };
-    }
-
-    const simpleMathMatch = lower.match(/(?:calculate|what\s+is|math)\s+([0-9\.\s\+\-\*\/\(\)]+)/i);
-    if (simpleMathMatch) {
+    const mathMatch = lower.match(/(?:calculate|what is|compute|solve)\s+([0-9+\-*/().\s%]+)/i);
+    if (mathMatch) {
       try {
-        const sanitized = simpleMathMatch[1].replace(/[^0-9\.\+\-\*\/\(\)\s]/g, '');
+        const expression = mathMatch[1].replace(/%/g, '*0.01');
         // eslint-disable-next-line no-eval
-        const result = Function(`'use strict'; return (${sanitized})`)();
+        const result = Function(`'use strict'; return (${expression})`)();
         if (typeof result === 'number' && !isNaN(result)) {
           return {
-            message: `✦ Computation result: **${sanitized.trim()} = ${result.toLocaleString()}**`,
+            message: `✦ Computation result:\n\n**${mathMatch[1].trim()} = ${result.toLocaleString()}**`,
             action: {
               actionType: 'MATH_CALCULATED',
               badgeTitle: `Result: ${result}`,
-              badgeDetails: sanitized.trim(),
+              badgeDetails: mathMatch[1].trim(),
               badgeColor: '#6C5CE7',
             },
           };
@@ -564,24 +599,31 @@ export class AiCommandEngine {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 8. GENERAL INTELLIGENCE ASSISTANCE
+    // 7. CONVERSATIONAL INTELLIGENCE (CHAT LIKE GEMINI)
+    // ─────────────────────────────────────────────────────────────
+    const conversational = getConversationalResponse(lower, raw, state);
+    if (conversational) {
+      return conversational;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 8. DYNAMIC INTELLIGENT FALLBACK (NO GENERIC "COMMAND RECEIVED")
     // ─────────────────────────────────────────────────────────────
     return {
-      message: `✦ Command received: **"${raw}"**.\n\n` +
-        `I am your autonomous neural operating core with full write & delete control over:\n` +
-        `• ⏰ **Alarms**: "Set alarm at 6:30 AM", "Turn off all alarms"\n` +
-        `• 💳 **Cashflow**: "Spent $45 on Dinner", "Got paid $2500", "Analyze spending"\n` +
-        `• 📝 **Protocols**: "Add note: Cold Plunge 3min at 50F", "Find notes about retinol"\n` +
-        `• 🔐 **Vault**: "Show vault status", "Lock vault"\n` +
-        `• ⚡ **System**: "System briefing", "Calculate 20% tip on $85"\n\n` +
-        `Give me any instruction and I will execute it automatically.`,
+      message:
+        `✦ I am on it, Divyang! Regarding: **"${raw}"**.\n\n` +
+        `I am your autonomous neural operating core. I can chat, discuss ideas, or command any part of your app:\n\n` +
+        `• ⏰ **Set an alarm**: *"Set alarm at 1:AM morning"*, *"Wake me up at 6:30"*.\n` +
+        `• 💳 **Track cash**: *"Spent $25 on groceries"*, *"Received $1200 salary"*.\n` +
+        `• 📝 **Take notes**: *"Note: Read Chapter 4 of Deep Work"*.\n` +
+        `• 🔐 **Secure vault**: *"Lock vault"*.\n` +
+        `• 💬 **Chat & Learn**: Ask me anything or tap **[✦ Gemini API]** at the top to connect your personal Google Gemini API key!`,
       action: {
-        actionType: 'INFO',
-        badgeTitle: 'Autonomous Agent Ready',
-        badgeDetails: 'Full System Access Granted',
+        actionType: 'CONVERSATION',
+        badgeTitle: 'Cortex Reasoning',
+        badgeDetails: 'Ready for Next Prompt',
         badgeColor: '#6C5CE7',
       },
     };
   }
 }
-

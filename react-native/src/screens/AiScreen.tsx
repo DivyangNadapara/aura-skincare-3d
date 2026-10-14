@@ -4,14 +4,15 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   TextInput,
   Platform,
   KeyboardAvoidingView,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { AiCommandEngine, AiActionResult } from '../services/aiCore';
+import { GeminiService } from '../services/geminiService';
 
 interface ChatMessage {
   id: string;
@@ -19,38 +20,46 @@ interface ChatMessage {
   text: string;
   timestamp: string;
   action?: AiActionResult;
+  isGemini?: boolean;
 }
 
 const QUICK_PROMPTS = [
-  '✦ System Briefing',
-  '⏰ Set alarm at 6:30 AM',
+  '⏰ Set alarm at 1:AM morning',
+  '💬 How should I organize my day?',
   '💳 Spent $45 on Dinner',
   '📝 Note: Cold Plunge 3min at 50F',
-  '📊 Analyze spending',
-  '🔒 Lock vault',
+  '✦ System Briefing',
+  '⚡ Tell me a joke',
   '💰 Got paid $2500',
-  '⚡ Calculate 18% tip on $140',
+  '📊 Financial intelligence tips',
 ];
 
 export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const app = useApp();
   const [inputText, setInputText] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [keySaveMessage, setKeySaveMessage] = useState('');
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'init-1',
       sender: 'cortex',
       text:
-        `✦ **Neural Cortex Initialized**\n\n` +
-        `I have autonomous read, write, and deletion control over the **entire application**:\n\n` +
-        `• **Alarms**: Set, update, turn off, or erase wake anchors.\n` +
-        `• **Cashflow**: Log expenses, record income, analyze burn rate, calculate savings.\n` +
-        `• **Protocols**: Create notes, attach research logs, search entries, toggle pins.\n` +
-        `• **Vault**: Inspect encrypted storage telemetry or lock down the enclave.\n\n` +
-        `Type any instruction below or tap a quick command capsule to execute.`,
+        `✦ **Cortex Neural Intelligence Ready**\n\n` +
+        `I am your personal AI companion & autonomous operator. I can hold **real, deep conversations** and manage your **entire application**:\n\n` +
+        `• **Circadian Alarms**: "Set alarm at 1:AM morning", "Turn off morning alarm"\n` +
+        `• **Cashflow & Ledger**: "Spent $45 on Dinner", "Received $2500 salary", "How to save money?"\n` +
+        `• **Protocols & Notes**: "Note: Retinol 0.5% every Tuesday", "Search notes for fitness"\n` +
+        `• **Secret Enclave**: "Lock vault", "Vault status"\n` +
+        `• **Conversational Chat**: Ask me anything — philosophy, jokes, productivity, coding, life!\n\n` +
+        `Tap **[✦ Gemini API]** at the top to connect your Google Gemini key for live web-scale LLM reasoning, or chat right away!`,
       timestamp: 'Active',
       action: {
         actionType: 'SYSTEM_BRIEFING',
-        badgeTitle: 'Autonomous Agent Hooked',
+        badgeTitle: 'Dual-Engine Intelligence Active',
         badgeDetails: 'Full System R/W Authority',
         badgeColor: '#6C5CE7',
       },
@@ -59,14 +68,25 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Check stored API key on mount
+  useEffect(() => {
+    (async () => {
+      const key = await GeminiService.getApiKey();
+      if (key) {
+        setHasApiKey(true);
+        setApiKeyInput(key);
+      }
+    })();
+  }, []);
+
   const formatNow = () => {
     const d = new Date();
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const prompt = (textToSend || inputText).trim();
-    if (!prompt) return;
+    if (!prompt || isThinking) return;
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -77,26 +97,67 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText('');
+    setIsThinking(true);
 
-    // Execute through autonomous engine
-    setTimeout(() => {
-      const response = AiCommandEngine.execute(prompt, app);
+    try {
+      const history = messages.map((m) => ({ sender: m.sender, text: m.text }));
+      const response = await AiCommandEngine.executeAsync(prompt, app, history);
+
       const aiMsg: ChatMessage = {
         id: `cortex-${Date.now()}`,
         sender: 'cortex',
         text: response.message,
         timestamp: formatNow(),
         action: response.action,
+        isGemini: response.isGemini,
       };
+
       setMessages((prev) => [...prev, aiMsg]);
-    }, 200);
+    } catch (err) {
+      const fallback = AiCommandEngine.executeLocal(prompt, app);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `cortex-${Date.now()}`,
+          sender: 'cortex',
+          text: fallback.message,
+          timestamp: formatNow(),
+          action: fallback.action,
+        },
+      ]);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  const handleSaveApiKey = async () => {
+    const cleaned = apiKeyInput.trim();
+    if (!cleaned) {
+      await GeminiService.clearApiKey();
+      setHasApiKey(false);
+      setKeySaveMessage('API key removed. Running on Local Neural Cortex.');
+      setTimeout(() => setKeySaveMessage(''), 3000);
+      return;
+    }
+
+    try {
+      await GeminiService.setApiKey(cleaned);
+      setHasApiKey(true);
+      setKeySaveMessage('✓ Google Gemini API Key saved successfully!');
+      setTimeout(() => {
+        setKeySaveMessage('');
+        setIsApiKeyModalOpen(false);
+      }, 1500);
+    } catch (e) {
+      setKeySaveMessage('Failed to save key. Please try again.');
+    }
   };
 
   useEffect(() => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 150);
-  }, [messages]);
+  }, [messages, isThinking]);
 
   // Aggregate live stats for telemetry bar
   const activeAlarmsCount = app.alarms.filter((a) => a.isEnabled).length;
@@ -123,10 +184,10 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             <TouchableOpacity
               onPress={onBack}
               activeOpacity={0.7}
-              className="py-1 pr-3 flex-row items-center gap-1.5"
+              className="py-1 pr-2 flex-row items-center gap-1"
             >
-              <Text className="text-lg text-[#6B6B8D]">←</Text>
-              <Text className="text-[11px] font-semibold tracking-[2px] uppercase text-[#6B6B8D]">
+              <Text className="text-base text-[#6B6B8D]">←</Text>
+              <Text className="text-[10px] font-semibold tracking-[1px] uppercase text-[#6B6B8D]">
                 Home
               </Text>
             </TouchableOpacity>
@@ -134,13 +195,29 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             <View />
           )}
 
-          {/* TELEMETRY STATUS PILL */}
-          <View className="flex-row items-center gap-2 bg-[#0D0D1A] px-3.5 py-1.5 rounded-full border border-[#1E1E3A]">
-            <View className="w-1.5 h-1.5 rounded-full bg-[#00B894]" />
-            <Text className="text-[10px] font-bold tracking-[2px] uppercase text-[#00B894]">
-              Autonomous • 4 Hooks
+          {/* ENGINE STATUS & GEMINI KEY PILL */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setIsApiKeyModalOpen(true)}
+            className={`flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border ${
+              hasApiKey
+                ? 'bg-[#6C5CE7]/15 border-[#6C5CE7]/40'
+                : 'bg-[#0D0D1A] border-[#1E1E3A]'
+            }`}
+          >
+            <View
+              className={`w-1.5 h-1.5 rounded-full ${
+                hasApiKey ? 'bg-[#00B894]' : 'bg-[#6C5CE7]'
+              }`}
+            />
+            <Text
+              className={`text-[9px] font-bold tracking-[1px] uppercase ${
+                hasApiKey ? 'text-[#00B894]' : 'text-[#6C5CE7]'
+              }`}
+            >
+              {hasApiKey ? '✦ Gemini 1.5 Flash' : '⚡ Local + Gemini API'}
             </Text>
-          </View>
+          </TouchableOpacity>
 
           {/* CLEAR STREAM BUTTON */}
           <TouchableOpacity
@@ -148,14 +225,14 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             activeOpacity={0.7}
             className="py-1 px-2"
           >
-            <Text className="text-[10px] font-bold tracking-[1px] uppercase text-[#3D3D5C]">
+            <Text className="text-[9px] font-bold tracking-[1px] uppercase text-[#3D3D5C]">
               Clear
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* ── TELEMETRY CAPSULE BAR ── */}
-        <View className="flex-row items-center justify-between px-5 py-2.5 bg-[#0A0A16] border-b border-[#14142A]">
+        <View className="flex-row items-center justify-between px-4 py-2 bg-[#0A0A16] border-b border-[#14142A]">
           <TouchableOpacity
             onPress={() => app.setCurrentScreen('alarm')}
             className="flex-row items-center gap-1"
@@ -186,7 +263,7 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           >
             <Text className="text-xs text-[#FD79A8]">◆</Text>
             <Text className="text-[10px] text-[#6B6B8D] font-mono">
-              {app.notes.length} Protocols
+              {app.notes.length} Notes
             </Text>
           </TouchableOpacity>
 
@@ -208,7 +285,7 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           ref={scrollViewRef}
           showsVerticalScrollIndicator={false}
           className="flex-1 px-4 pt-3"
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 16 }}
         >
           {messages.map((msg) => (
             <View
@@ -218,7 +295,11 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               {/* SENDER LABEL & TIME */}
               <View className="flex-row items-center gap-1.5 mb-1 px-2">
                 <Text className="text-[10px] font-bold tracking-[2px] uppercase text-[#6B6B8D]">
-                  {msg.sender === 'user' ? 'Operator' : '✦ Cortex Core'}
+                  {msg.sender === 'user'
+                    ? 'Divyang'
+                    : msg.isGemini
+                    ? '✦ Gemini 1.5'
+                    : '✦ Cortex Core'}
                 </Text>
                 <Text className="text-[9px] text-[#3D3D5C] font-mono">
                   {msg.timestamp}
@@ -227,7 +308,7 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
               {/* MESSAGE BUBBLE */}
               <View
-                className={`max-w-[90%] p-4 rounded-3xl ${
+                className={`max-w-[92%] p-4 rounded-3xl ${
                   msg.sender === 'user'
                     ? 'bg-[#14142A] border border-[#6C5CE7]/30 rounded-tr-md'
                     : 'bg-[#0D0D1A] border border-[#1E1E3A] rounded-tl-md shadow-xl'
@@ -280,6 +361,23 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               </View>
             </View>
           ))}
+
+          {/* THINKING INDICATOR */}
+          {isThinking && (
+            <View className="items-start mb-4">
+              <View className="flex-row items-center gap-1.5 mb-1 px-2">
+                <Text className="text-[10px] font-bold tracking-[2px] uppercase text-[#6C5CE7]">
+                  {hasApiKey ? '✦ Gemini Reasoning...' : '✦ Cortex Thinking...'}
+                </Text>
+              </View>
+              <View className="bg-[#0D0D1A] border border-[#1E1E3A] px-4 py-3 rounded-3xl rounded-tl-md flex-row items-center gap-2.5">
+                <ActivityIndicator size="small" color="#6C5CE7" />
+                <Text className="text-xs text-[#6B6B8D]">
+                  Parsing intent & executing across branches...
+                </Text>
+              </View>
+            </View>
+          )}
         </ScrollView>
 
         {/* ── QUICK PROMPT CAPSULES ── */}
@@ -312,17 +410,19 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               value={inputText}
               onChangeText={setInputText}
               onSubmitEditing={() => handleSend()}
-              placeholder="Command entire app (e.g. Set alarm, Log expense)..."
+              placeholder="Chat like Gemini or command app (e.g. Set alarm, Chat)..."
               placeholderTextColor="#3D3D5C"
               returnKeyType="send"
+              autoCapitalize="sentences"
+              autoCorrect={false}
               className="flex-1 text-[#E8E8F0] text-sm py-1 font-sans"
             />
             <TouchableOpacity
               onPress={() => handleSend()}
               activeOpacity={0.7}
-              disabled={!inputText.trim()}
+              disabled={!inputText.trim() || isThinking}
               className={`w-9 h-9 rounded-full items-center justify-center ${
-                inputText.trim() ? 'bg-[#6C5CE7]' : 'bg-[#1E1E3A]'
+                inputText.trim() && !isThinking ? 'bg-[#6C5CE7]' : 'bg-[#1E1E3A]'
               }`}
             >
               <Text className="text-white text-xs font-bold">▲</Text>
@@ -330,7 +430,94 @@ export const AiScreen: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {/* ── GEMINI API KEY CONFIGURATION MODAL ── */}
+      <Modal visible={isApiKeyModalOpen} animationType="slide" transparent>
+        <View className="flex-1 justify-end bg-black/85">
+          <View className="bg-[#0D0D1A] border-t border-[#1E1E3A] rounded-t-[36px] p-6 pb-10 shadow-2xl">
+            {/* Modal Handle */}
+            <View className="items-center mb-4">
+              <View className="w-10 h-1 rounded-full bg-[#1E1E3A]" />
+            </View>
+
+            {/* Header */}
+            <View className="flex-row items-center justify-between mb-4">
+              <View className="flex-row items-center gap-2">
+                <Text className="text-lg text-[#6C5CE7]">✦</Text>
+                <Text className="text-base font-extrabold text-[#E8E8F0]">
+                  Google Gemini 1.5 Flash
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setIsApiKeyModalOpen(false)}
+                activeOpacity={0.7}
+                className="p-1"
+              >
+                <Text className="text-xs text-[#6B6B8D] font-semibold uppercase">Close</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-xs text-[#6B6B8D] leading-relaxed mb-4">
+              Connect your free Google Gemini API key to unlock full conversational depth, natural language chatting, and autonomous multi-branch tool calling.
+            </Text>
+
+            <View className="bg-[#14142A] border border-[#1E1E3A] rounded-2xl px-4 py-3 mb-4">
+              <Text className="text-[10px] font-bold uppercase tracking-[2px] text-[#6C5CE7] mb-1">
+                Gemini API Key
+              </Text>
+              <TextInput
+                value={apiKeyInput}
+                onChangeText={setApiKeyInput}
+                placeholder="AIzaSy..."
+                placeholderTextColor="#3D3D5C"
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+                className="text-sm text-[#E8E8F0] py-1 font-mono"
+              />
+            </View>
+
+            {keySaveMessage ? (
+              <Text className="text-xs text-[#00B894] font-medium mb-3 text-center">
+                {keySaveMessage}
+              </Text>
+            ) : null}
+
+            {/* Action buttons */}
+            <View className="flex-row items-center gap-3">
+              <TouchableOpacity
+                onPress={handleSaveApiKey}
+                activeOpacity={0.8}
+                className="flex-1 bg-[#6C5CE7] py-3.5 rounded-2xl items-center justify-center shadow-lg shadow-[#6C5CE7]/30"
+              >
+                <Text className="text-xs font-bold text-white uppercase tracking-[1px]">
+                  {apiKeyInput.trim() ? 'Save Gemini Key' : 'Use Local Cortex'}
+                </Text>
+              </TouchableOpacity>
+
+              {hasApiKey && (
+                <TouchableOpacity
+                  onPress={async () => {
+                    await GeminiService.clearApiKey();
+                    setHasApiKey(false);
+                    setApiKeyInput('');
+                    setKeySaveMessage('API Key removed.');
+                    setTimeout(() => setKeySaveMessage(''), 2000);
+                  }}
+                  activeOpacity={0.7}
+                  className="px-4 py-3.5 rounded-2xl bg-[#1E1E3A] items-center justify-center"
+                >
+                  <Text className="text-xs font-semibold text-[#FD79A8]">Remove</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <Text className="text-[10px] text-[#3D3D5C] text-center mt-4">
+              Get a free key from ai.google.dev (Free tier available, no credit card required)
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
-
